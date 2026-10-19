@@ -1,0 +1,278 @@
+<html><head><script src="/Scripts/jquery-1.10.2.js"></script>
+<script src="/Content/assets/global/plugins/jquery-migrate.min.js"></script>
+<script src="/Content/assets/global/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+<link href="/Content/assets/global/plugins/owl-carousel2/owl.carousel.min.css" rel="stylesheet">
+<script src="/Content/assets/global/plugins/owl-carousel2/owl.carousel.min.js"></script>
+<link href="/Content/assets/global/plugins/owl-carousel2/owl.theme.default.css" rel="stylesheet">
+<!-- BEGIN GLOBAL MANDATORY STYLES -->
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&amp;subset=all" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/uniform/css/uniform.default.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/global/plugins/bootstrap-toastr/toastr.min.css" rel="stylesheet" type="text/css">
+<!-- END GLOBAL MANDATORY STYLES -->
+<!-- BEGIN THEME GLOBAL STYLES -->
+<link href="/Content/assets/global/css/components-md.css" rel="stylesheet" id="style_components" type="text/css">
+<link href="/Content/assets/global/css/plugins-md.min.css" rel="stylesheet" type="text/css">
+<!-- END THEME GLOBAL STYLES -->
+<!-- BEGIN THEME LAYOUT STYLES -->
+<link href="/Content/assets/layouts/layout/css/layout.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/layouts/layout/css/themes/default.css" rel="stylesheet" type="text/css" id="style_color">
+<link href="/Content/assets/layouts/layout/css/icones.css" rel="stylesheet">
+<link href="/Content/assets/layouts/layout/css/custom.css?v3" rel="stylesheet" type="text/css">
+<link href="/Content/assets/layouts/layout/css/publicador.css" rel="stylesheet" type="text/css">
+<link href="/Content/assets/layouts/layout/css/print.css" rel="stylesheet" type="text/css">
+<!-- END THEME LAYOUT STYLES -->
+<!-- PLUGINS CSS -->
+<!-- datapicker -->
+<link href="/Content/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css">
+<link rel="shortcut icon" href="favicon.ico">
+<script src="/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+<script src="/Scripts/UpdatePainel-1.10.0.js"></script>
+<script src="/Scripts/UpdatePainel-1.11.0.js"></script>
+<script src="/Scripts/Funcionalidades-1.10.0.js"></script>
+<script src="/Scripts/Funcionalidades-1.11.0.js"></script>
+<script src="/Scripts/Componentes-1.10.0.js"></script>
+<script src="/Scripts/Ocorrencias-1.10.0.js"></script>
+<script src="/Scripts/Painel-1.10.0.js"></script>
+<script src="/Scripts/Navegacao-1.10.1.js"></script>
+<script src="/Scripts/Validacoes-1.0.0.js"></script>
+
+
+
+<style>
+    @media (min-width: 992px){
+                    .page-footer-fixed .page-container {
+                        margin-bottom: 20px !important;
+                        margin-top: 0;
+                    }
+                    .page-content-wrapper .page-content {
+                        margin-left: 0px;
+                        margin-top: 0;
+                        min-height: 600px;
+                        padding: 0px 20px 10px 20px;
+                    }   
+                }
+    .False {
+        display:none;
+    }
+</style>
+
+</head><body style=""><div class="page-header-fixed page-sidebar-closed-hide-logo page-container-bg-solid page-content-white page-full-width page-md page-footer-fixed">
+  
+  <!-- BEGIN HEADER -->
+
+  
+
+  <!-- BEGIN HEADER & CONTENT DIVIDER -->
+  <div class="clearfix"></div>
+  <!-- END HEADER & CONTENT DIVIDER -->
+  <!-- BEGIN CONTAINER -->
+  <div class="page-container">
+    <!-- BEGIN CONTENT -->
+    <div class="page-content-wrapper">
+      <!-- BEGIN CONTENT BODY -->
+      <div class="page-content" id="divConteudo">
+        
+<!-- BEGIN PAGE HEADER-->
+<!-- BEGIN PAGE BAR -->
+
+<!-- END PAGE BAR -->
+<!-- END PAGE HEADER-->
+<!--<div class="container-conteudo">-->
+<!-- CONTEUDO INTERNO -->
+    <div class="container-conteudo">
+
+
+
+        <div class="row False">
+            <div class="col-md-12">
+                <!-- BEGIN Portlet PORTLET-->
+                <div class="portlet light">
+                    <div class="portlet-body">
+<form action="/Relatorios/SegundaVia?Length=10" class="form-inline" data-ajax="true" data-ajax-begin="onBegin" data-ajax-complete="onComplete" data-ajax-mode="replace" data-ajax-update="#divRetorno" id="formularioSegundaVia" method="post"></form>                    </div>
+                </div>
+                <!-- END Portlet PORTLET-->
+            </div>
+        </div>
+
+        <div id="divRetorno">    <style>
+        .carregando-cotas {
+            position: absolute;
+            left: 53%;
+            display:none;
+        }
+
+        .boleto-qrcode{
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+
+<!-- CONTEUDO INTERNO -->
+<div class="row">
+    <div class="col-md-9">
+        <!-- BEGIN Portlet PORTLET-->
+        <div class="portlet light">
+            <div class="portlet-body">
+                <div class="carregando-cotas"><img src="/Content/assets/global/img/loading-spinner-grey.gif">&nbsp;&nbsp;<span>Redirecionado para cotas pendentes...</span></div>
+
+                <form action="/Relatorios/SegundaVia?Length=10" data-ajax="true" data-ajax-begin="onBegin" data-ajax-complete="onComplete" data-ajax-mode="replace" data-ajax-update="#divRetorno" id="formularioSegundaVia" method="post">            <div class="form-inline">
+                <div class="form-group">
+                    <label><strong>Unidade:</strong></label>
+                    <select name="unidade" id="unidadeSelect" class="form-control input-small">
+                            <option value="//0034" selected="selected">//0034</option>
+                            <option value="//0054">//0054</option>
+                            <option value="//0062">//0062</option>
+                            <option value="//0081">//0081</option>
+                            <option value="//0141">//0141</option>
+                    </select>
+                </div>
+                <input type="submit" value="Avançar" id="btnConsultar" class="btn btn-primary">
+            </div>
+</form>    <script>
+        removerUnidadeOperacionalDoSelect()
+        function removerUnidadeOperacionalDoSelect() {
+            let operacional = document.querySelector("#unidadeSelect option[value='operacional']")
+            if (operacional != null) {
+                operacional.remove();
+            }
+        }
+    </script>
+
+                <ul class="list-unstyled">
+                    <li>Proprietário: JORGE ABRAHÃO JUDAR JUNIOR</li>
+                </ul>
+                <div class="row">
+                        <br>
+    <div class="row">
+        <div class="col-md-9">
+            <!-- BEGIN Portlet PORTLET-->
+            <div class="portlet light">
+                <p></p>
+                    <div>Não existem cotas disponíveis para pagamento na unidade <b>//0034</b><br>Em caso de dúvida entre em contato com a Administração</div>
+
+            </div>
+        </div>
+    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END Portlet PORTLET-->
+    <div class="col-md-3">
+        <!-- BEGIN Portlet PORTLET-->
+        <div class="portlet light">
+            <h4><strong>Importante pra você </strong></h4><p></p>
+
+            <p>Possuí débitos anteriores e gostaria de consulta-los? Veja mais detalhes em <a href="#" onclick="abrePendentes()">cotas pendentes!</a></p>
+            <p class="font-red-mint">Considere as informações aqui apresentadas, somente no caso de ainda não ter efetuado o pagamento.</p>
+        </div>
+    </div>
+</div>
+<!-- MODAL VER DETALHES NORMAL -->
+
+<!-- MODAL GERAR BOLETO -->
+
+
+<script src="/Scripts/Boleto-1.0.0.js" type="text/javascript"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    function bancoSelecionado(nomeBanco) {
+        var bancosSemDataPagamento = ["http://www.cef.gov.br", "http://www.itau.com.br", "http://www.bancodobrasil.com.br" ];
+        if (bancosSemDataPagamento.filter(x => x == nomeBanco.value).length > 0)
+            document.getElementById("dataPagamento").style.display = 'none'
+        else
+            document.getElementById("dataPagamento").style.display = 'block'
+    }
+
+    function abrePendentes() {
+        window.top.location.href = document.location.ancestorOrigins[0] + "/bin/aplic/aCotaAberta.asp"
+        document.getElementsByClassName('carregando-cotas')[0].style.display = 'block'
+    }
+</script></div>
+                
+            <style>
+                .portlet.light {
+                    box-shadow: 0px 0 0 0 !important;
+                    background: transparent;
+                }
+                .container-conteudo {
+                        margin: 0px !important;
+                }
+            </style>    
+        
+
+
+      </div>
+      <!-- END CONTENT BODY -->
+    </div>
+    <!-- END CONTENT -->
+  </div>
+  <!-- END CONTAINER -->
+  <!-- BEGIN FOOTER -->     
+    <!--[if lt IE 9]>
+    <script src="~/Content/assets/global/plugins/respond.min.js"></script>
+    <script src="~/Content/assets/global/plugins/excanvas.min.js"></script>
+    <![endif]-->
+    <!-- BEGIN CORE PLUGINS -->
+
+    <script src="/Content/assets/pages/scripts/portlet-draggable.min.js"></script>
+<script src="/Content/assets/global/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script src="/Content/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<script src="/Content/assets/global/plugins/bootbox/bootbox.min.js"></script>
+<script src="/Content/assets/global/scripts/app.min.js"></script>
+
+    <script src="/Scripts/UpdatePainel-1.10.0.js"></script>
+<script src="/Scripts/UpdatePainel-1.11.0.js"></script>
+<script src="/Scripts/Funcionalidades-1.10.0.js"></script>
+<script src="/Scripts/Funcionalidades-1.11.0.js"></script>
+<script src="/Scripts/Componentes-1.10.0.js"></script>
+<script src="/Scripts/Ocorrencias-1.10.0.js"></script>
+<script src="/Scripts/Painel-1.10.0.js"></script>
+<script src="/Scripts/Navegacao-1.10.1.js"></script>
+<script src="/Scripts/Validacoes-1.0.0.js"></script>
+
+    <script src="/Content/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/Content/assets/global/plugins/bootstrap-datepicker/locales/bootstrap-datepicker.pt-BR.min.js" type="text/javascript"></script>
+    <script src="/Content/assets/global/plugins/bootstrap-toastr/toastr.min.js" type="text/javascript"></script>
+    <script src="/Content/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+    <script src="/Content/assets/global/plugins/uniform/jquery.uniform.min.js">
+    </script>
+    <!-- END THEME LAYOUT SCRIPTS -->
+
+    
+            <script>
+            $(document).ready(function() { $("#formularioSegundaVia").submit();  });
+
+        function onBegin(args) {
+            Disable("btnConsultar");
+            App.startPageLoading({ message: "Carregando..." });
+            //$("#divRetorno").html("<center class='inconCarregando'  style='text-align:center;!important'><img src='http://webware.com.br/bin/rt/ico_carregando3.gif' /></center>");
+        }
+
+        function onComplete(args) {
+            Enable("btnConsultar");
+            App.stopPageLoading()
+        }
+
+            </script>
+        
+
+    </div></div></body></html>

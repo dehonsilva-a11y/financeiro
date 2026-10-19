@@ -1,0 +1,1266 @@
+{% extends 'base.html' %}
+
+{% block title %}Automações - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .robo-card { background: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.2s ease; height: 100%; display: flex; flex-direction: column;}
+    .robo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .robo-icon { width: 45px; height: 45px; object-fit: contain; }
+    
+    .status-badge { font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 20px; }
+    .status-parado { background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+    .status-rodando { background-color: #ecfdf5; color: #10b981; border: 1px solid #a7f3d0; animation: pulse 2s infinite; }
+    
+    .console-terminal { background-color: #0f172a; border-radius: 8px; padding: 15px; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.8rem; color: #e2e8f0; height: 280px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); border: 1px solid #334155; }
+    .log-info { color: #94a3b8; }
+    .log-success { color: #10b981; font-weight: bold; }
+    .log-error { color: #ef4444; font-weight: bold; }
+    .log-warn { color: #f59e0b; }
+    
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+    .metric-box { text-align: center; padding: 10px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; }
+    .metric-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1; }
+    .metric-label { font-size: 0.65rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Painel de Automações (RPA)</h4>
+            <span class="text-muted small">Gerenciamento e Monitoramento de Automaçãos em Tempo Real.</span>
+        </div>
+        
+        <!-- 🚀 BOTAO PRINCIPAL DE FERRAMENTAS DE PDF -->
+        <button class="btn px-4 fw-bold shadow-sm d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border-radius: 8px; transition: all 0.2s ease; border: none;" data-bs-toggle="modal" data-bs-target="#modalCompressaoPdf" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-file-pdf fs-5"></i>
+            <div class="text-start">
+                <div style="line-height: 1.2; font-size: 0.9rem;">Ferramentas de PDF</div>
+                <div style="font-size: 0.65rem; font-weight: normal; opacity: 0.9;">Comprimir, Dividir, Desbloquear</div>
+            </div>
+        </button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_WEBWARE">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Automação Webware</h6>
+                            <span class="status-badge status-parado" id="status_txt_WEBWARE">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_WEBWARE">0</div><div class="metric-label">Sucessos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_WEBWARE">0</div><div class="metric-label">Falhas / Erros</div></div>
+                </div>
+
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text bg-light fw-bold text-secondary border-end-0">Filtro:</span>
+                    <input type="text" id="filtro_WEBWARE" class="form-control border-start-0" placeholder="Ex: Aclimit...">
+                </div>
+
+                <div class="mt-auto d-flex gap-2">
+                    <button class="btn btn-sm btn-dark flex-grow-1 fw-bold" id="btn_iniciar_WEBWARE" onclick="iniciarRobo('WEBWARE')">▶ Iniciar Motor</button>
+                    <button class="btn btn-sm btn-danger fw-bold" id="btn_parar_WEBWARE" style="display: none;" onclick="pararRobo('WEBWARE')">■ Parar</button>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 mt-2" onclick="abrirBoletosRobo('WEBWARE')">📄 Ver boletos</button>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_WINKER">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Automação Winker</h6>
+                            <span class="status-badge status-parado" id="status_txt_WINKER">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_WINKER">0</div><div class="metric-label">Sucessos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_WINKER">0</div><div class="metric-label">Falhas / Erros</div></div>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text bg-light fw-bold text-secondary border-end-0">Filtro:</span>
+                    <input type="text" id="filtro_WINKER" class="form-control border-start-0" placeholder="Ex: Lello...">
+                </div>
+                <div class="mt-auto d-flex gap-2">
+                    <button class="btn btn-sm btn-dark flex-grow-1 fw-bold" id="btn_iniciar_WINKER" onclick="iniciarRobo('WINKER')">▶ Iniciar Motor</button>
+                    <button class="btn btn-sm btn-danger fw-bold" id="btn_parar_WINKER" style="display: none;" onclick="pararRobo('WINKER')">■ Parar</button>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 mt-2" onclick="abrirBoletosRobo('WINKER')">📄 Ver boletos</button>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_PAGAMENTOS">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Lançamento Portal</h6>
+                            <span class="status-badge status-parado" id="status_txt_PAGAMENTOS">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_PAGAMENTOS">0</div><div class="metric-label">Boletos Pagos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_PAGAMENTOS">0</div><div class="metric-label">Erros / Recusas</div></div>
+                </div>
+                <div class="mt-auto d-flex gap-2" style="flex-wrap: wrap;">
+    <!-- Botão Tradicional (Abre o modal de filtros) -->
+    <button class="btn btn-sm btn-success flex-grow-1 fw-bold text-white" id="btn_iniciar_PAGAMENTOS" onclick="abrirModalPagamentos()" style="background-color: #10b981; border: none;">▶ Exec. Pagamentos</button>
+    
+    <!-- NOVO BOTÃO: Roda Ryan e Jessica Simultâneos -->
+    <button class="btn btn-sm btn-warning flex-grow-1 fw-bold text-dark" id="btn_iniciar_duplo" onclick="iniciarDoisRobos()">▶ Rodar 2 Robôs</button>
+    
+    <!-- Botão de Parar (Ocupa a linha toda quando aparece) -->
+    <button class="btn btn-sm btn-danger fw-bold w-100 mt-1" id="btn_parar_PAGAMENTOS" style="display: none;" onclick="pararRobo('PAGAMENTOS')">■ Parar</button>
+</div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_FINMAIL">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1055/1055644.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Automação CTRL (E-mails)</h6>
+                            <span class="status-badge status-parado" id="status_txt_FINMAIL">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_FINMAIL">0</div><div class="metric-label">Boletos Salvos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_FINMAIL">0</div><div class="metric-label">Falhas</div></div>
+                </div>
+                <div class="mt-auto d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold text-white" id="btn_iniciar_FINMAIL" onclick="perguntarMesFinMail()" style="background-color: #3b82f6; border: none;">▶ Validar Caixa</button>
+                    
+                    <!-- 🎯 NOVO BOTÃO DE PAUSAR -->
+                    <button class="btn btn-sm btn-secondary fw-bold" id="btn_pausar_FINMAIL" onclick="abrirPausaFinMail()">⏸ Pausar</button>
+                    
+                    <button class="btn btn-sm btn-danger fw-bold w-100 mt-1" id="btn_parar_FINMAIL" style="display: none;" onclick="pararRobo('FINMAIL')">■ Parar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_SCANNER">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2282/2282216.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Scanner fisico</h6>
+                            <span class="status-badge status-parado" id="status_txt_SCANNER">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_SCANNER">0</div><div class="metric-label">Escaneados</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_SCANNER">0</div><div class="metric-label">Não Reconhecidos</div></div>
+                </div>
+                <div class="mt-auto d-flex gap-2">
+                    <button class="btn btn-sm text-white flex-grow-1 fw-bold" id="btn_iniciar_SCANNER" onclick="iniciarRobo('SCANNER')" style="background-color: #8b5cf6; border: none;">▶ Processar Pasta Scanner</button>
+                    <button class="btn btn-sm btn-danger fw-bold" id="btn_parar_SCANNER" style="display: none;" onclick="pararRobo('SCANNER')">■ Parar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card" id="card_LIAX">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Automação LIAX</h6>
+                            <span class="status-badge status-parado" id="status_txt_LIAX">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_LIAX">0</div><div class="metric-label">Sucessos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_LIAX">0</div><div class="metric-label">Falhas</div></div>
+                </div>
+                
+                <div class="mt-auto d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-warning flex-grow-1 fw-bold text-dark" id="btn_iniciar_LIAX" onclick="pedirLoginLiax()">▶ Iniciar Motor</button>
+                    <!-- Esse botão só aparece quando o robô estiver rodando e aguardando -->
+                    <button class="btn btn-sm btn-success flex-grow-1 fw-bold text-white w-100 mt-1" id="btn_continuar_LIAX" style="display: none;" onclick="continuarRoboLiax()">✔️ Continuar LIAX</button>
+                    <button class="btn btn-sm btn-danger fw-bold w-100 mt-1" id="btn_parar_LIAX" style="display: none;" onclick="pararRobo('LIAX')">■ Parar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card bg-dark text-white" style="border: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);">
+                <div class="d-flex justify-content-between align-items-start mb-3 border-bottom border-secondary pb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span style="font-size: 1.8rem;"></span>
+                        <div>
+                            <h6 class="fw-bold text-info mb-0 m-0">Painel de Agendamento</h6>
+                            <span class="text-muted" style="font-size: 0.65rem;">Sinalização de disparos diários</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">🤖 Webware:</label>
+                        <input type="time" id="time_webware" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_webware', '') }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">🤖 Winker:</label>
+                        <input type="time" id="time_winker" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_winker', '') }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">💰 Pagamentos:</label>
+                        <input type="time" id="time_pagamentos" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_pagamentos', '') }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">📧 FinMail:</label>
+                        <input type="time" id="time_finmail" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_finmail', '') }}">
+                    </div>
+                </div>
+                
+                <div class="mt-auto d-flex gap-2">
+                    <button class="btn btn-sm btn-info text-white flex-grow-1 fw-bold shadow-sm" onclick="salvarHorariosRobos()">💾 Gravar Horários</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold"><span style="color: #10b981;">>_</span> Console Central de Operações</h6>
+            <span class="badge bg-secondary">Acompanhamento em Tempo Real</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="row g-0">
+                <div class="col-md-2 bg-light border-end" style="max-height: 280px; overflow-y: auto;">
+                    <div class="list-group list-group-flush rounded-0">
+                        <button class="list-group-item list-group-item-action fw-bold active" onclick="filtrarTerminal('TODOS', this)">🌐 Todos os Logs</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('WEBWARE', this)">Webware</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('WINKER', this)">Winker</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('PAGAMENTOS', this)">Portal</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('FINMAIL', this)">FinMail</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('SCANNER', this)">Scanner</button>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="console-terminal" id="terminalCentral">
+                        <div class="log-info">[SISTEMA] Conectado ao Orquestrador Lello. Aguardando inicialização dos motores...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 MODAL CENTRAL DE FERRAMENTAS DE PDF -->
+    <div class="modal fade" id="modalCompressaoPdf" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header p-4" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none;">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1"><i class="fas fa-tools me-2"></i> Ferramentas de PDF</h5>
+                        <span style="font-size: 0.8rem; opacity: 0.8;">Comprima, divida e desbloqueie arquivos rapidamente</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white align-self-start" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    
+                    <!-- 🎯 BOTÕES DAS ABAS -->
+                    <ul class="nav nav-pills mb-4 nav-justified" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link tab-custom active fw-bold small shadow-sm" id="tab-manual" data-bs-toggle="pill" data-bs-target="#conteudo-manual" type="button" role="tab" style="border-radius: 8px;">1. Comprimir</button>
+                        </li>
+                        <li class="nav-item ms-2" role="presentation">
+                            <button class="nav-link tab-custom fw-bold small shadow-sm" id="tab-lote" data-bs-toggle="pill" data-bs-target="#conteudo-lote" type="button" role="tab" style="border-radius: 8px;">2. Em Lote</button>
+                        </li>
+                        <li class="nav-item ms-2" role="presentation">
+                            <button class="nav-link tab-custom fw-bold small shadow-sm" id="tab-dividir" data-bs-toggle="pill" data-bs-target="#conteudo-dividir" type="button" role="tab" style="border-radius: 8px;">3. Dividir PDF</button>
+                        </li>
+                        <li class="nav-item ms-2" role="presentation">
+                            <button class="nav-link tab-custom fw-bold small shadow-sm" id="tab-desbloquear" data-bs-toggle="pill" data-bs-target="#conteudo-desbloquear" type="button" role="tab" style="border-radius: 8px;">4. Desbloquear</button>
+                        </li>
+                    </ul>
+
+                    <!-- 🎯 CONTEÚDOS DAS ABAS -->
+                    <div class="tab-content" id="pills-tabContent">
+                        
+                        <!-- ABA 1: MANUAL -->
+                        <div class="tab-pane fade show active" id="conteudo-manual" role="tabpanel">
+                            <div class="bg-white p-3 rounded border border-secondary border-opacity-25 mb-3 text-center">
+                                <i class="fas fa-file-upload fs-1 text-muted mb-2 opacity-50"></i>
+                                <p class="text-muted small mb-3">Selecione <b>um ou mais arquivos PDF</b> do seu computador para reduzi-los instantaneamente.</p>
+                                <form id="formCompressaoManual" enctype="multipart/form-data">
+                                    <input type="file" id="arquivoPdfManual" class="form-control form-control-sm mb-3 border-secondary" accept=".pdf" multiple required>
+                                    <button type="button" class="btn w-100 fw-bold shadow-sm text-white" style="background-color: #10b981; border-radius: 8px;" onclick="comprimirPdfManual()">
+                                        <i class="fas fa-download me-1"></i> Comprimir e Baixar
+                                    </button>
+                                </form>
+                            </div>
+                            <div id="resultadoManual" class="mt-3 text-center small fw-bold"></div>
+                        </div>
+
+                        <!-- ABA 2: EM LOTE -->
+                        <div class="tab-pane fade" id="conteudo-lote" role="tabpanel">
+                            <div class="bg-white p-3 rounded border border-secondary border-opacity-25 mb-3">
+                                <p class="text-muted small mb-3"><i class="fas fa-info-circle text-primary"></i> O sistema buscará todos os boletos desta administradora com status <b>COLETADO</b> e comprimirá os PDFs diretamente na pasta de rede (Z:).</p>
+                                
+                                <label class="form-label small fw-bold text-secondary mb-1">Nome da Administradora:</label>
+                                <input type="text" id="admCompressaoLote" list="datalistAdms" class="form-control form-control-sm fw-bold border-secondary text-dark mb-3 shadow-none" placeholder="Digite para pesquisar ou selecione..." autocomplete="off" required>
+                                <datalist id="datalistAdms">
+                                {% for adm in lista_adms %}
+                                <option value="{{ adm }}"></option>
+                                {% endfor %}
+                                </datalist>
+                                
+                                <button type="button" class="btn w-100 fw-bold shadow-sm text-white" style="background-color: #3b82f6; border-radius: 8px;" onclick="comprimirPdfLote()">
+                                    <i class="fas fa-cogs me-1"></i> Iniciar Varredura e Compressão
+                                </button>
+                            </div>
+                            <div id="resultadoLote" class="mt-3 text-center small fw-bold"></div>
+                        </div>
+
+                        <!-- ABA 3: DIVIDIR PDF -->
+                        <div class="tab-pane fade" id="conteudo-dividir" role="tabpanel">
+                            <div class="bg-white p-3 rounded border border-warning border-opacity-50 mb-3 text-center">
+                                <i class="fas fa-cut fs-1 text-warning mb-2 opacity-75"></i>
+                                <p class="small text-muted mb-3">
+                                    Selecione um PDF com várias páginas. O sistema irá separá-lo (1 página por arquivo) e baixar um <b>arquivo ZIP</b> com todos eles.
+                                </p>
+                                <div class="mb-3">
+                                    <input type="file" id="arquivoDividir" class="form-control form-control-sm border-warning shadow-sm" accept="application/pdf">
+                                </div>
+                                
+                                <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm text-dark" style="border-radius: 8px;" onclick="dividirPDF()" id="btnDividirPdf">
+                                    ✂️ Cortar e Baixar (ZIP)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ABA 4: DESBLOQUEAR PDF -->
+                        <div class="tab-pane fade" id="conteudo-desbloquear" role="tabpanel">
+                            <div class="bg-white p-3 rounded border border-danger border-opacity-50 mb-3 text-center">
+                                <i class="fas fa-lock-open fs-1 text-danger mb-2 opacity-75"></i>
+                                <p class="small text-muted mb-3">
+                                    Selecione um PDF bloqueado por senha e informe o CPF/CNPJ. O sistema removerá a trava e baixará a versão livre.
+                                </p>
+                                
+                                <div class="mb-3 text-start">
+                                    <label class="form-label fw-bold text-secondary small">Arquivo PDF (Bloqueado):</label>
+                                    <input type="file" id="arquivoDesbloquear" class="form-control form-control-sm border-danger shadow-sm" accept="application/pdf">
+                                </div>
+                                
+                                <div class="mb-3 text-start">
+                                    <label class="form-label fw-bold text-secondary small">Senha ou CPF/CNPJ (Opcional):</label>
+                                    <input type="text" id="senhaDesbloquear" class="form-control form-control-sm border-danger shadow-sm" placeholder="Ex: 12345678909 ou deixe em branco para auto-descobrir">
+                                </div>
+                                
+                                <button type="button" class="btn btn-danger w-100 fw-bold shadow-sm text-white" style="border-radius: 8px;" onclick="desbloquearPDF()" id="btnDesbloquearPdf">
+                                    🔓 Desbloquear e Baixar
+                                </button>
+                                
+                                <div id="resultadoDesbloqueio" class="mt-3 text-center small fw-bold"></div>
+                            </div>
+                        </div>
+                        
+                    </div> <!-- Fim do tab-content -->
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais já existentes -->
+    <div class="modal fade" id="modalAuditoria" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h6 class="modal-title fw-bold">Rastreamento e Auditoria em Tempo Real</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <table class="table table-hover align-middle m-0" style="font-size: 0.85rem;">
+                        <thead class="bg-light sticky-top" style="z-index: 10;">
+                            <tr>
+                                <th class="py-3 px-3">Data / Hora</th>
+                                <th>Automação Origem</th>
+                                <th>Nº Imóvel</th>
+                                <th>Status da Ação</th>
+                                <th>Detalhe da Execução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAuditoriaBody">
+                            <tr><td colspan="5" class="text-center py-5 fw-bold text-muted">Aguardando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalFiltroPagamentos" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header text-white" style="background-color: #10b981; border: none;">
+                    <h6 class="modal-title fw-bold">⚙️ Lançamento de Pagamentos (Filtros)</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <p class="small text-muted mb-4">O automação varrerá a fila de boletos <b>COLETADOS</b>. Direcione o trabalho usando os filtros abaixo:</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small">Responsável pela Carteira:</label>
+                        <select id="filtroPag_Responsavel" class="form-select shadow-sm border-secondary fw-bold text-dark">
+                            <option value="">🏠 Todos os Operadores</option>
+                            <option value="Ryan">Ryan</option>
+                            <option value="Jessica">Jessica</option>
+                            <option value="Victor">Victor</option>
+                            <option value="Arthur">Arthur</option>
+                            <option value="Ellen">Ellen</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small">Empreendimento Específico:</label>
+                        <input type="text" id="filtroPag_Empreendimento" list="listaCondominios" class="form-control shadow-sm border-secondary fw-bold text-dark" placeholder="Digite para buscar...">
+                        <datalist id="listaCondominios"></datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small">Dias de Vencimento (Múltipla Escolha):</label>
+                        <div class="border rounded p-2 bg-white shadow-sm custom-scroll" style="max-height: 120px; overflow-y: auto; border-color: #cbd5e1 !important;">
+                            {% for i in range(1, 32) %}
+                            {% set val = '%02d' % i %}
+                            <div class="form-check form-check-inline" style="width: 45px;">
+                                <input class="form-check-input check-dia-pag" type="checkbox" value="{{ val }}" id="chkDiaPag{{ val }}">
+                                <label class="form-check-label small fw-bold text-dark" for="chkDiaPag{{ val }}">{{ val }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success fw-bold px-4" onclick="dispararRoboPagamentosFiltrado()" style="background-color: #10b981;">▶ Iniciar Automação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="modal fade" id="modalMesFinMail" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header text-white" style="background-color: #3b82f6; border: none;">
+                    <h6 class="modal-title fw-bold">📧 Mês de Coleta (FinMail)</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light text-center">
+                    <p class="small text-muted mb-3 fw-bold">Qual mês você deseja coletar na caixa de e-mails?</p>
+                    <input type="text" id="inputMesFinMail" class="form-control text-center fw-bold fs-4 mx-auto shadow-sm border-secondary text-primary" style="width: 100px; border-radius: 8px;" placeholder="Ex: 08" maxlength="2" autocomplete="off">
+                </div>
+                <div class="modal-footer bg-light border-top-0 justify-content-center pb-4">
+                    <button class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary fw-bold px-4" onclick="confirmarMesFinMail()" style="background-color: #3b82f6; border: none;">▶ Iniciar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL: BOLETOS DO ROBÔ (pendentes / coletados) -->
+    <div class="modal fade" id="modalBoletosRobo" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header text-white" style="background-color: #0f172a; border: none;">
+                    <h6 class="modal-title fw-bold" id="tituloBoletosRobo">📄 Boletos do robô</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light p-3">
+                    <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                        <div class="btn-group btn-group-sm" id="abasBoletosRobo"></div>
+                        <input type="text" id="buscaBoletosRobo" class="form-control form-control-sm ms-auto" style="max-width: 320px;"
+                               placeholder="Buscar imóvel, empreendimento, administradora..." oninput="renderBoletosRobo()">
+                    </div>
+                    <div id="msgBoletosRobo" class="small text-muted mb-2"></div>
+                    <div class="table-responsive bg-white border rounded" style="max-height: 60vh;">
+                        <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                            <thead class="table-light position-sticky top-0">
+                                <tr>
+                                    <th>Imóvel</th><th>Empreendimento</th><th>Administradora</th><th>Divisão / Unidade (site)</th>
+                                    <th>Vencimento</th><th>Situação</th><th>Coletado por / em</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoBoletosRobo"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="abrirBoletosRobo(roboBoletosAtual)">↻ Atualizar</button>
+                    <button class="btn btn-secondary btn-sm fw-bold" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let roboBoletosAtual = 'WINKER', dadosBoletosRobo = [], abaBoletosRobo = 'PENDENTE', resumoBoletosRobo = {};
+
+    function escHtmlBoletos(t) {
+        return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+    }
+
+    function abrirBoletosRobo(robo) {
+        roboBoletosAtual = robo;
+        document.getElementById('tituloBoletosRobo').innerText = '📄 Boletos — Automação ' + robo;
+        document.getElementById('corpoBoletosRobo').innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Carregando...</td></tr>';
+        const el = document.getElementById('modalBoletosRobo');
+        bootstrap.Modal.getOrCreateInstance(el).show();
+        fetch('/api/automacao/boletos_robo?robo=' + encodeURIComponent(robo))
+            .then(r => r.json())
+            .then(d => {
+                if (!d.sucesso) { document.getElementById('corpoBoletosRobo').innerHTML = '<tr><td colspan="7" class="text-danger py-3 text-center">' + escHtmlBoletos(d.msg || 'Erro ao carregar') + '</td></tr>'; return; }
+                dadosBoletosRobo = d.dados; resumoBoletosRobo = d.resumo;
+                renderBoletosRobo();
+            })
+            .catch(() => { document.getElementById('corpoBoletosRobo').innerHTML = '<tr><td colspan="7" class="text-danger py-3 text-center">Falha de comunicação com o servidor.</td></tr>'; });
+    }
+
+    function trocarAbaBoletosRobo(aba) { abaBoletosRobo = aba; renderBoletosRobo(); }
+
+    function renderBoletosRobo() {
+        const abas = [['PENDENTE', 'Pendentes', resumoBoletosRobo.pendentes], ['COLETADO', 'Coletados', resumoBoletosRobo.coletados],
+                      ['PAGO', 'Pagos', resumoBoletosRobo.pagos], ['TODOS', 'Todos', dadosBoletosRobo.length]];
+        document.getElementById('abasBoletosRobo').innerHTML = abas.map(a =>
+            '<button class="btn ' + (abaBoletosRobo === a[0] ? 'btn-dark' : 'btn-outline-dark') + ' fw-bold" onclick="trocarAbaBoletosRobo(\'' + a[0] + '\')">' + a[1] + ' (' + (a[2] || 0) + ')</button>').join('');
+
+        const termo = document.getElementById('buscaBoletosRobo').value.trim().toLowerCase();
+        let lista = dadosBoletosRobo.filter(l => abaBoletosRobo === 'TODOS' || l.situacao === abaBoletosRobo);
+        if (termo) lista = lista.filter(l => [l.imovel, l.empreendimento, l.administradora, l.winker_unidade, l.winker_predio].join(' ').toLowerCase().includes(termo));
+
+        const LIMITE = 600;
+        const cores = {PENDENTE: 'warning text-dark', COLETADO: 'success', PAGO: 'primary'};
+        document.getElementById('msgBoletosRobo').innerText = lista.length + ' imóvel(is) nesta lista' + (lista.length > LIMITE ? ' — mostrando os primeiros ' + LIMITE + ' (use a busca)' : '');
+        document.getElementById('corpoBoletosRobo').innerHTML = lista.slice(0, LIMITE).map(l => {
+            let site = [l.winker_predio, l.winker_unidade].filter(x => x && x.trim()).join(' / ') || '-';
+            let aviso = '';
+            if (roboBoletosAtual === 'WINKER' && l.situacao === 'PENDENTE' && !l.pronto_robo) aviso = ' <span class="badge bg-secondary" title="Sem vínculo com o site: o robô não visita este imóvel">sem vínculo</span>';
+            const quem = l.coletado_por ? escHtmlBoletos(l.coletado_por) + '<br><span class="text-muted">' + escHtmlBoletos(l.coletado_em) + '</span>' : '-';
+            return '<tr><td class="fw-bold">' + escHtmlBoletos(l.imovel) + '</td><td>' + escHtmlBoletos(l.empreendimento) + '</td><td>' + escHtmlBoletos(l.administradora) +
+                   '</td><td>' + escHtmlBoletos(site) + '</td><td>' + escHtmlBoletos(l.vencimento) + '</td><td><span class="badge bg-' + (cores[l.situacao] || 'secondary') + '">' +
+                   escHtmlBoletos(l.situacao) + '</span>' + aviso + '</td><td>' + quem + '</td></tr>';
+        }).join('') || '<tr><td colspan="7" class="text-center text-muted py-4">Nenhum imóvel nesta lista.</td></tr>';
+    }
+    </script>
+
+    <!-- MODAL DE LOGIN LIAX -->
+    <div class="modal fade" id="modalLoginLiax" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header text-white" style="background-color: #f59e0b; border: none;">
+                    <h6 class="modal-title fw-bold">🔑 Credenciais Portal Lello</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <p class="small text-muted mb-3 fw-bold">Insira seus dados para o robô LIAX logar no Portal Lello automaticamente.</p>
+                    
+                    <label class="form-label small fw-bold text-secondary mb-1">Usuário:</label>
+                    <input type="text" id="userLiax" class="form-control form-control-sm mb-3 shadow-sm border-secondary font-monospace" placeholder="Ex: ryan.lima">
+                    
+                    <label class="form-label small fw-bold text-secondary mb-1">Senha:</label>
+                    <input type="password" id="senhaLiax" class="form-control form-control-sm mb-3 shadow-sm border-secondary font-monospace" placeholder="Sua senha...">
+                </div>
+                <div class="modal-footer bg-light border-top-0 justify-content-center pb-4">
+                    <button class="btn btn-outline-secondary fw-bold btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-warning fw-bold btn-sm px-4 text-dark" onclick="dispararRoboLiax()" style="border: none;">▶ Iniciar LIAX</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function pedirLoginLiax() {
+        document.getElementById('userLiax').value = '';
+        document.getElementById('senhaLiax').value = '';
+        new bootstrap.Modal(document.getElementById('modalLoginLiax')).show();
+        setTimeout(() => document.getElementById('userLiax').focus(), 500);
+    }
+
+    function dispararRoboLiax() {
+        const u = document.getElementById('userLiax').value.trim();
+        const s = document.getElementById('senhaLiax').value.trim();
+        
+        if (!u || !s) { alert("⚠️ Usuário e Senha são obrigatórios."); return; }
+        
+        bootstrap.Modal.getInstance(document.getElementById('modalLoginLiax')).hide();
+        
+        // Passa as credenciais dentro do filtro separadas por vírgula
+        fetch('/api/robo/iniciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ robo: 'LIAX', filtro: u + ',' + s })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) alert(data.msg);
+            else alert("🚀 Atenção: O Robô LIAX foi iniciado.\nAguarde o Chrome abrir, faça login com sua conta Google na LIAX e depois clique em [Continuar LIAX] no console para ele seguir!");
+        });
+    }
+
+    function continuarRoboLiax() {
+        fetch('/api/robo/continuar_liax', { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+            if(!d.sucesso) alert(d.msg);
+            else {
+                // 🎯 MÁGICA: Oculta o botão instantaneamente e "trava" ele oculto
+                const btnCont = document.getElementById('btn_continuar_LIAX');
+                if (btnCont) {
+                    btnCont.style.display = 'none';
+                    btnCont.classList.add('oculto-forcado'); 
+                }
+                alert("✔️ Comando de continuação enviado com sucesso! O robô assumirá daqui.");
+            }
+        });
+    }
+    </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+<script>
+// ==========================================
+// FUNÇÕES DE FERRAMENTAS DE PDF
+// ==========================================
+
+// Configuração visual das Abas (Pills)
+document.querySelectorAll('.tab-custom').forEach(tab => {
+    // Cores originais: cinza inativo
+    tab.style.backgroundColor = '#e2e8f0';
+    tab.style.color = '#475569';
+    
+    tab.addEventListener('show.bs.tab', function (e) {
+        // Reseta todos para cinza
+        document.querySelectorAll('.tab-custom').forEach(t => {
+            t.style.backgroundColor = '#e2e8f0';
+            t.style.color = '#475569';
+        });
+        
+        // Define a cor do ativo com base no ID
+        if(this.id === 'tab-manual' || this.id === 'tab-lote') {
+            this.style.backgroundColor = '#6366f1'; // Azul roxo
+            this.style.color = 'white';
+        } else if (this.id === 'tab-dividir') {
+            this.style.backgroundColor = '#f59e0b'; // Amarelo
+            this.style.color = 'white';
+        } else if (this.id === 'tab-desbloquear') {
+            this.style.backgroundColor = '#ef4444'; // Vermelho
+            this.style.color = 'white';
+        }
+    });
+});
+// Força a cor do ativo inicial
+document.getElementById('tab-manual').style.backgroundColor = '#6366f1';
+document.getElementById('tab-manual').style.color = 'white';
+
+
+function comprimirPdfManual() {
+    const input = document.getElementById('arquivoPdfManual');
+    const resultado = document.getElementById('resultadoManual');
+    
+    if (!input.files || input.files.length === 0) {
+        resultado.innerHTML = '<span class="text-danger">Selecione pelo menos um PDF primeiro!</span>';
+        return;
+    }
+
+    const formData = new FormData();
+    
+    for (let i = 0; i < input.files.length; i++) {
+        formData.append('arquivos', input.files[i]);
+    }
+
+    resultado.innerHTML = '<span class="text-primary"><i class="fas fa-spinner fa-spin"></i> Otimizando... (Isso pode levar alguns segundos)</span>';
+
+    fetch('/api/pdf/comprimir_manual', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Erro ao comprimir");
+        
+        const header = response.headers.get('Content-Disposition');
+        let filename = "arquivos_otimizados.zip"; 
+        if (header && header.includes('filename=')) {
+            filename = header.split('filename=')[1].replace(/["']/g, '');
+        }
+        
+        return response.blob().then(blob => ({ blob, filename }));
+    })
+    .then(({ blob, filename }) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        
+        resultado.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Sucesso! O download começou automaticamente.</span>';
+        input.value = ""; 
+    })
+    .catch(err => {
+        resultado.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Falha ao comprimir os arquivos.</span>';
+    });
+}
+
+function comprimirPdfLote() {
+    const admsSelecionadas = Array.from(document.querySelectorAll('.adm-checkbox:checked')).map(cb => cb.value);
+    const resultado = document.getElementById('resultadoLote');
+    
+    if (admsSelecionadas.length === 0) {
+        resultado.innerHTML = '<span class="text-danger">Por favor, selecione pelo menos uma administradora.</span>';
+        return;
+    }
+
+    resultado.innerHTML = '<span class="text-primary"><i class="fas fa-spinner fa-spin"></i> Varrendo base e comprimindo arquivos pesados na rede... Aguarde.</span>';
+
+    fetch('/api/pdf/comprimir_lote', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ administradoras: admsSelecionadas })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            resultado.innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> Varredura Concluída! <b>${data.qtd_comprimidos} PDFs pesados</b> foram comprimidos e atualizados.</span>`;
+        } else {
+            resultado.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${data.msg}</span>`;
+        }
+    })
+    .catch(err => {
+        resultado.innerHTML = '<span class="text-danger"><i class="fas fa-wifi"></i> Erro de comunicação com o orquestrador.</span>';
+    });
+}
+
+
+function dividirPDF() {
+    const input = document.getElementById('arquivoDividir');
+    
+    if (input.files.length === 0) {
+        alert("⚠️ Selecione um arquivo PDF para dividir.");
+        return;
+    }
+
+    const btn = document.getElementById('btnDividirPdf');
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = "⏳ Fatiando páginas...";
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('arquivo', input.files[0]);
+
+    fetch('/api/sistema/dividir_pdf', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Falha no servidor");
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        
+        const nomeOriginal = input.files[0].name.replace('.pdf', '');
+        a.download = `${nomeOriginal}_dividido.zip`;
+        
+        document.body.appendChild(a);
+        a.click(); 
+        window.URL.revokeObjectURL(url); 
+
+        btn.innerHTML = "✔️ Sucesso!";
+        btn.classList.replace('btn-warning', 'btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = textoOriginal;
+            btn.classList.replace('btn-success', 'btn-warning');
+            btn.disabled = false;
+            input.value = ""; 
+        }, 2500);
+    })
+    .catch(err => {
+        alert("❌ Erro ao dividir PDF. O arquivo pode estar corrompido ou protegido por senha.");
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+    });
+}
+
+// NOVO: Função para o Motor de Desbloqueio (Integração PDF Guru RPA)
+function desbloquearPDF() {
+    const input = document.getElementById('arquivoDesbloquear');
+    const resultado = document.getElementById('resultadoDesbloqueio');
+    const btn = document.getElementById('btnDesbloquearPdf');
+
+    // Validação inicial
+    if (input.files.length === 0) {
+        resultado.innerHTML = '<span class="text-danger">⚠️ Por favor, selecione um arquivo PDF primeiro.</span>';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('arquivo', input.files[0]);
+
+    // Opcional: Se o robô for adaptado futuramente para injetar a senha
+    // formData.append('senha', document.getElementById('senhaDesbloquear').value);
+
+    // 1. Esconde o modal de ferramentas para dar foco ao Loading
+    const modalEl = document.getElementById('modalCompressaoPdf');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if(modalInstance) {
+        modalInstance.hide();
+    }
+
+    // 2. Abre o Pop-up do SweetAlert travando a tela (Requer SweetAlert2 no base.html)
+    Swal.fire({
+        title: 'Desbloqueando PDF...',
+        html: 'Nosso robô está processando o arquivo no servidor em modo invisível. Isso pode levar alguns segundos.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading()
+        }
+    });
+
+    // 3. Envia para a nova rota do Flask que aciona o Selenium
+    fetch('/api/pdf/desbloquear_guru', {
+        method: 'POST',
+        body: formData
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.msg || "Falha ao desbloquear o PDF. O site pode estar indisponível.");
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // Fecha o pop-up de loading
+        Swal.close();
+
+        // Faz o download silencioso do PDF retornado pelo Robô
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'desbloqueado_' + input.files[0].name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        
+        // Alerta de sucesso
+        Swal.fire({
+            icon: 'success',
+            title: 'Tudo Certo!',
+            text: 'Seu PDF foi desbloqueado e baixado com sucesso.'
+        }).then(() => {
+            // Reabre o modal original caso a pessoa queira continuar usando ferramentas
+            if(modalInstance) modalInstance.show();
+        });
+
+        // Limpa os campos
+        resultado.innerHTML = '';
+        input.value = "";
+        document.getElementById('senhaDesbloquear').value = "";
+    })
+    .catch(err => {
+        Swal.close();
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro na Automação',
+            text: err.message
+        }).then(() => {
+            if(modalInstance) modalInstance.show();
+        });
+        
+        input.value = "";
+    });
+}
+
+
+
+// ==========================================
+// FUNÇÕES DOS ROBÔS
+// ==========================================
+let terminalFiltroAtual = 'TODOS';
+let logsUnificados = [];
+
+function filtrarTerminal(roboId, elementoBtn) {
+    terminalFiltroAtual = roboId;
+    document.querySelectorAll('.list-group-item').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('text-secondary');
+    });
+    elementoBtn.classList.add('active');
+    elementoBtn.classList.remove('text-secondary');
+    renderizarTerminal();
+}
+
+function iniciarRobo(roboId) {
+    let filtro = "";
+    const campoFiltro = document.getElementById(`filtro_${roboId}`);
+    if (campoFiltro) filtro = campoFiltro.value;
+
+    fetch('/api/robo/iniciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ robo: roboId, filtro: filtro })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.sucesso) alert(data.msg);
+    });
+}
+
+function pararRobo(roboId) {
+    fetch('/api/robo/parar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ robo: roboId })
+    });
+}
+
+function salvarHorariosRobos() {
+    const payload = {
+        webware: document.getElementById('time_webware').value,
+        winker: document.getElementById('time_winker').value,
+        pagamentos: document.getElementById('time_pagamentos').value,
+        finmail: document.getElementById('time_finmail').value
+    };
+    
+    fetch('/api/sistema/salvar_horarios_robos', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) alert(" Horários de agendamento salvos com sucesso no servidor!");
+        else alert(" Erro ao salvar horários: " + data.msg);
+    });
+}
+
+function renderizarTerminal() {
+    const terminal = document.getElementById('terminalCentral');
+    let html = '';
+    
+    logsUnificados.forEach(log => {
+        if (terminalFiltroAtual === 'TODOS' || terminalFiltroAtual === log.robo) {
+            let classeCor = 'log-info';
+            if(log.tipo === 'success') classeCor = 'log-success';
+            else if(log.tipo === 'error') classeCor = 'log-error';
+            else if(log.tipo === 'warn') classeCor = 'log-warn';
+            
+            html += `<div class="${classeCor}">[${log.hora}] [${log.robo}] ${log.msg}</div>`;
+        }
+    });
+
+    if(html === '') html = `<div class="log-info">[SISTEMA] Nenhum log disponível para este filtro.</div>`;
+    
+    const isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 20;
+    terminal.innerHTML = html;
+    if (isScrolledToBottom) {
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+}
+
+async function iniciarDoisRobos() {
+    // 1. Abre o pop-up pedindo para escolher os operadores
+    const { value: operadoresEscolhidos } = await Swal.fire({
+        title: 'Força Tarefa 🚀',
+        html: `
+            <p class="text-muted small">Selecione quais carteiras os robôs devem processar simultaneamente:</p>
+            <div class="text-start mx-auto" style="max-width: 200px;">
+                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="ryan" id="op1"><label class="form-check-label fw-bold" for="op1">Ryan</label></div>
+                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="jessica" id="op2"><label class="form-check-label fw-bold" for="op2">Jessica</label></div>
+                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="victor" id="op3"><label class="form-check-label fw-bold" for="op3">Victor</label></div>
+                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="arthur" id="op4"><label class="form-check-label fw-bold" for="op4">Arthur</label></div>
+                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="ellen" id="op5"><label class="form-check-label fw-bold" for="op5">Ellen</label></div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '▶ Iniciar Motores',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#10b981',
+        preConfirm: () => {
+            let selecionados = [];
+            // Pega todo mundo que foi marcado
+            document.querySelectorAll('.chk-op:checked').forEach(chk => selecionados.push(chk.value));
+            if (selecionados.length === 0) {
+                Swal.showValidationMessage('Selecione pelo menos um operador!');
+            }
+            return selecionados;
+        }
+    });
+
+    // 2. Se o usuário marcou alguém e clicou em Iniciar
+    if (operadoresEscolhidos) {
+        Swal.fire({
+            title: 'Iniciando Motores! ⚙️',
+            html: `Disparando <b>${operadoresEscolhidos.length} robô(s) simultâneo(s)</b> no modo fantasma.`,
+            icon: 'info',
+            timer: 4000,
+            showConfirmButton: false
+        });
+
+        // 3. Envia a lista para o Python COM BLINDAGEM DE ERRO
+        fetch('/api/iniciar_dois_robos', {
+            method: 'POST',
+            headers: { 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ operadores: operadoresEscolhidos })
+        })
+        .then(async response => {
+            // Trava de segurança: se o Python der erro 500 ou 404, não quebra o site
+            const isJson = response.headers.get('content-type')?.includes('application/json');
+            const data = isJson ? await response.json() : null;
+
+            if (!response.ok) {
+                const error = (data && data.msg) || response.statusText;
+                return Promise.reject(error);
+            }
+
+            return data;
+        })
+        .then(data => {
+            if(!data.sucesso) {
+                Swal.fire('Atenção', data.msg, 'warning');
+            }
+            atualizarStatusRobos(); 
+        })
+        .catch(err => {
+            console.error("Erro na requisição:", err);
+            Swal.fire('Erro de Comunicação', 'O servidor Python não conseguiu processar. Reinicie o terminal (CTRL+C) e certifique-se de que colou o novo código no app.py.', 'error');
+        });
+    }
+}
+
+function atualizarStatusRobos() {
+    fetch('/api/robo/status')
+    .then(r => r.json())
+    .then(dados => {
+        let novosLogs = [];
+        
+        for (const [roboId, info] of Object.entries(dados)) {
+            const card = document.getElementById(`card_${roboId}`);
+            const badge = document.getElementById(`status_txt_${roboId}`);
+            const btnIni = document.getElementById(`btn_iniciar_${roboId}`);
+            const btnPar = document.getElementById(`btn_parar_${roboId}`);
+            const btnDuplo = document.getElementById(`btn_iniciar_duplo`);
+            
+            // 🎯 Captura o botão novo do LIAX
+            const btnContLiax = document.getElementById(`btn_continuar_LIAX`);
+            
+            const tSuc = document.getElementById(`suc_${roboId}`);
+            const tErr = document.getElementById(`err_${roboId}`);
+            
+            if (!card) continue;
+
+            if (tSuc) tSuc.innerText = info.sucessos;
+            if (tErr) tErr.innerText = info.falhas;
+
+            if (info.rodando) {
+                badge.innerText = "EXECUTANDO";
+                badge.className = "status-badge status-rodando";
+                if(btnIni) btnIni.style.display = 'none';
+                if(btnPar) btnPar.style.display = 'block';
+                if(roboId === 'LIAX' && btnContLiax && !btnContLiax.classList.contains('oculto-forcado')) {
+                    btnContLiax.style.display = 'block';
+                }
+                if(roboId === 'PAGAMENTOS' && btnDuplo) btnDuplo.style.display = 'none'; 
+                
+                // Oculta botão de pausa se estiver rodando
+                const btnPausa = document.getElementById(`btn_pausar_${roboId}`);
+                if(btnPausa) btnPausa.style.display = 'none';
+                
+                card.style.border = "1px solid #10b981";
+            } else {
+                badge.innerText = "DESLIGADO";
+                badge.className = "status-badge status-parado";
+                if(btnIni) btnIni.style.display = 'block';
+                if(btnPar) btnPar.style.display = 'none';
+                if(roboId === 'LIAX' && btnContLiax) {
+                    btnContLiax.style.display = 'none';
+                    btnContLiax.classList.remove('oculto-forcado');
+                }
+                if(roboId === 'PAGAMENTOS' && btnDuplo) btnDuplo.style.display = 'block'; 
+                
+                // Mostra botão de pausa se estiver desligado
+                const btnPausa = document.getElementById(`btn_pausar_${roboId}`);
+                if(btnPausa) btnPausa.style.display = 'block';
+
+                // 🎯 A MÁGICA VISUAL DA PAUSA (Pinta a tag de amarelo)
+                if (roboId === 'FINMAIL' && info.pausado_ate) {
+                    badge.innerText = `⏸ PAUSADO ATÉ ${info.pausado_ate}`;
+                    badge.className = "status-badge bg-warning text-dark border-warning shadow-sm";
+                }
+                
+                card.style.border = "1px solid #e2e8f0";
+            }
+
+            if (info.logs && info.logs.length > 0) {
+                info.logs.forEach(l => {
+                    novosLogs.push({ robo: roboId, hora: l.hora, msg: l.msg, tipo: l.tipo });
+                });
+            }
+        }
+
+        novosLogs.sort((a, b) => a.hora.localeCompare(b.hora));
+        
+        if(JSON.stringify(novosLogs) !== JSON.stringify(logsUnificados)) {
+            logsUnificados = novosLogs;
+            renderizarTerminal();
+        }
+    })
+    .catch(e => console.error("Erro ao buscar status: ", e));
+}
+
+setInterval(atualizarStatusRobos, 2000);
+atualizarStatusRobos();
+
+document.getElementById('modalAuditoria').addEventListener('show.bs.modal', function () {
+    const tbody = document.getElementById('tabelaAuditoriaBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">Buscando logs no servidor...</td></tr>';
+    
+    fetch('/api/sistema/auditoria_logs')
+    .then(r => r.json())
+    .then(dados => {
+        tbody.innerHTML = '';
+        if(dados.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum rastro encontrado ainda.</td></tr>';
+            return;
+        }
+        dados.forEach(log => {
+            let badgeClass = 'bg-secondary';
+            if(log.status_tentativa.includes('Sucesso') || log.status_tentativa.includes('Coletado')) badgeClass = 'bg-success';
+            else if(log.status_tentativa.includes('Falha') || log.status_tentativa.includes('Erro')) badgeClass = 'bg-danger';
+            else if(log.status_tentativa.includes('Não Disponível')) badgeClass = 'bg-warning text-dark';
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td class="text-muted fw-semibold px-3">${log.data_hora}</td>
+                    <td class="fw-bold text-dark">${log.robo}</td>
+                    <td class="text-primary fw-bold">${log.imovel}</td>
+                    <td><span class="badge ${badgeClass} px-2 py-1 shadow-sm">${log.status_tentativa}</span></td>
+                    <td class="text-secondary">${log.detalhe}</td>
+                </tr>
+            `;
+        });
+    });
+});
+
+function abrirModalPagamentos() {
+    new bootstrap.Modal(document.getElementById('modalFiltroPagamentos')).show();
+}
+
+function dispararRoboPagamentosFiltrado() {
+    const resp = document.getElementById('filtroPag_Responsavel').value.trim();
+    const emp = document.getElementById('filtroPag_Empreendimento').value.trim();
+    const diasSelecionados = Array.from(document.querySelectorAll('.check-dia-pag:checked')).map(cb => cb.value);
+    const diasStr = diasSelecionados.join(',');
+    const filtroCombinado = `RESP:${resp}|EMP:${emp}|DIAS:${diasStr}`;
+
+    fetch('/api/robo/iniciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ robo: 'PAGAMENTOS', filtro: filtroCombinado })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.sucesso) alert(data.msg);
+        else bootstrap.Modal.getInstance(document.getElementById('modalFiltroPagamentos')).hide();
+    });
+}
+
+function perguntarMesFinMail() {
+    document.getElementById('inputMesFinMail').value = '';
+    new bootstrap.Modal(document.getElementById('modalMesFinMail')).show();
+    setTimeout(() => document.getElementById('inputMesFinMail').focus(), 500);
+}
+
+function confirmarMesFinMail() {
+    let mes = document.getElementById('inputMesFinMail').value.trim();
+    
+    if (mes !== '') {
+        mes = mes.padStart(2, '0');
+        bootstrap.Modal.getInstance(document.getElementById('modalMesFinMail')).hide();
+        
+        fetch('/api/robo/iniciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ robo: 'FINMAIL', filtro: mes })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) alert(data.msg);
+        });
+    } else {
+        alert("⚠️ Por favor, digite um mês válido antes de iniciar.");
+    }
+}
+
+async function abrirPausaFinMail() {
+    const { value: horas } = await Swal.fire({
+        title: '⏸️ Pausar Automação (FinMail)',
+        text: 'O robô escuta os e-mails a cada 5 minutos. Deseja suspendê-lo por quanto tempo?',
+        input: 'select',
+        inputOptions: {
+            '0': '▶️ Remover Pausa (Voltar ao Normal)',
+            '1': 'Pausar por 1 Hora',
+            '2': 'Pausar por 2 Horas',
+            '12': 'Pausar por 12 Horas',
+            '24': 'Pausar por 1 Dia (24h)',
+            '48': 'Pausar por 2 Dias (48h)'
+        },
+        inputPlaceholder: 'Selecione o tempo de pausa...',
+        showCancelButton: true,
+        confirmButtonText: 'Aplicar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#f59e0b'
+    });
+
+    if (horas !== undefined) {
+        fetch('/api/robo/pausar_finmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ horas: parseInt(horas) })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.sucesso) {
+                Swal.fire('Pronto!', d.msg, 'success');
+                atualizarStatusRobos();
+            }
+        });
+    }
+}   
+</script>
+{% endblock %}

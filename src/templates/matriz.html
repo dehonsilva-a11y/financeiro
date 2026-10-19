@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+
+{% block title %}Matriz de Emissão x Vencimento - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    body { background-color: #f8fafc; }
+    .matrix-container { background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
+    .table-responsive { max-height: 75vh; overflow: auto; }
+    
+    #tabelaMatriz { font-size: 0.72rem; border-collapse: separate; border-spacing: 0; width: 100%; margin: 0; }
+    #tabelaMatriz th { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b; text-align: center; vertical-align: middle; padding: 6px 3px; position: sticky; top: 0; z-index: 10; font-weight: bold; }
+    #tabelaMatriz th.col-emissao { position: sticky; left: 0; z-index: 12; min-width: 90px; background-color: #0f172a !important; line-height: 1.3; }
+    #tabelaMatriz td { border: 1px solid #cbd5e1; text-align: center; vertical-align: middle; padding: 6px 3px; cursor: pointer; transition: all 0.15s ease; font-weight: 600; color: #334155; }
+    
+    #tabelaMatriz td:hover { background-color: #e0f2fe !important; color: #0284c7; font-weight: 800; transform: scale(1.2); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 5; position: relative; border-radius: 4px; }
+    #tabelaMatriz td.celula-vazia { color: #cbd5e1; font-weight: normal; pointer-events: none; }
+    
+    .diag-yellow { background-color: #fef08a !important; } 
+    .area-mes-atual { background-color: #ffffff !important; } 
+    .area-mes-seguinte { background-color: #e2e8f0 !important; } 
+    
+    #tabelaMatriz td.total-col { background-color: #1e293b !important; color: #ffffff !important; font-weight: bold; position: sticky; bottom: 0; z-index: 9; }
+    #tabelaMatriz td.total-linha { background-color: #1e293b !important; color: #ffffff !important; font-weight: bold; }
+    #tabelaMatriz th.total-corner { background-color: #020617 !important; color: #ffffff !important; }
+    
+    .divisor-coluna { border-left: 3px solid #0ea5e9 !important; }
+    .grand-total-badge { background-color: #0ea5e9; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-modo-real { background-color: #10b981; color: white; }
+    .badge-modo-planilha { background-color: #f59e0b; color: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.1);">
+        <div>
+            <h4 class="fw-bold m-0 d-flex align-items-center gap-2">
+                📅 Matriz de Emissão x Vencimento 
+                <span id="badgeModo" class="badge badge-modo-real fs-6 ms-2 shadow-sm">Tempo Real (Pendentes)</span>
+            </h4>
+            <p class="m-0 opacity-75 small">Análise cruzada de volumetria com soma combinada de operadores.</p>
+        </div>
+        <div class="text-end">
+            <span class="grand-total-badge shadow-sm d-block mb-2">📊 Volume Visível: <span id="lblTotalGeralMatriz">0</span></span>
+            
+            <!-- 🎯 AQUI ENTRA A NOVA TAG DE PROJEÇÃO DE PORCENTAGEM -->
+            <span class="badge shadow-sm d-block fs-6 py-2 border border-light" id="lblProjecaoAntecipada" style="background: linear-gradient(to right, #10b981, #059669) !important;">🎯 Entregas Antecipadas: Calculando...</span>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px;">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <span class="fw-bold text-secondary small m-0">Filtrar Operadores Combinados:</span>
+                    
+                    <!-- 🎯 TOGGLE PARA BASE TOTAL -->
+                    <div class="btn-group shadow-sm" role="group">
+                        <input type="radio" class="btn-check" name="btnRadioModoVisao" id="btnVisaoPendentes" autocomplete="off" checked onchange="alternarModoVisao('pendentes')">
+                        <label class="btn btn-outline-primary btn-sm fw-bold px-3" for="btnVisaoPendentes">Ver Pendentes</label>
+
+                        <input type="radio" class="btn-check" name="btnRadioModoVisao" id="btnVisaoTodos" autocomplete="off" onchange="alternarModoVisao('todos')">
+                        <label class="btn btn-outline-primary btn-sm fw-bold px-3" for="btnVisaoTodos">Ver Base Total (Iniciais)</label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 flex-wrap align-items-center" id="containerFiltrosMatriz">
+                    <span class="text-muted small">Carregando operadores do banco de dados...</span>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 bg-light p-2 rounded border shadow-sm">
+                <span class="small fw-bold text-dark"><i class="fas fa-file-excel text-success"></i> Modo Projeção Total:</span>
+                <input type="file" id="arquivoBaseMatriz" class="form-control form-control-sm border-secondary shadow-none" accept=".xlsx, .xls, .csv" style="max-width: 220px;">
+                <button class="btn btn-sm btn-primary fw-bold px-3 shadow-none" onclick="gerarMatrizViaPlanilha()" id="btnGerarPlanilha">Projetar Mês</button>
+                <button class="btn btn-sm btn-danger fw-bold shadow-none" onclick="voltarModoReal()" id="btnVoltarReal" style="display:none;" title="Voltar para tempo real">✖ Fechar Projeção</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="matrix-container">
+        <div class="table-responsive">
+            <table class="table table-sm m-0" id="tabelaMatriz">
+                <tr><td class="p-5 text-center text-muted fw-bold">Buscando dados no servidor...</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE DETALHES -->
+<div class="modal fade" id="modalDetalhesMatriz" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="tituloModalMatriz">Detalhes da Célula</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-hover table-striped m-0" style="font-size: 0.85rem;">
+            <thead class="table-light sticky-top">
+                <tr>
+                    <th>Nº Imóvel</th>
+                    <th>Vencimento</th>
+                    <th>Administradora</th>
+                    <th>Responsável</th>
+                    <th>Status Atual</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyDetalhesMatriz">
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer bg-light py-2">
+        <span class="fw-bold text-dark w-100 text-end fs-6">
+            Total de Casos Clicados: <span id="totalCasosModal" class="text-primary fs-5">0</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    let dadosMatrizGlobal = [];
+    let dadosMatrizProjecao = [];
+    let modoAtual = 'REAL'; // 'REAL' ou 'PLANILHA'
+    let modoVisaoGlobal = 'pendentes'; // 🎯 Nova variável para o Toggle
+    let nomeMesAtual = "Mês 1";
+    let nomeMesSeguinte = "Mês 2";
+
+    // 🎯 Nova função de manipulação da visão
+    function alternarModoVisao(modo) {
+        modoVisaoGlobal = modo;
+        
+        let badge = document.getElementById('badgeModo');
+        if(modo === 'todos') {
+            badge.innerText = "Tempo Real (Base Total Oficial)";
+            badge.className = "badge bg-primary fs-6 ms-2 shadow-sm";
+        } else {
+            badge.innerText = "Tempo Real (Pendentes)";
+            badge.className = "badge badge-modo-real fs-6 ms-2 shadow-sm";
+        }
+        
+        document.getElementById('tabelaMatriz').innerHTML = '<tr><td class="p-5 text-center text-muted fw-bold"><div class="spinner-border text-primary mb-3"></div><br>Buscando na matriz geral...</td></tr>';
+        carregarDadosIniciaisMatriz();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarDadosIniciaisMatriz();
+    });
+
+   function carregarDadosIniciaisMatriz() {
+        fetch('/api/relatorio_matriz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ responsaveis: [], modo_visao: modoVisaoGlobal }) 
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.sucesso) return;
+            dadosMatrizGlobal = data.dados;
+            
+            if (data.meses_ativos && data.meses_ativos.length > 0) {
+                nomeMesAtual = data.meses_ativos[0] || "Mês Atual";
+                nomeMesSeguinte = data.meses_ativos[1] || "Próximo Mês"; 
+            }
+
+            const responsaveisAtivos = data.responsaveis_disponiveis || [];
+            
+            let htmlFiltros = `
+                <div class="form-check form-check-inline m-0 border-end pe-3 me-3">
+                    <input class="form-check-input fw-bold" type="checkbox" id="chk_matriz_todos" onchange="marcarTodosMatriz(this)" checked>
+                    <label class="form-check-label small fw-bold text-primary" for="chk_matriz_todos">✔️ Selecionar Todos</label>
+                </div>
+            `;
+            responsaveisAtivos.forEach((resp, index) => {
+                htmlFiltros += `
+                    <div class="form-check form-check-inline m-0">
+                        <input class="form-check-input check-operador-matriz" type="checkbox" id="chk_op_${index}" value="${resp}" checked onchange="filtrarMatrizLocal()">
+                        <label class="form-check-label small fw-medium" for="chk_op_${index}">👤 ${resp}</label>
+                    </div>
+                `;
+            });
+            document.getElementById('containerFiltrosMatriz').innerHTML = htmlFiltros;
+            
+            renderizarEstruturaMatriz(dadosMatrizGlobal);
+        });
+    }
+
+    function marcarTodosMatriz(master) {
+        document.querySelectorAll('.check-operador-matriz').forEach(cb => cb.checked = master.checked);
+        filtrarMatrizLocal();
+    }
+
+    function filtrarMatrizLocal() {
+        const checkboxes = document.querySelectorAll('.check-operador-matriz');
+        document.getElementById('chk_matriz_todos').checked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        let operadores = [];
+        document.querySelectorAll('.check-operador-matriz:checked').forEach(cb => operadores.push(cb.value.toLowerCase()));
+        
+        let baseParaFiltro = modoAtual === 'REAL' ? dadosMatrizGlobal : dadosMatrizProjecao;
+        let dadosFiltrados = baseParaFiltro.filter(item => operadores.includes(item.responsavel.toLowerCase()));
+        
+        renderizarEstruturaMatriz(dadosFiltrados);
+    }
+
+    // 🎯 GERAÇÃO ESTÁTICA VIA PLANILHA UPLOAD
+    function gerarMatrizViaPlanilha() {
+        const input = document.getElementById('arquivoBaseMatriz');
+        if (input.files.length === 0) {
+            alert("⚠️ Selecione a planilha limpa da Lello (Mês Completo) primeiro!");
+            return;
+        }
+
+        const btn = document.getElementById('btnGerarPlanilha');
+        btn.innerHTML = "⏳ Projetando...";
+        btn.disabled = true;
+
+        document.getElementById('tabelaMatriz').innerHTML = '<tr><td class="p-5 text-center text-muted fw-bold"><div class="spinner-border text-primary mb-3"></div><br>Cruzando base total com datas de emissão. Aguarde...</td></tr>';
+
+        const formData = new FormData();
+        formData.append('arquivo', input.files[0]);
+
+        fetch('/api/matriz/gerar_via_planilha', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.innerHTML = "Atualizar Projeção";
+            btn.disabled = false;
+
+            if (!data.sucesso) {
+                alert("Erro: " + data.msg);
+                voltarModoReal();
+                return;
+            }
+
+            dadosMatrizProjecao = data.dados;
+            modoAtual = 'PLANILHA';
+            
+            document.getElementById('badgeModo').innerText = "Projeção (Base Completa)";
+            document.getElementById('badgeModo').className = "badge badge-modo-planilha fs-6 ms-2 shadow-sm";
+            document.getElementById('btnVoltarReal').style.display = "inline-block";
+
+            if (data.meses_ativos && data.meses_ativos.length > 0) {
+                nomeMesAtual = data.meses_ativos[0] || "Mês Atual";
+                nomeMesSeguinte = data.meses_ativos[1] || "Próximo Mês"; 
+            }
+
+            filtrarMatrizLocal();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Falha ao comunicar com o servidor.");
+            voltarModoReal();
+        });
+    }
+
+    function voltarModoReal() {
+        modoAtual = 'REAL';
+        // Ajusta o badge para o que estiver marcado no Toggle
+        alternarModoVisao(modoVisaoGlobal);
+        
+        document.getElementById('btnVoltarReal').style.display = "none";
+        document.getElementById('arquivoBaseMatriz').value = "";
+        
+        const btn = document.getElementById('btnGerarPlanilha');
+        btn.innerHTML = "Projetar Mês";
+        btn.disabled = false;
+    }
+
+    function abrirDetalhes(emi, ven) {
+        if (modoAtual === 'PLANILHA') {
+            alert("⚠️ Modo de Projeção Estática: Esta visualização cruza 100% da base importada. O clique para detalhamento individual foi desativado para evitar divergências com o status em tempo real do banco de dados.\n\nRetorne ao Modo Tempo Real para detalhar pendências.");
+            return;
+        }
+
+        let operadoresSelecionados = [];
+        document.querySelectorAll('.check-operador-matriz:checked').forEach(cb => {
+            operadoresSelecionados.push(cb.value);
+        });
+
+        document.getElementById('tituloModalMatriz').innerText = `Pendências - Emissão Dia ${emi} x Vencimento Dia ${ven}`;
+        document.getElementById('totalCasosModal').innerText = '0';
+        
+        const tbody = document.getElementById('tbodyDetalhesMatriz');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">⏳ Buscando casos...</td></tr>';
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalhesMatriz'));
+        modal.show();
+
+        fetch('/api/matriz/detalhes_celula', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                emissao: emi, 
+                vencimento: ven, 
+                responsaveis: operadoresSelecionados,
+                modo_visao: modoVisaoGlobal // 🎯 Injeta o modo atual (todos ou pendentes)
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.sucesso) {
+                document.getElementById('totalCasosModal').innerText = data.dados.length;
+
+                if(data.dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Nenhum caso encontrado.</td></tr>';
+                } else {
+                    let html = '';
+                    data.dados.forEach(item => {
+                        let corBadge = item.status_interno === 'EM BRANCO' ? 'bg-secondary' : 'bg-warning text-dark';
+                        // Se o boleto já tiver sido pago/coletado, pinta o badge de verde para fácil identificação
+                        if (['PAGO', 'COLETADO', 'PAGO NA 275', 'PAGO NA ADM'].includes(item.status_interno.toUpperCase())) {
+                            corBadge = 'bg-success';
+                        }
+                        
+                        html += `<tr>
+                            <td class="fw-bold"><a href="/?busca=${item.imovel}" target="_blank" class="text-decoration-none">${item.imovel} 🔗</a></td>
+                            <td>${item.vencimento || '-'}</td>
+                            <td>${item.administradora}</td>
+                            <td>${item.responsavel}</td>
+                            <td><span class="badge ${corBadge}">${item.status_interno}</span></td>
+                        </tr>`;
+                    });
+                    tbody.innerHTML = html;
+                }
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Erro: ${data.msg}</td></tr>`;
+            }
+        });
+    }
+
+    function renderizarEstruturaMatriz(dadosBrutos) {
+        try {
+            let matriz = {}; let totalColuna = {}; let totalLinha = {};
+            let totalLinhaMesAtual = {}; let totalLinhaMesSeguinte = {};
+            let totalGeral = 0; let totalGeralMesAtual = 0; let totalGeralMesSeguinte = 0;
+
+            for (let i = 1; i <= 31; i++) {
+                matriz[i] = {}; totalColuna[i] = 0; totalLinha[i] = 0;
+                totalLinhaMesAtual[i] = 0; totalLinhaMesSeguinte[i] = 0;
+                for (let j = 1; j <= 31; j++) matriz[i][j] = { total: 0, detalhe: {} };
+            }
+
+            if (dadosBrutos && dadosBrutos.length > 0) {
+                dadosBrutos.forEach(item => {
+                    let emi = parseInt(String(item.emissao).substring(0, 2), 10);
+                    let ven = parseInt(String(item.vencimento).substring(0, 2), 10);
+                    let qtd = parseInt(item.qtd, 10);
+                    
+                    if (!isNaN(emi) && emi >= 1 && emi <= 31 && !isNaN(ven) && ven >= 1 && ven <= 31) {
+                        matriz[emi][ven].total += qtd;
+                        let resp = item.responsavel || 'Não Atribuído';
+                        matriz[emi][ven].detalhe[resp] = (matriz[emi][ven].detalhe[resp] || 0) + qtd;
+                        
+                        totalLinha[emi] += qtd; totalColuna[ven] += qtd; totalGeral += qtd;
+
+                        if (emi > ven) {
+                            totalLinhaMesAtual[emi] += qtd; totalGeralMesAtual += qtd;
+                        } else {
+                            totalLinhaMesSeguinte[emi] += qtd; totalGeralMesSeguinte += qtd;
+                        }
+                    }
+                });
+            }
+
+            document.getElementById('lblTotalGeralMatriz').innerText = totalGeral.toLocaleString('pt-BR');
+
+            // 🎯 LÓGICA DE PORCENTAGEM (Adicionada aqui)
+            let pctAntecipado = totalGeral > 0 ? ((totalGeralMesAtual / totalGeral) * 100).toFixed(1).replace('.', ',') : 0;
+            let badgeAntecipado = document.getElementById('lblProjecaoAntecipada');
+            if(badgeAntecipado) {
+                badgeAntecipado.innerHTML = `🎯 Entregas Antecipadas (${nomeMesAtual}): <span class="ms-1 px-2 py-1 bg-white text-success rounded-pill">${totalGeralMesAtual.toLocaleString('pt-BR')} casos (${pctAntecipado}%)</span>`;
+            }
+
+            let pctSeguinte = totalGeral > 0 ? ((totalGeralMesSeguinte / totalGeral) * 100).toFixed(1).replace('.', ',') : 0;
+
+            let html = `<thead><tr><th class="col-emissao" style="z-index: 13;">Vencimento →<br>Emissão ↓</th>`;
+            for (let d = 1; d <= 31; d++) html += `<th>${d}</th>`;
+            html += `<th class="divisor-coluna" style="background-color: #0f172a !important; min-width: 60px;">${nomeMesAtual}</th>`;
+            html += `<th style="background-color: #0f172a !important; min-width: 70px;">${nomeMesSeguinte}</th>`;
+            html += '<th class="total-corner" style="min-width: 80px;">TOTAL GERAL</th></tr></thead><tbody>';
+
+            for (let emi = 1; emi <= 31; emi++) {
+                html += `<tr><th class="col-emissao">${emi}</th>`;
+                for (let ven = 1; ven <= 31; ven++) {
+                    let celula = matriz[emi][ven];
+                    let classFundo = emi === ven ? "diag-yellow" : (emi > ven ? "area-mes-atual" : "area-mes-seguinte");
+
+                    if (celula.total > 0) {
+                        let textoTooltip = `Clique para ver os detalhes!\n-----------------------------------------\n`;
+                        if (modoAtual === 'PLANILHA') textoTooltip = `Dados Projetados\n-----------------------------------------\n`;
+                        
+                        for (const [operador, subQtd] of Object.entries(celula.detalhe)) {
+                            textoTooltip += `👤 ${operador}: ${subQtd} caso(s)\n`;
+                        }
+                        
+                        html += `<td class="${classFundo}" title="${textoTooltip}" onclick="abrirDetalhes(${emi}, ${ven})">${celula.total}</td>`;
+                    } else {
+                        html += `<td class="celula-vazia ${classFundo}">-</td>`;
+                    }
+                }
+                
+                html += `<td class="divisor-coluna total-linha" style="background-color: #334155 !important;">${totalLinhaMesAtual[emi] > 0 ? totalLinhaMesAtual[emi] : ''}</td>`;
+                html += `<td class="total-linha" style="background-color: #334155 !important;">${totalLinhaMesSeguinte[emi] > 0 ? totalLinhaMesSeguinte[emi] : ''}</td>`;
+                html += `<td class="total-linha">${totalLinha[emi] > 0 ? totalLinha[emi] : ''}</td></tr>`;
+            }
+
+            // 🎯 INJETANDO A PORCENTAGEM NO RODAPÉ TAMBÉM
+            html += '<tr><td class="total-col col-emissao">TOTAL</td>';
+            for (let ven = 1; ven <= 31; ven++) html += `<td class="total-col">${totalColuna[ven] > 0 ? totalColuna[ven] : ''}</td>`;
+            html += `<td class="divisor-coluna total-col text-info" style="font-size: 0.90rem;">
+                        ${totalGeralMesAtual > 0 ? totalGeralMesAtual + '<br><span style="font-size: 0.70rem; color: #a5f3fc;">' + pctAntecipado + '%</span>' : ''}
+                     </td>`;
+            html += `<td class="total-col text-info" style="font-size: 0.90rem;">
+                        ${totalGeralMesSeguinte > 0 ? totalGeralMesSeguinte + '<br><span style="font-size: 0.70rem; color: #a5f3fc;">' + pctSeguinte + '%</span>' : ''}
+                     </td>`;
+            html += `<td class="total-corner text-warning" style="font-size: 0.95rem;">${totalGeral}</td></tr></tbody>`;
+            
+            document.getElementById('tabelaMatriz').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('tabelaMatriz').innerHTML = `<tr><td class="text-danger p-4 text-center">Erro ao renderizar a matriz.</td></tr>`;
+        }
+    }
+</script>
+{% endblock %}

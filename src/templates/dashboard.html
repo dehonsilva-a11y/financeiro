@@ -1,0 +1,1686 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Executivo - Lello{% endblock %}
+
+{% block extra_styles %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    /* DESIGN ULTRA PREMIUM - ESTILO SAAS CONTEMPORÂNEO */
+    body { background-color: #f8fafc; }
+    
+    .premium-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #00a7e1 100%);
+        border-radius: 16px;
+        padding: 28px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    .premium-banner::before {
+        content: ''; position: absolute; top: -50%; right: -20%; width: 350px; height: 400px;
+        background: rgba(0, 167, 225, 0.12); filter: blur(70px); border-radius: 50%;
+    }
+
+    /* KPI CARDS REMODELADOS */
+    .kpi-card { 
+        background: #ffffff; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 14px; 
+        padding: 22px; 
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        position: relative; 
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
+    }
+    .kpi-card:hover { 
+        transform: translateY(-4px); 
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    }
+    .kpi-card.clickable { cursor: pointer; }
+    .kpi-card.clickable::after { 
+        content: '🔍 DETALHAR'; 
+        position: absolute; 
+        bottom: 8px; 
+        right: 12px; 
+        font-size: 0.6rem; 
+        color: #94a3b8; 
+        font-weight: 700; 
+        letter-spacing: 0.5px;
+    }
+    .kpi-label { color: #64748b; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .kpi-value { font-size: 2.3rem; font-weight: 800; line-height: 1.1; margin: 0; color: #0f172a; letter-spacing: -1px; }
+    
+    .border-accent-blue { border-top: 4px solid #00a7e1; }
+    .border-accent-indigo { border-top: 4px solid #6366f1; }
+    .border-accent-green { border-top: 4px solid #10b981; }
+    .border-accent-amber { border-top: 4px solid #f59e0b; }
+    .border-accent-red { border-top: 4px solid #ef4444; }
+
+    /* CONTÊINERES DE GRÁFICOS */
+    .chart-container { 
+        background: #ffffff; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 14px; 
+        padding: 24px; 
+        height: 100%; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); 
+    }
+    
+    .panel-container {
+        background: #ffffff; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 14px; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); 
+        overflow: hidden;
+    }
+
+    .table-modern { font-size: 0.85rem; width: 100%; margin: 0; }
+    .table-modern thead th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; letter-spacing: 0.5px; }
+    .table-modern tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; font-weight: 500; }
+    
+    .clickable-row { cursor: pointer; transition: background-color 0.15s ease-in-out; }
+    .clickable-row:hover { background-color: #f8fafc !important; }
+
+    /* CUSTOM SCROLLBAR */
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-1">
+
+   <div class="premium-banner mb-4 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h3 class="fw-bold m-0" style="letter-spacing: -0.5px; color: #ffffff !important;">Inteligência Operacional Gerencial</h3>
+            <p class="m-0 text-white-50 small">Análise executiva estratégica de volumetria, metas e burn-down de liquidações.</p>
+        </div>
+        
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <a href="/ia_assistant" class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
+               style="font-size: 0.78rem; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 15px rgba(124, 58, 237, 0.5)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                🤖 IA DADOS
+            </a>
+
+            <button class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
+        onclick="abrirRelatorioLotes()" 
+        style="font-size: 0.78rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;"
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 15px rgba(16, 185, 129, 0.5)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+    📦 Rastreio de Lotes
+</button>
+            <button class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
+                onclick="abrirVisaoFimDeMes()" 
+                style="font-size: 0.78rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;">
+                📊 Visão Lote fim de Mês
+            </button>
+
+
+            <div style="width: 280px;">
+                <select class="form-select form-select-sm fw-bold border-light shadow-sm bg-white text-dark" onchange="window.location.href = '/dashboard_gerencial?mes_ref=' + this.value;">
+                    <option value="">
+                        📊 Mês Atual {% if nome_mes_real %}({{ nome_mes_real }}){% else %}(Tempo Real){% endif %}
+                    </option>
+
+                    {% for m in meses_arquivados %}
+                        <option value="{{ m }}" {% if mes_ref == m %}selected{% endif %}>📅 {{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if not mes_ref %}
+                {% if base_congelada %}
+                    <button class="btn btn-sm fw-bold shadow-sm px-3 py-2" onclick="descongelarBaseAtual()" style="font-size: 0.78rem; background-color: #ef4444; border: none; color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;" title="Clique para resetar a meta e ler a nova planilha">
+                        🔓 Descongelar Base{% if meta_mes_ref %} · Meta de {{ meta_mes_ref }}{% endif %}
+                    </button>
+                {% else %}
+                    <button class="btn btn-sm btn-primary fw-bold shadow-sm px-3 py-2" onclick="congelarBaseAtual()" style="font-size: 0.78rem; background-color: #00a7e1; border: none; color: #ffffff !important; border-radius: 8px;">
+                        🔒 Congelar Base
+                    </button>
+                {% endif %}
+            {% endif %}
+            
+            <span class="badge px-3 py-2 fw-semibold" style="font-size: 0.78rem; background-color: rgba(255, 255, 255, 0.25) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;">
+                {% if mes_ref %}Relatório Consolidado{% else %} Em Tempo Real{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md">
+            <div class="kpi-card border-accent-blue text-center" style="cursor: help;" 
+                 title="Distribuição de Portais:&#10;🤖 Winker: {{ breakdown_total.get('WINKER', 0) }}&#10;🤖 Webware: {{ breakdown_total.get('WEBWARE', 0) }}&#10;🌐 Diversos: {{ breakdown_total.get('DIVERSOS', 0) }}">
+                <div class="kpi-label">Volume Total ({% if mes_ref %}Histórico{% else %}Meta Fixo{% endif %})</div>
+                <div class="kpi-value text-dark">{{ "{:,}".format(total).replace(',', '.') }}</div>
+            </div>
+        </div>
+        
+        <div class="col-md">
+            <div class="kpi-card border-accent-amber text-center" style="cursor: help;"
+                 title="Pendências por Portal:&#10;🤖 Winker: {{ breakdown_faltam.get('WINKER', 0) }}&#10;🤖 Webware: {{ breakdown_faltam.get('WEBWARE', 0) }}&#10;🌐 Diversos: {{ breakdown_faltam.get('DIVERSOS', 0) }}">
+                <div class="kpi-label text-warning">Base Atualizada (Faltam)</div>
+                <div class="kpi-value" style="color: #d97706;">{{ "{:,}".format(base_atualizada).replace(',', '.') }}</div>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="kpi-card border-accent-green clickable" data-bs-toggle="modal" data-bs-target="#modalColetados">
+                <div class="kpi-label text-success">Total Coletado</div>
+                <div class="kpi-value text-success">{{ "{:,}".format(coletados).replace(',', '.') }}</div>
+            </div>
+        </div>
+
+        {% if not mes_ref and emissao_hoje_geral %}
+        <div class="col-md">
+            <div class="kpi-card border-accent-blue text-center" style="border-top-color: #00a7e1;">
+                <div class="kpi-label text-indigo" style="color: #00a7e1;">Emissões Hoje</div>
+                <div class="kpi-value" style="color: #00a7e1;">{{ emissao_hoje_geral | sum(attribute='qtd') }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not mes_ref %}
+        <div class="col-md">
+            <div class="kpi-card border-accent-red clickable" data-bs-toggle="modal" data-bs-target="#modalVencemHoje">
+                <div class="kpi-label text-danger">Crítico (Vencem Hoje)</div>
+                <div class="kpi-value text-danger">{{ vencendo_hoje }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not mes_ref and emissao_hoje_geral %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="chart-container shadow-sm p-4">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark mb-0">📌 Volume de Emissão Agendada para Hoje</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Colaborador Responsável</th>
+                                <th class="text-end">Quantidade de Casos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in emissao_hoje_geral %}
+                            <tr>
+                                <td class="fw-bold text-secondary">👤 {{ item.responsavel }}</td>
+                                <td class="text-end fw-bold text-dark fs-6">{{ item.qtd }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="panel-container h-100 border-0 shadow-sm d-flex flex-column">
+                <div class="p-4 border-bottom bg-white">
+                    <h6 class="fw-bold text-dark m-0">🥇 Performance Individual: Operação Manual</h6>
+                </div>
+                <div class="table-responsive flex-grow-1 custom-scroll" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th style="padding-left: 24px;">Colaborador</th>
+                                <th class="text-end" style="padding-right: 24px;">Baixas Efetuadas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for op in ranking_manual %}
+                            <tr>
+                                <td style="padding-left: 24px;" class="fw-bold text-secondary">👤 {{ op.nome }}</td>
+                                <td class="text-end fw-bold text-primary" style="padding-right: 24px; font-size: 0.95rem;">{{ op.qtd }} coletas</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not ranking_manual %}
+                            <tr><td colspan="2" class="text-center py-5 text-muted">Nenhum registro manual encontrado nesta competência.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="chart-container shadow-sm">
+                <h6 class="fw-bold text-dark mb-3">🤖 Distribuição de Captura por Automação (RPA)</h6>
+                <div id="dadosGrafico2" data-webware="{{ stats_robos.WEBWARE }}" data-winker="{{ stats_robos.WINKER }}" data-finmail="{{ stats_robos.FINMAIL }}" data-scanner="{{ stats_robos.SCANNER }}" style="display: none;"></div>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="chartRobos"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="chart-container text-center shadow-sm py-4" style="border-radius: 14px; background: #ffffff;">
+                <h6 class="fw-bold text-secondary mb-3" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolução de Conclusão da Base</h6>
+                <div id="dadosGrafico1" data-coletados="{{ coletados }}" data-base-atualizada="{{ base_atualizada }}" style="display: none;"></div>
+                <div style="position: relative; height: 140px; width: 100%; display: flex; justify-content: center;">
+                    <canvas id="chartProgresso"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-12">
+            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0">
+                
+                <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center bg-light gap-3">
+                    <h6 class="fw-bold text-dark m-0" style="font-size: 0.9rem;">📊 Acompanhamento de Resolução por Dia de Vencimento</h6>
+                    
+                    <div class="d-flex gap-2">
+                        <select id="filtroPeriodoDias" class="form-select form-select-sm shadow-sm fw-bold border-secondary text-secondary" style="font-size: 0.75rem; min-width: 140px;" onchange="filtrarTabelaDias('periodo')">
+                            <option value="ALL" selected>📅 Todos os Períodos</option>
+                            <option value="1-4">Dias 01 a 04</option>
+                            <option value="5-9">Dias 05 a 09</option>
+                            <option value="10-14">Dias 10 a 14</option>
+                            <option value="15-31">Dias 15 a 31</option>
+                        </select>
+
+                        <select id="filtroDiaUnico" class="form-select form-select-sm shadow-sm fw-bold border-secondary text-secondary" style="font-size: 0.75rem; min-width: 130px;" onchange="filtrarTabelaDias('dia')">
+                            <option value="ALL" selected> Todos os Dias</option>
+                            {% for r in resumo_diario %}
+                            <option value="{{ r.dia | replace('Dia ', '') }}">Apenas Dia {{ r.dia | replace('Dia ', '') }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-responsive custom-scroll" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table-modern text-center m-0"id="tabelaAcompanhamentoDias">
+                        <thead style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th class="text-start ps-4">Dia Vencimento</th>
+                                <th>Total Existente</th>
+                                <th>Faltantes (Base Atualizada)</th>
+                                <th>Concluídos (Diferença)</th>
+                                <th class="text-end pe-4">% Baixado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in resumo_diario %}
+                            <tr class="clickable-row" data-dia="{{ r.dia | replace('Dia ', '') }}" data-bs-toggle="modal" data-bs-target="#modalDetalheDia">
+                                <td class="text-start fw-bold text-dark ps-4" style="font-size: 0.78rem;"> {{ r.dia }}</td>
+                                <td class="text-secondary fw-semibold">{{ r.total }}</td>
+                                <td class="fw-bold" style="color: #d97706 !important;">{{ r.atual }}</td>
+                                <td class="text-success fw-bold">{{ r.diferenca }}</td>
+                                <td class="text-end pe-4">
+                                    {% set pct_num = r.pct.replace(',', '.') | float %}
+                                    <span class="badge 
+                                        {% if pct_num >= 95 %} bg-success 
+                                        {% elif pct_num >= 80 %} bg-success bg-opacity-75
+                                        {% elif pct_num >= 60 %} bg-warning text-dark 
+                                        {% else %} bg-danger {% endif %} 
+                                        px-2.5 py-1.5 fw-bold" style="font-size: 0.75rem; min-width: 65px;">
+                                        {{ r.pct }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="bg-light border-top fw-bold" style="position: sticky; bottom: 0; z-index: 1;">
+                            <tr>
+                                <td class="text-start text-dark ps-4" style="font-size: 0.85rem;">TOTAL GERAL</td>
+                                <td class="text-dark" style="font-size: 0.95rem;">{{ total }}</td>
+                                <td class="text-dark" style="font-size: 0.95rem;">{{ base_atualizada }}</td>
+                                <td class="text-dark" style="font-size: 0.95rem;">{{ diferenca_total }}</td>
+                                <td class="text-end pe-4 text-dark" style="font-size: 1rem;">
+                                    {{ (percentual_baixado_total|default(0))|float|round(2)|string|replace('.', ',') }}%
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalColetados" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold">Baixas Efetuadas (Operadores / Automaçãos)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table-modern m-0">
+                    <thead><tr><th class="ps-4">Origem da Coleta</th><th class="text-end pe-4">Quantidade</th></tr></thead>
+                    <tbody>
+                        {% for item in lista_coletados %}
+                        <tr><td class="ps-4 fw-bold text-secondary">🤖 {{ item.nome }}</td><td class="text-end pe-4 fw-bold text-success">{{ "{:,}".format(item.qtd).replace(',', '.') }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetalheDia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> 
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold" id="modalDetalheDiaLabel">Detalhes do Dia: <span id="detalheDiaTitulo"></span></h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table-modern m-0 text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-start ps-4">Responsável</th>
+                            <th>Total Inicial</th>
+                            <th>Base Atualizada</th>
+                            <th class="text-end pe-4">Diferença (Baixados)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalheDiaCorpo">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================= -->
+
+<!-- MODAL VISÃO FIM DE MÊS -->
+<div class="modal fade" id="modalVisaoFimDeMes" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-bottom: 4px solid #b45309;">
+                <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">📊 Fechamento: Visão Lote Fim de Mês</h5>
+                        <small class="text-white-50">Volume consolidado de coletas da base ativa no mês selecionado.</small>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <select id="filtroMesFechamento" class="form-select fw-bold shadow-sm text-dark" onchange="carregarFechamentoMes(this.value)">
+                            <option value="">Carregando...</option>
+                        </select>
+
+                        <select id="filtroVisaoFimMes" class="form-select fw-bold shadow-sm text-dark" onchange="renderizarTabelaFimDeMes()">
+                            <option value="ALL">📦 Mostrar Todos</option>
+                            <option value="01-05">Apenas 01-05</option>
+                            <option value="06-10">Apenas 06-10</option>
+                            <option value="11-15">Apenas 11-15</option>
+                            <option value="16-20">Apenas 16-20</option>
+                            <option value="21-29">Apenas 21-29</option>
+                            <option value="30 - Aluguel Tranquilo">Apenas 30</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-light">
+                <table class="table-modern text-center m-0">
+                    <thead style="position: sticky; top: 0; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <tr>
+                            <th class="text-start ps-4">Faixa de Lote</th>
+                            <th>Total da Base</th>
+                            <th>Total Coletado</th>
+                            <th>% Concluído</th>
+                            <th id="thProjecaoVisao" class="text-end pe-4" style="color: #0ea5e9;">🎯 Projeção Fim de Mês</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoVisaoFimDeMes">
+                    </tbody>
+                    <tfoot id="rodapeVisaoFimDeMes" class="bg-light border-top fw-bold">
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SIMULADOR DE DATA DEFINITIVA -->
+<div class="modal fade" id="modalSimulacaoLote" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
+            <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border-bottom: 4px solid #312e81;">
+                <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">⚙️ Simulador Estratégico: Lote <span id="tituloLoteSimulacao"></span></h5>
+                        <small class="text-white-50">Ajuste a Data Definitiva de recebimento para visualizar a captura de boletos.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 bg-white p-2 rounded shadow-sm">
+                        <label class="fw-bold text-dark mb-0 small">Data Definitiva (Dia):</label>
+                        <input type="number" id="inputDataDefinitiva" class="form-control form-control-sm fw-bold text-primary text-center" value="21" min="1" max="31" style="width: 70px;" onchange="renderizarMatrizSimulacao()">
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-light d-flex flex-column">
+                <div class="d-flex justify-content-around p-3 bg-white border-bottom shadow-sm">
+                    <div class="text-center">
+                        <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">📦 Total do Lote</h6>
+                        <h4 class="text-dark fw-bold mb-0" id="simTotal">0</h4>
+                    </div>
+                    <div class="text-center border-start ps-4">
+                        <h6 class="text-success fw-bold mb-1" style="font-size: 0.8rem;">✅ Capturados no Prazo</h6>
+                        <h4 class="text-success fw-bold mb-0" id="simCapturados">0</h4>
+                    </div>
+                    <div class="text-center border-start ps-4">
+                        <h6 class="text-danger fw-bold mb-1" style="font-size: 0.8rem;">⏳ Fora do Prazo (Atrasados)</h6>
+                        <h4 class="text-danger fw-bold mb-0" id="simPerdidos">0</h4>
+                    </div>
+                </div>
+                <div class="table-responsive flex-grow-1 custom-scroll p-3">
+                    <table class="table table-sm table-bordered text-center m-0" style="font-size: 0.75rem; background: white;">
+                        <thead id="headMatrizSimulacao" style="position: sticky; top: 0; z-index: 2; background: #0f172a; color: white;">
+                            <!-- Preenchido via JS -->
+                        </thead>
+                        <tbody id="corpoMatrizSimulacao">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RASTREIO DE LOTES (AGRUPADO)                        -->
+<!-- ========================================================= -->
+<div class="modal fade" id="modalRelatorioLotes" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
+           <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid #10b981;">
+                
+                <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">📦 Rastreio de Entregas por Lote</h5>
+                        <small class="text-white-50">Desdobramento de volumetria: Lote ➔ Emissão ➔ Vencimento.</small>
+                    </div>
+                    
+                    <div style="min-width: 250px;">
+                        <select id="filtroLoteModal" class="form-select fw-bold shadow-sm text-dark" onchange="renderizarTabelaLotes()">
+                            <option value="ALL">📦 Todos os Lotes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-light">
+                <div class="table-responsive h-100 custom-scroll">
+                    <table class="table-modern text-center m-0">
+                        <thead style="position: sticky; top: 0; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <tr>
+                                <th class="text-start ps-4">Agrupamento</th>
+                                <th>Dia da Emissão</th>
+                                <th>Dia do Vencimento</th>
+                                <th>Total Casos</th>
+                                <th>Coletados</th>
+                                <th>Pendentes</th>
+                                <th class="text-end pe-4">Conclusão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoRelatorioLotes">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not mes_ref %}
+<div class="modal fade" id="modalVencemHoje" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title fw-bold">🚨 Casos Críticos - Vencimento Hoje</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                
+                <div class="bg-light border-bottom p-3">
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">📊 Resumo Rápido de Status</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% set grupos_status = lista_vencem_hoje | groupby('status_interno') %}
+                        {% for grupo in grupos_status %}
+                        <span class="badge bg-white text-dark border shadow-sm px-2 py-1" style="font-size: 0.75rem;">
+                            {{ grupo.grouper }}: <strong class="text-danger fs-6 ms-1">{{ grupo.list | length }}</strong>
+                        </span>
+                        {% endfor %}
+                        
+                        {% if not lista_vencem_hoje %}
+                        <span class="text-muted small">Nenhum caso pendente para hoje.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <table class="table-modern m-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Nº Imóvel</th>
+                            <th>Administradora</th>
+                            <th>Status Atual</th>
+                            <th class="pe-4">Dono da Carteira</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in lista_vencem_hoje %}
+                        <tr>
+                            <td class="fw-bold text-primary ps-4">🏢 {{ item.imovel }}</td>
+                            <td class="fw-semibold text-secondary">{{ item.administradora }}</td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1" style="font-size: 0.7rem;">
+                                    {{ item.status_interno }}
+                                </span>
+                            </td>
+                            <td class="pe-4">{% if not item.responsavel or item.responsavel == 'Não Atribuída' %}<span class="text-danger fw-bold">⚠️ Não Atribuída</span>{% else %}<span class="badge bg-light text-dark border px-2 py-1">{{ item.responsavel }}</span>{% endif %}</td>                        
+                        </tr>
+                        {% endfor %}
+                        
+                        {% if not lista_vencem_hoje %}
+                        <tr><td colspan="4" class="text-center py-5 text-muted fw-semibold">🎉 Nenhum boleto pendente para a data de hoje.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<!-- ========================================================================= -->
+    <!-- SCRIPT DE NAVEGAÇÃO DA MATRIZ (TEM QUE FICAR AQUI PARA FUNCIONAR)         -->
+    <!-- ========================================================================= -->
+    <script>
+    function atualizarComparativo() {
+        const selectM1 = document.getElementById('selectMes1');
+        const selectM2 = document.getElementById('selectMes2');
+        
+        let m1 = selectM1 ? selectM1.value : '';
+        let m2 = selectM2 ? selectM2.value : '';
+        
+        let url = '/dashboard_gerencial?';
+        
+        // Se a pessoa clicou no X para fechar o comparativo
+        if (m2 === 'fechar') {
+            m2 = '';
+        }
+
+        if(m1) url += 'mes_ref=' + encodeURIComponent(m1) + '&';
+        if(m2) url += 'mes_ref_2=' + encodeURIComponent(m2);
+        
+        // Se escolheu só o mês comparativo mas o principal tá vazio, joga o comparativo pro principal
+        if(!m1 && m2) { 
+            url = '/dashboard_gerencial?mes_ref=' + encodeURIComponent(m2); 
+        }
+        
+        // Ativa o loading e viaja para a URL nova
+        if (typeof ativarLoading === 'function') ativarLoading();
+        window.location.href = url;
+    }
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- SCRIPT DE NAVEGAÇÃO DA MATRIZ -->
+    <!-- ========================================================================= -->
+    <script>
+    function adicionarComparativo(mes2) {
+        if(!mes2) return;
+        const urlParams = new URLSearchParams(window.location.search);
+        let mes1 = urlParams.get('mes_ref') || '';
+        
+        let novaUrl = '/dashboard_gerencial?';
+        if(mes1) novaUrl += 'mes_ref=' + encodeURIComponent(mes1) + '&';
+        novaUrl += 'mes_ref_2=' + encodeURIComponent(mes2);
+        
+        if (typeof ativarLoading === 'function') ativarLoading();
+        window.location.href = novaUrl;
+    }
+
+    function removerComparativo() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let mes1 = urlParams.get('mes_ref') || '';
+        
+        let novaUrl = '/dashboard_gerencial';
+        if(mes1) novaUrl += '?mes_ref=' + encodeURIComponent(mes1);
+        
+        if (typeof ativarLoading === 'function') ativarLoading();
+        window.location.href = novaUrl;
+    }
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- LEGENDA E BOTÃO DE GERENCIAMENTO DE JORNADA                               -->
+    <!-- ========================================================================= -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 px-2 gap-3">
+        <div class="d-flex gap-3 bg-white p-2 rounded shadow-sm border">
+            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #FFFF00; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Férias / Folga / Atestado</small></div>
+            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #FFA500; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Home Office</small></div>
+            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #00FFFF; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Feriado Nacional / Ponte</small></div>
+        </div>
+        <button class="btn btn-dark fw-bold btn-sm shadow-sm" style="background-color: #1e293b;" onclick="abrirGestaoJornada('{{ base_data_1 }}')">
+            ⚙️ Gerenciar Férias e Feriados
+        </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MATRIZ DE PRODUTIVIDADE DIÁRIA (FUNDO BRANCO E JORNADA DESTACADA)         -->
+    <!-- ========================================================================= -->
+    <div class="row mb-5 gx-3 px-2">
+        <!-- TABELA 1 -->
+        <div class="{% if matriz_calendario_2 %}col-lg-6{% else %}col-lg-12{% endif %} mb-4">
+            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0" style="background-color: #e2e8f0;">
+                <div class="p-2 d-flex justify-content-between align-items-center" style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                    <h6 class="fw-bold m-0 text-dark ps-2" style="font-size: 0.85rem;">📊 Matriz de Coletas</h6>
+                    {% if not matriz_calendario_2 %}
+                    <div style="width: 200px;"> 
+                        <select class="form-select form-select-sm fw-bold shadow-sm text-white" style="background-color: #6366f1; border-color: #4f46e5; font-size: 0.75rem;" onchange="adicionarComparativo(this.value)">
+                            <option value="" style="background: white; color: black;">➕ Comparar com outro mês...</option>
+                            <option value="atual" style="background: white; color: black;">📊 Mês Atual</option>
+                            {% for m in meses_arquivados %}
+                                <option value="{{ m }}" style="background: white; color: black;">📅 {{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="table-responsive custom-scroll" style="padding: 10px; display: flex; justify-content: center; background-color: #ffffff;">
+                    <table class="table-sm text-center m-0 mx-auto" style="background-color: #fff; width: 100%; min-width: 400px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.75rem; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th style="background-color: #fff; border: none;"></th>
+                                <th colspan="{{ time_operacional|length }}" style="background-color: #1a0b2e; color: #ffffff; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; border: 1px solid #000; padding: 4px;">{{ titulo_matriz_1 }}</th>
+                                <th style="background-color: #fff; border: none;"></th>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                                <th class="text-dark fw-bold" style="width: 25px; border: 1px solid #000; padding: 2px;">Dia</th>
+                                {% for op in time_operacional %}
+                                <th class="text-dark fw-bold" style="min-width: 45px; border: 1px solid #000; padding: 2px;">{{ op }}</th>
+                                {% endfor %}
+                                <th class="text-muted fw-bold" style="width: 35px; border: none; background-color: #e2e8f0; padding: 2px 0 2px 4px; text-align: left;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in matriz_calendario %}
+                            <tr class="clickable-row" style="height: 16px;">
+                                <td class="fw-bold text-dark" style="border: 1px solid #000; background-color: #f1f5f9; padding: 0;">{{ linha.dia }}</td>
+                                
+                                {% for colab in linha.colaboradores %}
+                                    {% set bg_c = '#ffffff' %} 
+                                    {% set txt_c = '#0f172a' %} 
+                                    
+                                    {% if colab.status == 'FERIADO' %} {% set bg_c = '#00FFFF' %} 
+                                    {% elif colab.status in ['FERIAS', 'FOLGA'] %} {% set bg_c = '#FFFF00' %} 
+                                    {% elif colab.status == 'HOME' %} {% set bg_c = '#FFA500' %} 
+                                    {% else %}
+                                        {% if colab.qtd == 0 %} {% set txt_c = '#cbd5e1' %} {% endif %}
+                                    {% endif %}
+                                    
+                                {% if colab.is_futuro %}
+                                    <td style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }};"></td>
+                                {% else %}
+                                    <td class="fw-bold" style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }}; color: {{ txt_c }};">{{ colab.qtd }}</td>
+                                {% endif %}
+                                {% endfor %}
+                                
+                                {% if linha.is_futuro %}
+                                    <td style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;"></td>
+                                {% else %}
+                                    <td class="text-muted fw-bold" style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;">{{ linha.total_dia }}</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot style="position: sticky; bottom: 0; z-index: 2;">
+                            <tr style="height: 20px;">
+                                <td class="fw-bold bg-secondary text-white" style="border: 1px solid #000; padding: 0;">TOT</td>
+                                {% for total in totais_rodape %}
+                                <td class="fw-bold bg-light text-dark" style="border: 1px solid #000; padding: 0;">{{ total }}</td>
+                                {% endfor %}
+                                <td class="fw-bold bg-dark text-white" style="border: 1px solid #000; text-align: center; padding: 0;">{{ total_geral_mes }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA 2 (COMPARATIVO) -->
+        {% if matriz_calendario_2 %}
+        <div class="col-lg-6 mb-4">
+            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0" style="background-color: #e2e8f0;">
+                <div class="p-2 d-flex justify-content-between align-items-center" style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0;">
+                    <div style="width: 200px;"> 
+                        <select class="form-select form-select-sm fw-bold shadow-sm text-white" style="background-color: #6366f1; border-color: #4f46e5; font-size: 0.75rem;" onchange="adicionarComparativo(this.value)">
+                            <option value="atual" style="background: white; color: black;" {% if mes_ref_2 == 'atual' %}selected{% endif %}>Mês Atual</option>
+                            {% for m in meses_arquivados %}
+                                <option value="{{ m }}" style="background: white; color: black;" {% if mes_ref_2 == m %}selected{% endif %}>📅 {{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger fw-bold py-0 px-2 shadow-sm" style="font-size: 0.7rem;" onclick="removerComparativo()">✖ Fechar Comparativo</button>
+                </div>
+                
+                <div class="table-responsive custom-scroll" style="padding: 10px; display: flex; justify-content: center; background-color: #ffffff;">
+                    <table class="table-sm text-center m-0 mx-auto" style="background-color: #fff; width: 100%; min-width: 400px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.75rem; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th style="background-color: #fff; border: none;"></th>
+                                <th colspan="{{ time_operacional_2|length }}" style="background-color: #166534; color: #ffffff; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; border: 1px solid #000; padding: 4px;">{{ titulo_matriz_2 }}</th>
+                                <th style="background-color: #fff; border: none;"></th>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                                <th class="text-dark fw-bold" style="width: 25px; border: 1px solid #000; padding: 2px;">Dia</th>
+                                {% for op in time_operacional_2 %}
+                                <th class="text-dark fw-bold" style="min-width: 45px; border: 1px solid #000; padding: 2px;">{{ op }}</th>
+                                {% endfor %}
+                                <th class="text-muted fw-bold" style="width: 35px; border: none; background-color: #e2e8f0; padding: 2px 0 2px 4px; text-align: left;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in matriz_calendario_2 %}
+                            <tr class="clickable-row" style="height: 16px;">
+                                <td class="fw-bold text-dark" style="border: 1px solid #000; background-color: #f1f5f9; padding: 0;">{{ linha.dia }}</td>
+                                
+                                {% for colab in linha.colaboradores %}
+                                    {% set bg_c = '#ffffff' %} 
+                                    {% set txt_c = '#0f172a' %} 
+                                    
+                                    {% if colab.status == 'FERIADO' %} {% set bg_c = '#00FFFF' %} 
+                                    {% elif colab.status in ['FERIAS', 'FOLGA'] %} {% set bg_c = '#FFFF00' %} 
+                                    {% elif colab.status == 'HOME' %} {% set bg_c = '#FFA500' %} 
+                                    {% else %}
+                                        {% if colab.qtd == 0 %} {% set txt_c = '#cbd5e1' %} {% endif %}
+                                    {% endif %}
+                                    
+                                {% if colab.is_futuro %}
+                                    <td style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }};"></td>
+                                {% else %}
+                                    <td class="fw-bold" style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }}; color: {{ txt_c }};">{{ colab.qtd }}</td>
+                                {% endif %}
+                                {% endfor %}
+                                
+                                {% if linha.is_futuro %}
+                                    <td style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;"></td>
+                                {% else %}
+                                    <td class="text-muted fw-bold" style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;">{{ linha.total_dia }}</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot style="position: sticky; bottom: 0; z-index: 2;">
+                            <tr style="height: 20px;">
+                                <td class="fw-bold bg-secondary text-white" style="border: 1px solid #000; padding: 0;">TOT</td>
+                                {% for total in totais_rodape_2 %}
+                                <td class="fw-bold bg-light text-dark" style="border: 1px solid #000; padding: 0;">{{ total }}</td>
+                                {% endfor %}
+                                <td class="fw-bold bg-dark text-white" style="border: 1px solid #000; text-align: center; padding: 0;">{{ total_geral_mes_2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- MODAL DE EXCEÇÕES E JORNADA -->
+    <div class="modal fade" id="modalExcecoes" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h6 class="modal-title fw-bold">Gestão de Férias e Feriados</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-2 mb-4">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary mb-1">Motivo / Tipo</label>
+                            <select id="tipoExcecao" class="form-select form-select-sm fw-bold border-secondary shadow-sm">
+                                <option value="FERIADO">Feriado Nacional / Ponte (Pinta a linha toda)</option>
+                                <option value="FERIAS">Férias</option>
+                                <option value="FOLGA">Folga / Atestado Médico</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-bold text-secondary mb-1">Data Início</label>
+                            <input type="date" id="dataInicioEx" class="form-control form-control-sm border-secondary shadow-sm">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-bold text-secondary mb-1">Data Fim (Op)</label>
+                            <input type="date" id="dataFimEx" class="form-control form-control-sm border-secondary shadow-sm" title="Deixe em branco para apenas 1 dia">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-bold text-secondary mb-1">Colaborador</label>
+                            <select id="usuExcecao" class="form-select form-select-sm border-secondary shadow-sm fw-bold">
+                                <option value="TODOS">TODOS (Time Inteiro)</option>
+                                {% for op in time_operacional %}
+                                    {% if op != 'Robôs' %}<option value="{{ op }}">{{ op }}</option>{% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button class="btn btn-success btn-sm w-100 fw-bold shadow-sm" onclick="salvarExcecao()">Salvar Exceção no Calendário</button>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 0.8rem;">Exceções Cadastradas Neste Mês:</h6>
+                    <div id="listaExcecoesPainel" style="max-height: 150px; overflow-y: auto;">
+                        <p class="text-muted small text-center">Carregando...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    let mesAuditoriaJornada = '';
+    function abrirGestaoJornada(mesBase) {
+        mesAuditoriaJornada = mesBase;
+        var modal = new bootstrap.Modal(document.getElementById('modalExcecoes'));
+        modal.show();
+        carregarExcecoes();
+    }
+    
+    function carregarExcecoes() {
+        fetch('/api/sistema/excecoes_lista?mes=' + mesAuditoriaJornada)
+        .then(r => r.json()).then(dados => {
+            let div = document.getElementById('listaExcecoesPainel');
+            div.innerHTML = '';
+            if(dados.length === 0) { div.innerHTML = '<p class="text-muted small text-center m-0">Nenhuma exceção gravada neste mês.</p>'; return; }
+            
+            dados.forEach(d => {
+                let badgeColor = d.tipo === 'FERIADO' ? 'bg-info text-dark' : 'bg-warning text-dark';
+                div.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <span class="badge ${badgeColor} me-1">${d.tipo}</span>
+                            <span class="fw-bold" style="font-size:0.8rem;">${d.data_excecao.split('-').reverse().join('/')}</span>
+                            <span class="text-secondary ms-1" style="font-size:0.75rem;">(${d.usuario})</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" style="font-size:0.6rem;" onclick="removerExcecao(${d.id})">X</button>
+                    </div>
+                `;
+            });
+        });
+    }
+    
+    function salvarExcecao() {
+        const di = document.getElementById('dataInicioEx').value;
+        const df = document.getElementById('dataFimEx').value;
+        const u = document.getElementById('usuExcecao').value;
+        const t = document.getElementById('tipoExcecao').value;
+        if(!di) { alert('Escolha a data de início!'); return; }
+        
+        fetch('/api/sistema/excecoes', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({data_inicio: di, data_fim: df, usuario: u, tipo: t})
+        }).then(()=> { 
+            document.getElementById('dataInicioEx').value=''; 
+            document.getElementById('dataFimEx').value=''; 
+            carregarExcecoes(); 
+            window.location.reload(); 
+        });
+    }
+    
+    function removerExcecao(id) {
+        fetch('/api/sistema/excecoes', {
+            method: 'DELETE', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
+        }).then(()=> { window.location.reload(); });
+    }
+    </script>
+
+<script>
+function congelarBaseAtual() {
+    if(confirm("Deseja congelar a quantidade de boletos de HOJE como sendo a meta oficial deste mês?")) {
+        fetch('/api/sistema/congelar_metas', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.sucesso) window.location.reload();
+            else alert("Erro ao gravar meta na base de dados.");
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    // 🎯 1. ROSCA GLOBAL (COM PORCENTAGEM FIXA DESENHADA NO CENTRO)
+    const elProgresso = document.getElementById('dadosGrafico1');
+    const valColetados = parseInt(elProgresso.getAttribute('data-coletados')) || 0;
+    const valBaseAtualizada = parseInt(elProgresso.getAttribute('data-base-atualizada')) || 0;
+
+    new Chart(document.getElementById('chartProgresso'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Coletado', 'Base Faltante'],
+            datasets: [{
+                data: [valColetados, valBaseAtualizada],
+                backgroundColor: ['#10b981', '#e2e8f0'],
+                borderWidth: 0,
+                cutout: '72%'
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { display: false } } 
+        },
+        plugins: [{
+            id: 'centerTextPercentage',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
+                ctx.save();
+                ctx.font = 'bold 20px Segoe UI, Arial';
+                ctx.fillStyle = '#10b981';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const total = chart.data.datasets[0].data[0];
+                const base = chart.data.datasets[0].data[1];
+                const pct = (total + base > 0) ? Math.round((total / (total + base)) * 100) : 0;
+                
+                ctx.fillText(pct + '%', left + width / 2, top + height / 2);
+                ctx.restore();
+            }
+        }]
+    });
+
+    // 🎯 2. BARRAS HORIZONTAIS AUTOMAÇÃOS (COM VALORES EXIBIDOS LADO A LADO DA BARRA)
+    const elRobos = document.getElementById('dadosGrafico2');
+    const valWebware = parseInt(elRobos.getAttribute('data-webware')) || 0;
+    const valWinker = parseInt(elRobos.getAttribute('data-winker')) || 0;
+    const valFinmail = parseInt(elRobos.getAttribute('data-finmail')) || 0;
+    const valScanner = parseInt(elRobos.getAttribute('data-scanner')) || 0;
+
+    new Chart(document.getElementById('chartRobos'), {
+        type: 'bar',
+        data: {
+            labels: ['Webware', 'Winker', 'FinMail', 'Scanner'],
+            datasets: [{
+                label: 'Volume',
+                data: [valWebware, valWinker, valFinmail, valScanner],
+                backgroundColor: '#1e293b',
+                borderRadius: 5,
+                barThickness: 18
+            }]
+        },
+        options: {
+            responsive: true, 
+            maintainAspectRatio: false, 
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            layout: { padding: { right: 35 } }, // Dá espaço para o texto não cortar na borda direita
+            scales: { 
+                x: { display: false, grid: { display: false } }, 
+                y: { grid: { display: false }, ticks: { font: { family: 'Segoe UI', weight: 'bold' }, color: '#475569' } } 
+            }
+        },
+        plugins: [{
+            id: 'alwaysVisibleLabels',
+            afterDatasetsDraw(chart) {
+                const { ctx, data } = chart;
+                ctx.save();
+                ctx.font = 'bold 11px Segoe UI, Arial';
+                ctx.fillStyle = '#0f172a';
+                
+                chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                    const value = data.datasets[0].data[index];
+                    if(value > 0) {
+                        // Desenha o número fixo deslocado 8 pixels para a direita do fim da barra
+                        ctx.fillText(value + " un", bar.x + 8, bar.y + 4);
+                    } else {
+                        ctx.fillText("0", bar.x + 8, bar.y + 4);
+                    }
+                });
+                ctx.restore();
+            }
+        }]
+    });
+
+    // DETALHAMENTO DO DIÁRIO VIA AJAX (SUPORTE HISTÓRICO)
+    const modalDetalheDia = document.getElementById('modalDetalheDia');
+    modalDetalheDia.addEventListener('show.bs.modal', function (event) {
+        const row = event.relatedTarget; 
+        const dia = row.getAttribute('data-dia');
+        const titulo = document.getElementById('detalheDiaTitulo');
+        const corpo = document.getElementById('detalheDiaCorpo');
+
+        titulo.textContent = `Dia ${dia}`;
+        corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando no banco Lello...</td></tr>';
+
+        fetch(`/api/dashboard/resumo_por_dia?dia=${dia}&mes_ref={{ mes_ref }}`)
+            .then(res => res.json())
+            .then(res => {
+                corpo.innerHTML = '';
+                if (res.sucesso && res.dados.length > 0) {
+                    res.dados.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="text-start fw-bold ps-4">👤 ${item.responsavel}</td>
+                            <td class="text-secondary fw-semibold">${item.total_inicial}</td>
+                            <td class="fw-bold" style="color: #d97706;">${item.base_atualizada}</td>
+                            <td class="text-end pe-4 text-success fw-bold">${item.diferenca}</td>
+                        `;
+                        corpo.appendChild(tr);
+                    });
+                } else {
+                    corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Sem pendências registradas para este dia.</td></tr>';
+                }
+            })
+            .catch(err => {
+                corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-danger">Falha de conexão com o servidor local.</td></tr>';
+            });
+    });
+});
+
+let dadosLotesGlobais = []; 
+let modalLotesInstancia = null; // Guardião do Modal
+    
+function abrirRelatorioLotes() {
+    if (!modalLotesInstancia) {
+        modalLotesInstancia = new bootstrap.Modal(document.getElementById('modalRelatorioLotes'));
+    }
+    
+    const corpo = document.getElementById('corpoRelatorioLotes');
+    
+    corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-success" role="status"></div> Calculando matriz de lotes...</td></tr>';
+    
+    fetch('/api/sistema/relatorio_lotes')
+    .then(r => r.json())
+    .then(res => {
+        if(res.sucesso && res.dados.length > 0) {
+            dadosLotesGlobais = res.dados;
+            
+            // Popula o filtro com os Lotes na ordem certa
+            const lotesUnicos = [...new Set(res.dados.map(item => item.lote))];
+            const select = document.getElementById('filtroLoteModal');
+            select.innerHTML = '<option value="ALL">📦 Mostrar Todos os Lotes</option>';
+            lotesUnicos.forEach(l => {
+                select.innerHTML += `<option value="${l}">Apenas Lote ${l}</option>`;
+            });
+            
+            renderizarTabelaLotes();
+            
+        } else {
+            corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted fw-bold">Nenhum dado de lote localizado na base ativa atual.</td></tr>';
+        }
+    })
+    .catch(e => {
+        console.error(e);
+        corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-danger fw-bold">Erro de conexão ao buscar dados dos lotes.</td></tr>';
+    });
+    modalLotesInstancia.show();
+}
+
+function recarregarLotesAntecipados() {
+    const corpo = document.getElementById('corpoRelatorioLotes');
+    const antecipado = document.getElementById('toggleAntecipado') ? document.getElementById('toggleAntecipado').checked : false;
+    
+    corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-success" role="status"></div> Calculando matriz de lotes...</td></tr>';
+    
+    fetch(`/api/sistema/relatorio_lotes?antecipado=${antecipado}`)
+    .then(r => r.json())
+    .then(res => {
+        if(res.sucesso && res.dados.length > 0) {
+            dadosLotesGlobais = res.dados;
+            
+            // Popula o filtro com os Lotes na ordem certa
+            const lotesUnicos = [...new Set(res.dados.map(item => item.lote))];
+            const select = document.getElementById('filtroLoteModal');
+            
+            // Salva a seleção do menu para não resetar se o usuário só clicou na chavinha
+            const selecaoAtual = select.value;
+            
+            select.innerHTML = '<option value="ALL">📦 Mostrar Todos os Lotes</option>';
+            lotesUnicos.forEach(l => {
+                select.innerHTML += `<option value="${l}">Apenas Lote ${l}</option>`;
+            });
+            
+            // Tenta restaurar a seleção
+            if(lotesUnicos.includes(selecaoAtual)) {
+                select.value = selecaoAtual;
+            }
+            
+            renderizarTabelaLotes();
+            
+        } else {
+            corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted fw-bold">Nenhum dado de lote localizado na base ativa atual.</td></tr>';
+        }
+    })
+    .catch(e => {
+        console.error(e);
+        corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-danger fw-bold">Erro de conexão ao buscar dados dos lotes.</td></tr>';
+    });
+}
+
+function renderizarTabelaLotes() {
+    const corpo = document.getElementById('corpoRelatorioLotes');
+    const filtro = document.getElementById('filtroLoteModal').value;
+    corpo.innerHTML = '';
+    
+    // 1. Agrupa calculando a Média Ponderada
+    const grupos = {};
+    dadosLotesGlobais.forEach(item => {
+        if(filtro !== 'ALL' && item.lote !== filtro) return;
+        
+        if(!grupos[item.lote]) {
+            grupos[item.lote] = { 
+                total: 0, coletados: 0, pendentes: 0, 
+                somaEmissao: 0, somaVencimento: 0, 
+                detalhamento: [] 
+            };
+        }
+        
+        let tot = parseInt(item.total) || 0;
+        let emi = parseInt(item.emissao) || 0;
+        let ven = parseInt(item.vencimento) || 0;
+        
+        grupos[item.lote].total += tot;
+        grupos[item.lote].coletados += parseInt(item.coletados) || 0;
+        grupos[item.lote].pendentes += parseInt(item.pendentes) || 0;
+        
+        // Multiplica pelo total de imóveis para fazer a média ponderada exata
+        grupos[item.lote].somaEmissao += (emi * tot);
+        grupos[item.lote].somaVencimento += (ven * tot);
+        
+        grupos[item.lote].detalhamento.push(item);
+    });
+    
+    if (Object.keys(grupos).length === 0) {
+        corpo.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted fw-bold">Nenhum dado encontrado para o filtro selecionado.</td></tr>';
+        return;
+    }
+    
+    // 2. Desenha a Tela (Linha Mestra + Linhas Ocultas)
+    let contadorLote = 0;
+    for (const [lote, dados] of Object.entries(grupos)) {
+        contadorLote++;
+        let classId = 'sublote_' + contadorLote;
+        
+        let pctLote = dados.total > 0 ? ((dados.coletados / dados.total) * 100).toFixed(2) : 0;
+        let badgeLote = pctLote >= 100 ? 'bg-success' : (pctLote >= 70 ? 'bg-primary' : (pctLote >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
+        
+        let mediaEmi = dados.total > 0 ? Math.round(dados.somaEmissao / dados.total) : 0;
+        let mediaVen = dados.total > 0 ? Math.round(dados.somaVencimento / dados.total) : 0;
+        
+        let txtEmi = mediaEmi > 0 ? `Dia ${String(mediaEmi).padStart(2, '0')}` : '-';
+        let txtVen = mediaVen > 0 ? `Dia ${String(mediaVen).padStart(2, '0')}` : '-';
+        
+        let isTranquilo = lote.includes('Aluguel Tranquilo');
+        let corFundo = isTranquilo ? '#dcfce7' : '#ffffff';
+        let corHover = isTranquilo ? '#bbf7d0' : '#f8fafc';
+
+        // LINHA MESTRA CONSOLIDADA (Clicável)
+        corpo.innerHTML += `
+            <tr class="clickable-row" style="background-color: ${corFundo}; border-bottom: 2px solid #e2e8f0; cursor: pointer;" 
+                onclick="toggleExpansaoLote('${classId}')" 
+                onmouseover="this.style.backgroundColor='${corHover}'" 
+                onmouseout="this.style.backgroundColor='${corFundo}'">
+                
+                <td class="text-start ps-4 fw-bold text-primary" style="font-size: 0.95rem;">
+                    <span id="icone_${classId}" class="me-2 text-muted" style="font-size: 0.8rem;">➕</span> 📦 Lote ${lote}
+                </td>
+                <td class="fw-bold text-secondary">Média: ${txtEmi}</td>
+                <td class="fw-bold text-dark">Média: ${txtVen}</td>
+                <td class="fw-bold text-dark" style="font-size: 1.05rem;">${dados.total}</td>
+                <td class="fw-bold text-success" style="font-size: 1.05rem;">${dados.coletados}</td>
+                <td class="fw-bold" style="color: #d97706 !important; font-size: 1.05rem;">${dados.pendentes}</td>
+                <td class="text-end pe-4">
+                    <span class="badge ${badgeLote} px-2 py-1 fw-bold" style="font-size: 0.85rem; min-width: 65px; border: 1px solid rgba(0,0,0,0.1);">
+                        ${String(pctLote).replace('.', ',')}%
+                    </span>
+                </td>
+            </tr>
+        `;
+        
+        // LINHAS DE ABERTURA (Invisíveis por padrão)
+        dados.detalhamento.forEach(item => {
+            let pctSub = parseFloat(item.pct.replace(',', '.'));
+            let badgeSub = pctSub >= 100 ? 'bg-success' : (pctSub >= 70 ? 'bg-primary' : (pctSub >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
+            
+            corpo.innerHTML += `
+                <tr class="${classId}" style="background-color: #f1f5f9; display: none; border-bottom: 1px solid #e2e8f0;">
+                    <td class="text-start ps-5 text-muted" style="font-size: 0.8rem;">↳ Fração do Lote</td>
+                    <td class="fw-semibold text-secondary">Dia ${item.emissao}</td>
+                    <td class="fw-semibold text-dark">Dia ${item.vencimento}</td>
+                    <td class="fw-semibold text-secondary">${item.total}</td>
+                    <td class="fw-semibold text-success">${item.coletados}</td>
+                    <td class="fw-semibold text-warning">${item.pendentes}</td>
+                    <td class="text-end pe-4">
+                        <span class="badge ${badgeSub} bg-opacity-75 px-2 py-1 fw-bold" style="font-size: 0.7rem; min-width: 55px;">
+                            ${item.pct}%
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+}
+
+// 3. Função Efeito Sanfona
+window.toggleExpansaoLote = function(classId) {
+    const linhas = document.querySelectorAll('.' + classId);
+    const icone = document.getElementById('icone_' + classId);
+    
+    let estaEscondido = linhas[0].style.display === 'none';
+    
+    linhas.forEach(linha => {
+        linha.style.display = estaEscondido ? 'table-row' : 'none';
+    });
+    
+    if (icone) {
+        icone.innerText = estaEscondido ? '➖' : '➕';
+    }
+};
+
+// =========================================================
+// FILTRO DA TABELA DE ACOMPANHAMENTO DIÁRIO (NO DASHBOARD)
+// =========================================================
+function filtrarTabelaDias(origem) {
+    const selectPeriodo = document.getElementById('filtroPeriodoDias');
+    const selectDia = document.getElementById('filtroDiaUnico');
+    
+    // UX Inteligente
+    if (origem === 'periodo' && selectPeriodo.value !== 'ALL') selectDia.value = 'ALL';
+    else if (origem === 'dia' && selectDia.value !== 'ALL') selectPeriodo.value = 'ALL';
+    
+    const periodo = selectPeriodo.value;
+    const diaUnico = selectDia.value;
+    
+    const tabela = document.getElementById('tabelaAcompanhamentoDias');
+    if (!tabela) return;
+
+    const tbody = tabela.querySelector('tbody');
+    
+    // Limpa a linha agrupada se ela já existir na tela
+    const existingGroupedRow = document.getElementById('linhaAgrupadaPeriodo');
+    if (existingGroupedRow) existingGroupedRow.remove();
+
+    const rows = tbody.querySelectorAll('tr.clickable-row:not(.dynamic-period-row)');
+    
+    let sumTotal = 0;
+    let sumFaltantes = 0;
+    let sumConcluidos = 0;
+    let matchCount = 0;
+
+    rows.forEach(row => {
+        const diaStr = row.getAttribute('data-dia');
+        const diaNum = parseInt(diaStr, 10);
+        
+        let exibirPeriodo = true;
+        if (periodo === '1-4') exibirPeriodo = (diaNum >= 1 && diaNum <= 4);
+        else if (periodo === '5-9') exibirPeriodo = (diaNum >= 5 && diaNum <= 9);
+        else if (periodo === '10-14') exibirPeriodo = (diaNum >= 10 && diaNum <= 14);
+        else if (periodo === '15-31') exibirPeriodo = (diaNum >= 15 && diaNum <= 31);
+        
+        let exibirDia = true;
+        if (diaUnico !== 'ALL') exibirDia = (diaStr === diaUnico);
+        
+        if (exibirPeriodo && exibirDia) {
+            // 🎯 Se escolheu período, ESCONDE a linha individual (mas soma os valores dela)
+            if (periodo !== 'ALL') row.style.display = 'none';
+            else row.style.display = '';
+            
+            const valTotal = parseInt(row.children[1].innerText.replace(/\./g, '')) || 0;
+            const valFaltantes = parseInt(row.children[2].innerText.replace(/\./g, '')) || 0;
+            const valConcluidos = parseInt(row.children[3].innerText.replace(/\./g, '')) || 0;
+            
+            sumTotal += valTotal;
+            sumFaltantes += valFaltantes;
+            sumConcluidos += valConcluidos;
+            matchCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // 🎯 MÁGICA: CRIA A LINHA AGRUPADA MESTRE SE TIVER UM PERÍODO SELECIONADO
+    if (periodo !== 'ALL' && matchCount > 0) {
+        let pct = 0;
+        if (sumTotal > 0) pct = ((sumConcluidos / sumTotal) * 100).toFixed(2);
+        
+        let badgeClass = 'bg-danger';
+        if (pct >= 95) badgeClass = 'bg-success';
+        else if (pct >= 80) badgeClass = 'bg-success bg-opacity-75';
+        else if (pct >= 60) badgeClass = 'bg-warning text-dark';
+
+        const trGroup = document.createElement('tr');
+        trGroup.id = 'linhaAgrupadaPeriodo';
+        trGroup.className = 'clickable-row dynamic-period-row';
+        trGroup.style.backgroundColor = '#e0f2fe'; // Azul clarinho para destacar que é um grupo
+        trGroup.setAttribute('data-dia', periodo); // Manda "1-4" pro modal chamar a API!
+        trGroup.setAttribute('data-bs-toggle', 'modal');
+        trGroup.setAttribute('data-bs-target', '#modalDetalheDia');
+        
+        let labelPeriodo = `Período ${periodo}`;
+        if (periodo === '1-4') labelPeriodo = "Dias 01 a 04";
+        if (periodo === '5-9') labelPeriodo = "Dias 05 a 09";
+        if (periodo === '10-14') labelPeriodo = "Dias 10 a 14";
+        if (periodo === '15-31') labelPeriodo = "Dias 15 a 31";
+
+        trGroup.innerHTML = `
+            <td class="text-start fw-bold text-primary ps-4" style="font-size: 0.85rem;">📅 ${labelPeriodo}</td>
+            <td class="text-secondary fw-bold">${sumTotal.toLocaleString('pt-BR')}</td>
+            <td class="fw-bold" style="color: #d97706 !important;">${sumFaltantes.toLocaleString('pt-BR')}</td>
+            <td class="text-success fw-bold">${sumConcluidos.toLocaleString('pt-BR')}</td>
+            <td class="text-end pe-4">
+                <span class="badge ${badgeClass} px-2.5 py-1.5 fw-bold" style="font-size: 0.75rem; min-width: 65px;">
+                    ${String(pct).replace('.', ',')}%
+                </span>
+            </td>
+        `;
+        tbody.prepend(trGroup); // Joga ela lá no topo da tabela
+    }
+    
+    // Atualiza o Rodapé Geral
+    const tfoot = tabela.querySelector('tfoot');
+    if (tfoot) {
+        tfoot.children[0].children[1].innerText = sumTotal.toLocaleString('pt-BR');
+        tfoot.children[0].children[2].innerText = sumFaltantes.toLocaleString('pt-BR');
+        tfoot.children[0].children[3].innerText = sumConcluidos.toLocaleString('pt-BR');
+        let pct = 0;
+        if (sumTotal > 0) pct = ((sumConcluidos / sumTotal) * 100).toFixed(2);
+        tfoot.children[0].children[4].innerText = String(pct).replace('.', ',') + '%';
+    }
+}
+
+// 🎯 AJUSTE DO EVENTO DO MODAL (Para exibir "Período" ou "Dia" no título)
+document.addEventListener("DOMContentLoaded", function() {
+    const modalDetalheDia = document.getElementById('modalDetalheDia');
+    if(modalDetalheDia) {
+        modalDetalheDia.addEventListener('show.bs.modal', function (event) {
+            const row = event.relatedTarget; 
+            const dia = row.getAttribute('data-dia');
+            const titulo = document.getElementById('detalheDiaTitulo');
+            const corpo = document.getElementById('detalheDiaCorpo');
+
+            // 🎯 Se tiver traço, ele escreve "Período". Se não, escreve "Dia".
+            if (dia.includes('-')) {
+                titulo.textContent = `Período ${dia}`;
+            } else {
+                titulo.textContent = `Dia ${dia}`;
+            }
+
+            corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando no banco Lello...</td></tr>';
+
+            fetch(`/api/dashboard/resumo_por_dia?dia=${dia}&mes_ref={{ mes_ref|default('') }}`)
+                .then(res => res.json())
+                .then(res => {
+                    corpo.innerHTML = '';
+                    if (res.sucesso && res.dados.length > 0) {
+                        res.dados.forEach(item => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="text-start fw-bold ps-4">👤 ${item.responsavel}</td>
+                                <td class="text-secondary fw-semibold">${item.total_inicial}</td>
+                                <td class="fw-bold" style="color: #d97706;">${item.base_atualizada}</td>
+                                <td class="text-end pe-4 text-success fw-bold">${item.diferenca}</td>
+                            `;
+                            corpo.appendChild(tr);
+                        });
+                    } else {
+                        corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Sem pendências registradas para esta seleção.</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-danger">Falha de conexão com o servidor local.</td></tr>';
+                });
+        });
+    }
+});
+
+function descongelarBaseAtual() {
+    if(confirm("Deseja descongelar a meta atual? Uma cópia dela fica guardada e você poderá congelar de novo a partir da base de hoje. (Na virada de mês isso já é feito automaticamente ao importar a nova planilha.)")) {
+        fetch('/api/sistema/descongelar_metas', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.sucesso) window.location.reload();
+            else alert("Erro ao descongelar meta no banco de dados.");
+        });
+    }
+}
+
+let dadosFimDeMesGlobais = [];
+
+function abrirVisaoFimDeMes() {
+    const modal = new bootstrap.Modal(document.getElementById('modalVisaoFimDeMes'));
+    carregarFechamentoMes('');
+    modal.show();
+}
+
+function carregarFechamentoMes(mesAlvo) {
+    const corpo = document.getElementById('corpoVisaoFimDeMes');
+    corpo.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-warning" role="status"></div> Calculando fechamento...</td></tr>';
+    document.getElementById('rodapeVisaoFimDeMes').innerHTML = '';
+    
+    fetch('/api/sistema/visao_fim_de_mes?mes_alvo=' + encodeURIComponent(mesAlvo))
+    .then(r => r.json())
+    .then(res => {
+        if(res.sucesso && res.dados.length > 0) {
+            dadosFimDeMesGlobais = res.dados;
+            
+            // Popula o Dropdown de Meses
+            const selectMes = document.getElementById('filtroMesFechamento');
+            if (selectMes.options.length <= 1) { // Só popula na primeira vez ou se tiver vazio
+                selectMes.innerHTML = '';
+                res.meses_disponiveis.forEach(m => {
+                    const selected = (m === res.mes_ativo) ? 'selected' : '';
+                    selectMes.innerHTML += `<option value="${m}" ${selected}>Vencimentos de ${m}</option>`;
+                });
+            }
+            
+            renderizarTabelaFimDeMes();
+        } else {
+            corpo.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum dado encontrado para o fechamento.</td></tr>';
+        }
+    })
+    .catch(e => {
+        corpo.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-danger fw-bold">Erro ao buscar fechamento.</td></tr>';
+    });
+}
+
+function renderizarTabelaFimDeMes() {
+    const corpo = document.getElementById('corpoVisaoFimDeMes');
+    const rodape = document.getElementById('rodapeVisaoFimDeMes');
+    const filtro = document.getElementById('filtroVisaoFimMes').value;
+    const thProjecao = document.getElementById('thProjecaoVisao'); 
+    
+    corpo.innerHTML = '';
+    let somaTotal = 0, somaColetados = 0, somaProjetados = 0;
+    
+    // Transforma o cabeçalho se um lote for selecionado
+    if (filtro !== 'ALL') {
+        thProjecao.innerHTML = '💡 Melhor Dia p/ Geração';
+        thProjecao.style.color = '#f59e0b'; // Laranja
+    } else {
+        thProjecao.innerHTML = '🎯 Projeção Fim de Mês';
+        thProjecao.style.color = '#0ea5e9'; // Azul
+    }
+    
+    dadosFimDeMesGlobais.forEach(dados => {
+        if(filtro !== 'ALL' && dados.lote !== filtro) return;
+        
+        somaTotal += dados.total;
+        somaColetados += dados.coletados;
+        somaProjetados += dados.projetado;
+        
+        let pctLote = parseFloat(dados.pct.replace(',', '.'));
+        let badgeLote = pctLote >= 80 ? 'bg-success' : (pctLote >= 50 ? 'bg-primary' : (pctLote >= 20 ? 'bg-warning text-dark' : 'bg-danger'));
+        
+        let txtColunaDinamica = '';
+        
+        // Transforma o dado da célula (Projeção % vs Melhor Dia)
+        if (filtro !== 'ALL') {
+            txtColunaDinamica = `<span class="text-warning fw-bold" style="font-size: 1.05rem; cursor: help;" title="${dados.motivo_dia}">📅 Dia ${dados.melhor_dia}</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">⚙️ Simular Datas</button>`;
+        } else {
+            txtColunaDinamica = `<span class="text-info fw-bold" style="font-size: 1rem;">${dados.pct_proj}%</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">⚙️ Simular Datas</button>`;
+        }
+
+        corpo.innerHTML += `
+            <tr style="background-color: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                <td class="text-start ps-4 fw-bold text-dark" style="font-size: 0.95rem;">📦 ${dados.lote}</td>
+                <td class="text-secondary fw-semibold">${dados.total}</td>
+                <td class="fw-bold text-success" style="font-size: 1.05rem;">${dados.coletados}</td>
+                <td>
+                    <span class="badge ${badgeLote} px-2 py-1 fw-bold" style="font-size: 0.85rem; min-width: 65px;">
+                        ${dados.pct}%
+                    </span>
+                </td>
+                <td class="text-end pe-4" style="line-height: 1.1;">${txtColunaDinamica}</td>
+            </tr>
+        `;
+    });
+    
+    if (somaTotal === 0) {
+        corpo.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum dado para o filtro selecionado.</td></tr>';
+        rodape.innerHTML = '';
+        return;
+    }
+    
+    let pctGeral = somaTotal > 0 ? ((somaColetados / somaTotal) * 100).toFixed(2).replace('.', ',') : "0,00";
+    let pctProjGeral = somaTotal > 0 ? ((somaProjetados / somaTotal) * 100).toFixed(2).replace('.', ',') : "0,00";
+    
+    if (filtro !== 'ALL') {
+        rodape.innerHTML = `
+            <tr>
+                <td class="text-start text-dark ps-4" style="font-size: 0.9rem;">TOTAL LOTE</td>
+                <td class="text-dark" style="font-size: 1rem;">${somaTotal}</td>
+                <td class="text-success" style="font-size: 1rem;">${somaColetados}</td>
+                <td class="text-dark" style="font-size: 1rem;">${pctGeral}%</td>
+                <td class="text-end pe-4 text-warning fw-bold" style="font-size: 1rem; line-height: 1.1;">
+                    Ação <br> <span class="text-muted small" style="font-weight:normal;">Estratégica</span>
+                </td>
+            </tr>
+        `;
+    } else {
+        rodape.innerHTML = `
+            <tr>
+                <td class="text-start text-dark ps-4" style="font-size: 0.9rem;">TOTAL GERAL</td>
+                <td class="text-dark" style="font-size: 1rem;">${somaTotal}</td>
+                <td class="text-success" style="font-size: 1rem;">${somaColetados}</td>
+                <td class="text-dark" style="font-size: 1rem;">${pctGeral}%</td>
+                <td class="text-end pe-4 text-info fw-bold" style="font-size: 1rem; line-height: 1.1;">
+                    ${pctProjGeral}% <br> <span class="text-muted small" style="font-weight:normal;">(${somaProjetados} un)</span>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+let dadosMatrizSimulacao = [];
+
+function abrirSimuladorLote(lote) {
+    document.getElementById('tituloLoteSimulacao').innerText = lote;
+    const corpo = document.getElementById('corpoMatrizSimulacao');
+    corpo.innerHTML = '<tr><td class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+    
+    // Sugere uma data definitiva padrão baseada no lote
+    let diaPadrao = 21;
+    if (lote === '01-05') diaPadrao = 21;
+    else if (lote === '06-10') diaPadrao = 30;
+    else if (lote === '11-15') diaPadrao = 5;
+    else if (lote === '16-20') diaPadrao = 10;
+    else if (lote === '21-29') diaPadrao = 15;
+    
+    document.getElementById('inputDataDefinitiva').value = diaPadrao;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalSimulacaoLote'));
+    modal.show();
+
+    fetch('/api/matriz/simular_lote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lote: lote })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(res.sucesso) {
+            dadosMatrizSimulacao = res.dados;
+            renderizarMatrizSimulacao();
+        } else {
+            corpo.innerHTML = `<tr><td class="text-danger text-center py-5 fw-bold">Erro: ${res.msg}</td></tr>`;
+        }
+    });
+}
+
+function renderizarMatrizSimulacao() {
+    const diaDefinitivo = parseInt(document.getElementById('inputDataDefinitiva').value) || 31;
+    const head = document.getElementById('headMatrizSimulacao');
+    const corpo = document.getElementById('corpoMatrizSimulacao');
+    
+    let matriz = {};
+    for(let e = 1; e <= 31; e++) {
+        matriz[e] = {};
+        for(let v = 1; v <= 31; v++) matriz[e][v] = 0;
+    }
+
+    let total = 0, capturados = 0, perdidos = 0;
+
+    dadosMatrizSimulacao.forEach(item => {
+        let e = parseInt(item.emissao);
+        let v = parseInt(item.vencimento);
+        let q = parseInt(item.qtd);
+        
+        if (matriz[e] && matriz[e][v] !== undefined) {
+            matriz[e][v] += q;
+            total += q;
+            
+            // 🎯 A MÁGICA ACONTECE AQUI: A regra do prazo!
+            if (e <= diaDefinitivo) {
+                capturados += q;
+            } else {
+                perdidos += q;
+            }
+        }
+    });
+
+    // Atualiza o Placar
+    document.getElementById('simTotal').innerText = total;
+    document.getElementById('simCapturados').innerText = `${capturados} (${((capturados/total)*100 || 0).toFixed(1)}%)`;
+    document.getElementById('simPerdidos').innerText = `${perdidos} (${((perdidos/total)*100 || 0).toFixed(1)}%)`;
+
+    // Desenha o Cabeçalho
+    let htmlHead = `<tr><th style="min-width: 90px; background: #0f172a; z-index: 3;">Vencimento →<br>Emissão ↓</th>`;
+    for(let v = 1; v <= 31; v++) htmlHead += `<th>${v}</th>`;
+    htmlHead += `</tr>`;
+    head.innerHTML = htmlHead;
+
+    // Desenha o Corpo com as cores da simulação
+    let htmlCorpo = '';
+    for(let e = 1; e <= 31; e++) {
+        htmlCorpo += `<tr><th style="background: #1e293b; color: white; position: sticky; left: 0; z-index: 1;">${e}</th>`;
+        for(let v = 1; v <= 31; v++) {
+            let val = matriz[e][v];
+            if (val > 0) {
+                // Pinta de verde se a emissão for menor ou igual à data definitiva
+                let corFundo = (e <= diaDefinitivo) ? '#dcfce7' : '#fee2e2';
+                let corTexto = (e <= diaDefinitivo) ? '#166534' : '#991b1b';
+                htmlCorpo += `<td style="background-color: ${corFundo}; color: ${corTexto}; font-weight: bold;">${val}</td>`;
+            } else {
+                htmlCorpo += `<td style="color: #cbd5e1;">-</td>`;
+            }
+        }
+        htmlCorpo += `</tr>`;
+    }
+    corpo.innerHTML = htmlCorpo;
+}
+
+</script>
+
+{% endblock %}

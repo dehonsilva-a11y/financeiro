@@ -1,0 +1,1061 @@
+{% extends 'base.html' %}
+
+{% block title %}Raio-X RPA - Diagnóstico de Falhas{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px 10px;
+        text-align: center;
+        transition: all 0.2s ease;
+        height: 100%;
+        cursor: pointer;
+    }
+    .kpi-card:hover, .kpi-card.active {
+        transform: translateY(-3px);
+        border-color: #0284c7;
+        box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.15);
+    }
+    .kpi-icon { font-size: 1.5rem; margin-bottom: 6px; display: inline-block; }
+    .kpi-label { font-size: 0.70rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .kpi-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1; }
+
+    .item-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+    }
+    .item-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    }
+    .pill-unidade { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .pill-condominio { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .pill-login { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .pill-faltam_dados { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .pill-ajustado { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .pill-outros { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+    .tag-site {
+        background: #f8fafc; border: 1px dashed #cbd5e1;
+        padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #334155;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <h3 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Raio-X RPA</h3>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 py-2 px-3 fw-bold" id="badgeCiclo">
+                    <i class="bi bi-clock-history me-1"></i> Base Atual: identificando...
+                </span>
+            </div>
+            <span class="text-muted small">Gerenciamento de falhas ativas de coleta. Ajuste ou dispense erros pontuais do sistema.</span>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="input-group input-group-sm" style="max-width: 260px;">
+                <input type="text" id="campoPesquisa" class="form-control fw-semibold" placeholder="Buscar imóvel, condomínio...">
+                <button type="button" class="btn btn-dark fw-bold px-3" id="btnBuscar">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+
+            <select id="filtroResponsavel" class="form-select form-select-sm fw-bold border-secondary" style="width: 160px;">
+                <option value="todos">👤 Todos Operadores</option>
+            </select>
+
+            <select id="filtroPortal" class="form-select form-select-sm fw-bold border-secondary" style="width: 130px;">
+                <option value="TODOS">🌐 Portais</option>
+                <option value="WINKER">Winker</option>
+                <option value="WEBWARE">Webware</option>
+                <option value="SUPERLOGICA">Superlógica</option>
+                <option value="DIVERSOS">Diversos</option>
+            </select>
+
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="btnAtualizar">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="btnDiagnostico">
+                <i class="bi bi-activity"></i> Diagnóstico
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-dark fw-bold d-none" id="btnVerTeste">
+                🤖 Último teste
+            </button>
+        </div>
+    </div>
+
+    <div id="avisoVersao" class="alert alert-warning border-0 shadow-sm small fw-semibold" style="display: none;"></div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card active" data-cat="TODOS">
+                <div class="kpi-icon text-danger"><i class="bi bi-exclamation-octagon"></i></div>
+                <div class="kpi-label">Problemas Pendentes</div>
+                <div class="kpi-value text-danger" id="kpi_total">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="FALTAM_DADOS">
+                <div class="kpi-icon text-danger"><i class="bi bi-pencil-square"></i></div>
+                <div class="kpi-label">Faltam Dados</div>
+                <div class="kpi-value text-danger" id="kpi_faltam_dados">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="UNIDADE_BLOCO">
+                <div class="kpi-icon text-warning"><i class="bi bi-door-closed"></i></div>
+                <div class="kpi-label">Unidade / Bloco</div>
+                <div class="kpi-value text-warning" id="kpi_unidade_bloco">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="CONDOMINIO">
+                <div class="kpi-icon text-warning"><i class="bi bi-building-x"></i></div>
+                <div class="kpi-label">Condomínio</div>
+                <div class="kpi-value text-warning" id="kpi_condominio">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="LOGIN">
+                <div class="kpi-icon text-danger"><i class="bi bi-key"></i></div>
+                <div class="kpi-label">Login / Senha</div>
+                <div class="kpi-value text-danger" id="kpi_login">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="OUTROS">
+                <div class="kpi-icon" style="color: #7e22ce;"><i class="bi bi-wrench-adjustable"></i></div>
+                <div class="kpi-label">Falha Técnica</div>
+                <div class="kpi-value" style="color: #7e22ce;" id="kpi_outros">0</div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="AJUSTADO">
+                <div class="kpi-icon text-success"><i class="bi bi-check2-circle"></i></div>
+                <div class="kpi-label">Já Ajustados</div>
+                <div class="kpi-value text-success" id="kpi_ajustados">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Imóveis -->
+    <div class="card border-0 shadow-sm" style="border-radius: 14px; overflow: hidden;">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <input class="form-check-input m-0" type="checkbox" id="chkSelecionarTodos" style="width: 1.1rem; height: 1.1rem;">
+                <span class="fw-bold text-dark small" id="contadorLista">Carregando erros...</span>
+                <span class="small text-muted" id="resumoFiltros"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold py-0 px-2" id="btnLimparFiltros" style="display: none;">
+                    Limpar filtros
+                </button>
+            </div>
+            <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" id="checkVerAjustados">
+                <label class="form-check-label small fw-semibold text-muted" for="checkVerAjustados">Mostrar também os já ajustados</label>
+            </div>
+        </div>
+
+        <div id="barraSelecao" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2 d-none" style="background-color: #e0f2fe;">
+            <span class="fw-bold small text-dark" id="qtdSelecionados">0 selecionado(s)</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold py-0 px-2" id="btnLimparSelecao">Limpar seleção</button>
+
+            <div class="ms-auto d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-3 shadow-sm" id="btnRemoverErrosLote">
+                    <i class="bi bi-trash me-1"></i> Remover Erros Selecionados
+                </button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-3 shadow-sm" id="btnTestarRobo">
+                    🤖 Testar no robô
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body p-3 bg-light" id="containerLista">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2 fw-semibold">Carregando dados da base atual...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Teste Robô -->
+<div class="modal fade" id="modalTesteRobo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white p-3">
+                <h6 class="modal-title fw-bold m-0" id="tituloTesteRobo">🤖 Testar no robô</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light small" id="corpoTesteRobo"></div>
+            <div class="modal-footer bg-light border-top p-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-4 d-none" id="btnIniciarTeste">Iniciar teste</button>
+                <button type="button" class="btn btn-sm btn-dark fw-bold px-4 d-none" id="btnAtualizarAposTeste">Atualizar lista</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Diagnóstico -->
+<div class="modal fade" id="modalDiagnostico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white p-3">
+                <h6 class="modal-title fw-bold m-0"><i class="bi bi-activity text-info me-2"></i>Diagnóstico do Raio-X</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light small" id="corpoDiagnostico">Carregando...</div>
+            <div class="modal-footer bg-light border-top p-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-sm btn-dark fw-bold px-3" id="btnCopiarDiag"><i class="bi bi-clipboard me-1"></i>Copiar diagnóstico</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ajuste -->
+<div class="modal fade" id="modalAjuste" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white p-3">
+                <div>
+                    <h6 class="modal-title fw-bold m-0"><i class="bi bi-tools text-warning me-2"></i>Ajustar Cadastro para o Robô</h6>
+                    <small class="text-muted" id="modalSubtitulo">Imóvel: -</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <input type="hidden" id="ajuste_imovel">
+
+                <div class="alert alert-danger border-0 p-3 mb-4 rounded-3 shadow-sm">
+                    <div class="fw-bold small text-danger"><i class="bi bi-bug-fill me-1"></i>ÚLTIMO RETORNO DO ROBÔ:</div>
+                    <div id="modalErroDetalhe" class="small mt-1 text-dark"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary">Portal:</label>
+                        <select id="ajuste_portal" class="form-select form-select-sm fw-bold">
+                            <option value="WINKER">WINKER</option>
+                            <option value="WEBWARE">WEBWARE</option>
+                            <option value="SUPERLOGICA">SUPERLOGICA</option>
+                            <option value="DIVERSOS">DIVERSOS</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label small fw-bold text-secondary">Nome do Empreendimento (Como está no site):</label>
+                        <input type="text" id="ajuste_emp" class="form-control form-control-sm fw-bold" placeholder="Ex: CONDOMINIO EDIFICIO MODELO">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary">Divisão / Bloco (Site):</label>
+                        <input type="text" id="ajuste_bloco" class="form-control form-control-sm fw-bold" placeholder="Ex: BLOCO A">
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label small fw-bold text-secondary">Unidade (Como está no site):</label>
+                        <input type="text" id="ajuste_unid" class="form-control form-control-sm fw-bold" placeholder="Ex: 52 ou A/AP/52">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary">Login / Usuário de Acesso:</label>
+                        <input type="text" id="ajuste_login" class="form-control form-control-sm" placeholder="Usuário do site...">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary">Senha de Acesso:</label>
+                        <input type="text" id="ajuste_senha" class="form-control form-control-sm" placeholder="Senha do site...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top p-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-4" id="btnSalvarAjuste">
+                    <i class="bi bi-check-circle me-1"></i>Salvar e Tirar da Fila de Erros
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+(function () {
+    'use strict';
+    if (window.__raioXIniciado) return;
+    window.__raioXIniciado = true;
+
+    var VERSAO_TELA = '2026-10-16.3';
+    var $ = function(id) { return document.getElementById(id); };
+
+    var versaoServidor = null;
+    var dadosCarregados = [];
+    var filtroErroAtual = 'TODOS';
+    var respCarregados = false;
+    var seqRequisicao = 0;
+    var timerBusca = null;
+    var ultimaAssinatura = null;
+    var ultimaUrl = '';
+    var controlador = null;
+    var textoDiagnostico = '';
+    var selecionados = new Set();
+    var jobTeste = null;
+    var timerTeste = null;
+    var ultimaPrevia = null;
+    var ultimoResultadoTeste = null;
+    var iniciandoTeste = false;
+
+    var NOME_CATEGORIA = {
+        TODOS: 'Todos', FALTAM_DADOS: 'Faltam dados', UNIDADE_BLOCO: 'Unidade / Bloco', CONDOMINIO: 'Condomínio',
+        LOGIN: 'Login / Senha', OUTROS: 'Falha técnica', AJUSTADO: 'Já ajustados'
+    };
+
+    function esc(v) {
+        if (v == null) return '';
+        return String(v)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function valoresTela() {
+        return {
+            pesquisa: $('campoPesquisa').value.trim(),
+            portal: $('filtroPortal').value,
+            resp: $('filtroResponsavel').value,
+            verAjustados: $('checkVerAjustados').checked
+        };
+    }
+
+    function assinatura() {
+        var v = valoresTela();
+        return JSON.stringify([v.pesquisa, v.portal, v.resp, v.verAjustados, filtroErroAtual]);
+    }
+
+    function sincronizar() {
+        if (ultimaAssinatura !== null && assinatura() !== ultimaAssinatura) carregarDados();
+    }
+
+    function agendarBusca() {
+        clearTimeout(timerBusca);
+        timerBusca = setTimeout(sincronizar, 350);
+    }
+
+    function marcarCarregando(sim) {
+        $('containerLista').style.opacity = sim ? '0.45' : '';
+        $('containerLista').style.pointerEvents = sim ? 'none' : '';
+        if (sim) $('contadorLista').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Consultando...';
+    }
+
+    function carregarDados() {
+        clearTimeout(timerBusca);
+        if (controlador) controlador.abort();
+        controlador = new AbortController();
+        var v = valoresTela();
+        ultimaAssinatura = assinatura();
+        var meuSeq = ++seqRequisicao;
+
+        var url = '/api/raio_x/dados?pesquisa=' + encodeURIComponent(v.pesquisa) +
+            '&portal=' + encodeURIComponent(v.portal) +
+            '&tipo_erro=' + encodeURIComponent(filtroErroAtual) +
+            '&responsavel=' + encodeURIComponent(v.resp) +
+            '&ver_ajustados=' + (v.verAjustados ? '1' : '0');
+        ultimaUrl = url;
+        marcarCarregando(true);
+
+        fetch(url, { signal: controlador.signal })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(res) {
+                if (meuSeq !== seqRequisicao) return;
+                marcarCarregando(false);
+                if (!res.sucesso) {
+                    $('containerLista').innerHTML = '<div class="alert alert-danger p-3 m-0">O servidor recusou a consulta: ' + esc(res.msg || 'sem detalhes') + '</div>';
+                    return;
+                }
+                dadosCarregados = res.registros;
+                versaoServidor = res.versao || null;
+                avisarSeVersaoDiferente();
+
+                if (res.ciclo_desde) {
+                    $('badgeCiclo').innerHTML = '<i class="bi bi-calendar-check me-1"></i> Base Atual: desde ' + esc(res.ciclo_desde);
+                }
+
+                if (!respCarregados && res.responsaveis) {
+                    var selectResp = $('filtroResponsavel');
+                    res.responsaveis.forEach(function(nome) { selectResp.appendChild(new Option('👤 ' + nome, nome)); });
+                    selectResp.appendChild(new Option('👤 Sem responsável', 'Não Atribuído'));
+                    respCarregados = true;
+                }
+
+                var t = res.totais;
+                $('kpi_total').innerText = t.total;
+                $('kpi_faltam_dados').innerText = t.faltam_dados;
+                $('kpi_unidade_bloco').innerText = t.unidade_bloco;
+                $('kpi_condominio').innerText = t.condominio;
+                $('kpi_login').innerText = t.login;
+                $('kpi_outros').innerText = t.outros;
+                $('kpi_ajustados').innerText = t.ajustados;
+
+                renderizarLista();
+            })
+            .catch(function(err) {
+                if (err && err.name === 'AbortError') return;
+                if (meuSeq !== seqRequisicao) return;
+                marcarCarregando(false);
+                $('containerLista').innerHTML = '<div class="alert alert-danger p-3 m-0">Falha ao carregar dados: ' + esc(err.message || err) + '</div>';
+            });
+    }
+
+    function marcarCardAtivo() {
+        document.querySelectorAll('.kpi-card').forEach(function(c) {
+            c.classList.toggle('active', c.dataset.cat === filtroErroAtual);
+        });
+    }
+
+    function filtrarCategoria(categoria) {
+        filtroErroAtual = (categoria !== 'TODOS' && filtroErroAtual === categoria) ? 'TODOS' : categoria;
+        if (filtroErroAtual === 'AJUSTADO') $('checkVerAjustados').checked = true;
+        marcarCardAtivo();
+        carregarDados();
+    }
+
+    function alternarAjustados() {
+        if (!$('checkVerAjustados').checked && filtroErroAtual === 'AJUSTADO') {
+            filtroErroAtual = 'TODOS';
+            marcarCardAtivo();
+        }
+        carregarDados();
+    }
+
+    function limparFiltros() {
+        $('campoPesquisa').value = '';
+        $('filtroPortal').value = 'TODOS';
+        $('filtroResponsavel').value = 'todos';
+        $('checkVerAjustados').checked = false;
+        filtroErroAtual = 'TODOS';
+        marcarCardAtivo();
+        carregarDados();
+    }
+
+    function filtrosAtivos() {
+        var ativos = [];
+        var selResp = $('filtroResponsavel');
+        if (selResp.value !== 'todos') {
+            var op = selResp.options[selResp.selectedIndex];
+            ativos.push('Operador: ' + (op ? op.text.replace('👤 ', '') : selResp.value));
+        }
+        if ($('filtroPortal').value !== 'TODOS') {
+            var opPortal = $('filtroPortal').selectedOptions[0];
+            ativos.push('Portal: ' + (opPortal ? opPortal.text : $('filtroPortal').value));
+        }
+        if (filtroErroAtual !== 'TODOS') ativos.push('Erro: ' + NOME_CATEGORIA[filtroErroAtual]);
+        var busca = $('campoPesquisa').value.trim();
+        if (busca) ativos.push('Busca: "' + busca + '"');
+        return ativos;
+    }
+
+    function renderizarLista() {
+        var container = $('containerLista');
+        var ativos = filtrosAtivos();
+        $('contadorLista').innerText = 'Mostrando ' + dadosCarregados.length + ' imóvel(is)';
+        $('resumoFiltros').innerText = ativos.length ? '· ' + ativos.join(' · ') : '';
+        $('btnLimparFiltros').style.display = ativos.length ? '' : 'none';
+        atualizarBarraSelecao();
+
+        if (dadosCarregados.length === 0) {
+            container.innerHTML = ativos.length
+                ? '<div class="text-center py-5">' +
+                    '<i class="bi bi-funnel text-secondary fs-1"></i>' +
+                    '<h6 class="fw-bold mt-2 text-dark">Nenhum imóvel encontrado com esses filtros.</h6>' +
+                    '<button type="button" class="btn btn-sm btn-outline-secondary fw-bold mt-1" data-acao="limpar">Limpar filtros</button>' +
+                  '</div>'
+                : '<div class="text-center py-5">' +
+                    '<i class="bi bi-check-circle text-success fs-1"></i>' +
+                    '<h6 class="fw-bold mt-2 text-dark">Nenhuma falha ativa encontrada!</h6>' +
+                    '<span class="text-muted small">Todos os imóveis estão com o cadastro em dia ou já foram coletados.</span>' +
+                  '</div>';
+            return;
+        }
+
+        var html = '';
+        dadosCarregados.forEach(function(item) {
+            var pillClass = 'pill-outros';
+            if (item.categoria_erro === 'UNIDADE_BLOCO') pillClass = 'pill-unidade';
+            else if (item.categoria_erro === 'CONDOMINIO') pillClass = 'pill-condominio';
+            else if (item.categoria_erro === 'LOGIN') pillClass = 'pill-login';
+            else if (item.categoria_erro === 'FALTAM_DADOS') pillClass = 'pill-faltam_dados';
+            else if (item.categoria_erro === 'AJUSTADO') pillClass = 'pill-ajustado';
+
+            var detalheErro = item.ultimo_detalhe_erro || 'Faltam dados essenciais para o robô acessar.';
+            var dataFalha = item.data_ultima_falha ? item.data_ultima_falha : 'Pendente de preenchimento';
+
+            html += '<div class="item-card ' + (item.esta_ajustado ? 'border-success border-opacity-50 bg-white' : '') + '">' +
+                '<div class="d-flex flex-wrap justify-content-between align-items-start gap-2">' +
+                    '<div style="flex: 1; min-width: 280px;">' +
+                        '<div class="d-flex align-items-center gap-2 mb-1">' +
+                            '<input type="checkbox" class="form-check-input m-0 rx-sel" style="width: 1.1rem; height: 1.1rem;" data-acao="selecionar" data-imovel="' + esc(item.imovel) + '" ' + (selecionados.has(String(item.imovel)) ? 'checked' : '') + '>' +
+                            '<span class="fw-bold text-dark fs-6">#' + esc(item.imovel) + '</span>' +
+                            '<span class="fw-bold text-secondary">•</span>' +
+                            '<span class="fw-bold text-primary">' + (esc(item.empreendimento) || 'Empreendimento não informado') + '</span>' +
+                            '<span class="status-pill ' + pillClass + '">' +
+                                '<i class="bi ' + (item.esta_ajustado ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill') + '"></i> ' + esc(item.motivo_resumido) +
+                            '</span>' +
+                        </div>' +
+                        '<div class="small text-muted mb-2">' +
+                            '<span class="text-dark fw-bold"><i class="bi bi-person-badge text-primary"></i> Resp: <span class="badge bg-light text-dark border">' + esc(item.responsavel) + '</span></span>' +
+                            '<span class="mx-2">|</span>' +
+                            '<span><i class="bi bi-building"></i> Adm: <b>' + (esc(item.administradora) || '-') + '</b></span>' +
+                            '<span class="mx-2">|</span>' +
+                            '<span><i class="bi bi-geo-alt"></i> Endereço base: ' + esc(item.endereco) + '</span>' +
+                            '<span class="mx-2">|</span>' +
+                            '<span><i class="bi bi-clock"></i> Último registro: ' + esc(dataFalha) + '</span>' +
+                        </div>' +
+                        '<div class="p-2 rounded border bg-light small ' + (item.esta_ajustado ? 'text-success' : 'text-danger') + ' font-monospace" style="font-size: 0.78rem;">' +
+                            '<b>' + (item.esta_ajustado ? 'Histórico:' : 'Retorno do Robô:') + '</b> ' + esc(detalheErro) +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="d-flex flex-column align-items-end justify-content-between gap-3 text-end" style="min-width: 260px;">' +
+                        '<div>' +
+                            '<div class="small text-muted mb-1">Configurado no Portal (<b>' + esc(item.portal) + '</b>):</div>' +
+                            '<div class="tag-site mb-1">Condomínio: <b>' + (item.emp_site ? esc(item.emp_site) : '<span class="text-danger">Vazio</span>') + '</b></div>' +
+                            '<div class="tag-site">' +
+                                (item.bloco_site ? 'Bloco: <b>' + esc(item.bloco_site) + '</b> | ' : '') +
+                                'Unidade: <b>' + (item.unid_site ? esc(item.unid_site) : '<span class="text-danger">Vazia</span>') + '</b>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="d-flex gap-2">' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger fw-bold px-2 shadow-sm d-flex align-items-center gap-1" data-acao="remover_erro" data-imovel="' + esc(item.imovel) + '">' +
+                                '<i class="bi bi-trash"></i> Remover' +
+                            '</button>' +
+                            '<button type="button" class="btn btn-sm ' + (item.esta_ajustado ? 'btn-outline-success' : 'btn-dark') + ' fw-bold px-3 shadow-sm d-flex align-items-center gap-1" data-acao="ajustar" data-imovel="' + esc(item.imovel) + '">' +
+                                '<i class="bi bi-pencil-square"></i> ' + (item.esta_ajustado ? 'Re-ajustar' : 'Ajustar Cadastro') +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function avisarSeVersaoDiferente() {
+        var aviso = $('avisoVersao');
+        if (versaoServidor === VERSAO_TELA) { aviso.style.display = 'none'; return; }
+        aviso.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Esta tela é a versão <b>' + esc(VERSAO_TELA) +
+            '</b>, mas o servidor está rodando <b>' + (versaoServidor ? esc(versaoServidor) : 'uma versão antiga do app.py') +
+            '</b>. Reinicie o servidor para sincronizar.';
+        aviso.style.display = '';
+    }
+
+    function tabelaDiag(titulo, cabecalhos, linhas) {
+        var corpo = linhas.length
+            ? linhas.map(function(l) { return '<tr>' + l.map(function(c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('')
+            : '<tr><td colspan="' + cabecalhos.length + '" class="text-muted">sem registros</td></tr>';
+        return '<div class="fw-bold mt-3 mb-1">' + esc(titulo) + '</div>' +
+            '<div class="table-responsive bg-white border rounded"><table class="table table-sm mb-0">' +
+            '<thead class="table-light"><tr>' + cabecalhos.map(function(c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>' + corpo + '</tbody></table></div>';
+    }
+
+    function descreverSelect(id) {
+        var s = $(id);
+        if (!s) return '(não encontrado)';
+        var op = s.options && s.options[s.selectedIndex];
+        return 'valor="' + s.value + '" | texto="' + (op ? op.text : '-') + '" | ' + (s.options ? s.options.length : 0) + ' opções';
+    }
+
+    function respsNaLista() {
+        var c = {};
+        dadosCarregados.forEach(function(i) { c[i.responsavel] = (c[i.responsavel] || 0) + 1; });
+        return Object.keys(c).sort().map(function(k) { return k + ' (' + c[k] + ')'; }).join(', ') || '-';
+    }
+
+    function abrirDiagnostico() {
+        var corpo = $('corpoDiagnostico');
+        corpo.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        textoDiagnostico = '';
+        bootstrap.Modal.getOrCreateInstance($('modalDiagnostico')).show();
+
+        fetch('/api/raio_x/diagnostico')
+            .then(function(r) {
+                if (r.status === 404) throw new Error('O servidor não conhece /api/raio_x/diagnostico: reinicie o servidor.');
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(d) {
+                if (!d.sucesso) throw new Error(d.msg || 'falha no diagnóstico');
+                var ativos = filtrosAtivos();
+                var linhasStatus = d.status.map(function(s) { return [s.robo, s.status, s.qtd, s.categoria]; });
+                var linhasPortal = d.portais.map(function(p) { return [p.portal, p.qtd]; });
+                var linhasOper = d.operadores.map(function(o) { return [o.responsavel, o.qtd]; });
+                var estadoTela = [
+                    ['Operador (select)', descreverSelect('filtroResponsavel')],
+                    ['Portal (select)', descreverSelect('filtroPortal')],
+                    ['Última consulta enviada', ultimaUrl || '-'],
+                    ['Responsáveis presentes na lista', respsNaLista()],
+                    ['Tela x consulta em sincronia', assinatura() === ultimaAssinatura ? 'sim' : 'NÃO']
+                ];
+
+                corpo.innerHTML =
+                    '<div class="p-3 bg-white border rounded">' +
+                        '<div>Versão da tela: <b>' + esc(VERSAO_TELA) + '</b> | Versão do servidor: <b>' + esc(d.versao) + '</b> ' + (d.versao === VERSAO_TELA ? '✔️' : '⚠️') + '</div>' +
+                        '<div>Ciclo (último upload da base): <b>' + esc(d.data_corte) + '</b></div>' +
+                        '<div>Registros de auditoria: <b>' + d.auditoria_ciclo + '</b> no ciclo / ' + d.auditoria_total + ' total</div>' +
+                        '<div>Filtros ativos: <b>' + (ativos.length ? esc(ativos.join(' · ')) : 'nenhum') + '</b> | listados: <b>' + dadosCarregados.length + '</b></div>' +
+                    '</div>' +
+                    tabelaDiag('Estado da tela agora', ['Item', 'Valor'], estadoTela) +
+                    tabelaDiag('O que os robôs gravaram neste ciclo', ['Robô', 'Status', 'Qtd', 'Card'], linhasStatus) +
+                    tabelaDiag('Portais dos imóveis pendentes', ['Portal', 'Imóveis'], linhasPortal) +
+                    tabelaDiag('Operadores dos imóveis pendentes', ['Operador', 'Imóveis'], linhasOper);
+
+                textoDiagnostico = 'RAIO-X DIAGNÓSTICO\n' +
+                    'Tela: ' + VERSAO_TELA + ' | Servidor: ' + d.versao + '\n' +
+                    'Ciclo desde: ' + d.data_corte + '\n' +
+                    'Auditoria: ' + d.auditoria_ciclo + ' no ciclo / ' + d.auditoria_total + ' total';
+            })
+            .catch(function(err) {
+                corpo.innerHTML = '<div class="alert alert-danger mb-0">' + esc(err.message || err) + '</div>';
+            });
+    }
+
+    function copiarDiagnostico() {
+        var btn = $('btnCopiarDiag');
+        var ok = function() {
+            btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Copiado!';
+            setTimeout(function() { btn.innerHTML = '<i class="bi bi-clipboard me-1"></i>Copiar diagnóstico'; }, 2000);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textoDiagnostico).then(ok);
+        } else {
+            var ta = document.createElement('textarea');
+            ta.value = textoDiagnostico;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            ok();
+        }
+    }
+
+    function removerErroIndividual(imovel) {
+        Swal.fire({
+            title: 'Remover erro do imóvel #' + imovel + '?',
+            text: 'O caso sairá da lista agora. Se voltar a falhar na próxima execução, ele reaparecerá automaticamente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sim, remover erro',
+            cancelButtonText: 'Cancelar'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                fetch('/api/raio_x/remover_erro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imovel: imovel })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.sucesso) {
+                        selecionados.delete(String(imovel));
+                        atualizarBarraSelecao();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Erro removido!',
+                            text: 'O imóvel saiu da lista de erros.',
+                            timer: 1600,
+                            showConfirmButton: false
+                        });
+                        carregarDados();
+                    } else {
+                        Swal.fire('Erro', res.msg || 'Não foi possível remover.', 'error');
+                    }
+                })
+                .catch(function(err) { Swal.fire('Erro de Rede', String(err), 'error'); });
+            }
+        });
+    }
+
+    function removerErrosEmLote() {
+        if (!selecionados.size) return;
+        var qtd = selecionados.size;
+
+        Swal.fire({
+            title: 'Remover ' + qtd + ' erro(s) selecionado(s)?',
+            text: 'Todos os casos selecionados sairão da lista de erros. Se falharem novamente na próxima execução, reaparecerão.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sim, remover ' + qtd + ' erro(s)',
+            cancelButtonText: 'Cancelar'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                fetch('/api/raio_x/remover_erro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imoveis: Array.from(selecionados) })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.sucesso) {
+                        selecionados.clear();
+                        atualizarBarraSelecao();
+                        Swal.fire({
+                            icon: 'success',
+                            title: res.qtd + ' erro(s) removido(s)!',
+                            text: 'Os casos saíram da lista.',
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+                        carregarDados();
+                    } else {
+                        Swal.fire('Erro', res.msg || 'Não foi possível remover os erros.', 'error');
+                    }
+                })
+                .catch(function(err) { Swal.fire('Erro de Rede', String(err), 'error'); });
+            }
+        });
+    }
+
+    function atualizarBarraSelecao() {
+        var total = selecionados.size;
+        var visiveis = dadosCarregados.map(function(i) { return String(i.imovel); });
+        var selVisiveis = visiveis.filter(function(v) { return selecionados.has(v); }).length;
+        var fora = total - selVisiveis;
+        $('barraSelecao').classList.toggle('d-none', total === 0);
+        $('qtdSelecionados').innerText = total + ' selecionado(s)' + (fora > 0 ? ' (' + fora + ' fora desta lista)' : '');
+        var todos = $('chkSelecionarTodos');
+        todos.checked = visiveis.length > 0 && selVisiveis === visiveis.length;
+        todos.indeterminate = selVisiveis > 0 && selVisiveis < visiveis.length;
+    }
+
+    function alternarSelecao(imovel, marcado) {
+        if (marcado) selecionados.add(String(imovel)); else selecionados.delete(String(imovel));
+        atualizarBarraSelecao();
+    }
+
+    function selecionarTodosDaLista(marcado) {
+        dadosCarregados.forEach(function(i) {
+            if (marcado) selecionados.add(String(i.imovel)); else selecionados.delete(String(i.imovel));
+        });
+        document.querySelectorAll('#containerLista .rx-sel').forEach(function(cb) { cb.checked = marcado; });
+        atualizarBarraSelecao();
+    }
+
+    function limparSelecao() {
+        selecionados.clear();
+        document.querySelectorAll('#containerLista .rx-sel').forEach(function(cb) { cb.checked = false; });
+        atualizarBarraSelecao();
+    }
+
+    var SPINNER_TESTE = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    var ROTULO_RESULTADO = {
+        OK: ['bg-success', 'OK'], ERRO: ['bg-danger', 'Ainda com erro'], AGUARDANDO: ['bg-secondary', 'Aguardando'],
+        NAO_PROCESSADO: ['bg-warning text-dark', 'Não processado'], SEM_REGISTRO: ['bg-info text-dark', 'Sem erro'],
+        FALHA_ROBO: ['bg-danger', 'Robô com erro'], NAO_INICIADO: ['bg-warning text-dark', 'Não iniciado']
+    };
+
+    function rodapeTeste(modo) {
+        $('btnIniciarTeste').classList.toggle('d-none', modo !== 'previa');
+        $('btnAtualizarAposTeste').classList.toggle('d-none', modo !== 'concluido');
+    }
+
+    function alertaTeste(tipo, texto) {
+        return '<div class="alert alert-' + tipo + ' mb-2">' + esc(texto) + '</div>';
+    }
+
+    function tabelaSimples(cabecalhos, linhasHtml) {
+        return '<div class="table-responsive bg-white border rounded"><table class="table table-sm align-middle mb-0">' +
+            '<thead class="table-light"><tr>' + cabecalhos.map(function(c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead>' +
+            '<tbody>' + linhasHtml.join('') + '</tbody></table></div>';
+    }
+
+    function abrirTesteRobo() {
+        if (!selecionados.size) return;
+        clearTimeout(timerTeste);
+        ultimaPrevia = null;
+        $('tituloTesteRobo').innerText = '🤖 Testar no robô';
+        $('corpoTesteRobo').innerHTML = SPINNER_TESTE;
+        rodapeTeste('nenhum');
+        bootstrap.Modal.getOrCreateInstance($('modalTesteRobo')).show();
+
+        fetch('/api/raio_x/teste_robo/previa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imoveis: Array.from(selecionados) })
+        })
+            .then(function(r) {
+                if (r.status === 404) throw new Error('Servidor com versão antiga: reinicie o servidor.');
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(d) {
+                if (!d.sucesso) {
+                    $('corpoTesteRobo').innerHTML = alertaTeste('danger', d.msg || 'Falha ao preparar teste.');
+                    return;
+                }
+                ultimaPrevia = d;
+                var ocupados = Object.keys(d.robos_ocupados || {}).filter(function(k) { return d.robos_ocupados[k]; });
+                var html = '';
+                if (d.elegiveis.length) {
+                    html += '<div class="fw-bold mb-1">O robô vai tentar ' + d.elegiveis.length + ' caso(s):</div>' +
+                        tabelaSimples(['Imóvel', 'Empreendimento', 'Robô'], d.elegiveis.map(function(e) {
+                            return '<tr><td class="fw-bold">#' + esc(e.imovel) + '</td><td>' + esc(e.empreendimento) + '</td><td>' + esc(e.robo) + '</td></tr>';
+                        }));
+                    html += '<div class="form-check mt-3"><input class="form-check-input" type="checkbox" id="chkMarcarColetado" checked>' +
+                        '<label class="form-check-label fw-semibold" for="chkMarcarColetado">Marcar como COLETADO se o robô conseguir baixar o boleto</label>' +
+                        '<div class="text-muted">Desmarque para apenas testar: o robô tenta baixar sem alterar o status.</div></div>';
+                } else {
+                    html += alertaTeste('warning', 'Nenhum dos casos selecionados pode ser pego pelo robô agora.');
+                }
+                if (ocupados.length) {
+                    html += '<div class="mt-3">' + alertaTeste('warning', 'O robô ' + ocupados.join(' e ') + ' já está em execução.') + '</div>';
+                }
+                if (d.ignorados.length) {
+                    html += '<div class="fw-bold mt-3 mb-1">Não serão testados (' + d.ignorados.length + '):</div>' +
+                        tabelaSimples(['Imóvel', 'Motivo'], d.ignorados.map(function(i) {
+                            return '<tr><td class="fw-bold">#' + esc(i.imovel) + (i.empreendimento ? '<div class="fw-normal text-muted">' + esc(i.empreendimento) + '</div>' : '') + '</td><td>' + esc(i.motivo) + '</td></tr>';
+                        }));
+                }
+                $('corpoTesteRobo').innerHTML = html;
+                rodapeTeste(d.elegiveis.length ? 'previa' : 'nenhum');
+            })
+            .catch(function(err) { $('corpoTesteRobo').innerHTML = alertaTeste('danger', err.message || String(err)); });
+    }
+
+    function iniciarTeste() {
+        if (iniciandoTeste || !ultimaPrevia || !ultimaPrevia.elegiveis.length) return;
+        iniciandoTeste = true;
+        $('btnIniciarTeste').disabled = true;
+        var chk = $('chkMarcarColetado');
+        var marcar = chk ? chk.checked : true;
+
+        fetch('/api/raio_x/teste_robo/iniciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imoveis: ultimaPrevia.elegiveis.map(function(e) { return e.imovel; }), marcar: marcar })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                iniciandoTeste = false;
+                $('btnIniciarTeste').disabled = false;
+                if (!d.sucesso) {
+                    $('corpoTesteRobo').innerHTML = alertaTeste('danger', d.msg || 'Não foi possível iniciar o teste.');
+                    rodapeTeste('nenhum');
+                    return;
+                }
+                jobTeste = d.job_id;
+                $('btnVerTeste').classList.remove('d-none');
+                rodapeTeste('nenhum');
+                $('corpoTesteRobo').innerHTML = SPINNER_TESTE;
+                consultarTeste();
+            })
+            .catch(function(err) {
+                iniciandoTeste = false;
+                $('btnIniciarTeste').disabled = false;
+                $('corpoTesteRobo').innerHTML = alertaTeste('danger', 'Falha ao iniciar: ' + (err.message || err));
+            });
+    }
+
+    function consultarTeste() {
+        clearTimeout(timerTeste);
+        if (!jobTeste) return;
+        fetch('/api/raio_x/teste_robo/' + encodeURIComponent(jobTeste))
+            .then(function(r) {
+                if (r.status === 404) throw new Error('Este teste não existe mais. Faça um novo teste.');
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(d) {
+                ultimoResultadoTeste = d;
+                renderizarResultadoTeste(d);
+                if (!d.concluido) timerTeste = setTimeout(consultarTeste, 3000);
+                else rodapeTeste('concluido');
+            })
+            .catch(function(err) {
+                $('corpoTesteRobo').innerHTML = alertaTeste('danger', err.message || String(err));
+                rodapeTeste('nenhum');
+            });
+    }
+
+    function renderizarResultadoTeste(d) {
+        var r = d.resumo || {};
+        var total = d.resultados.length;
+        var pendentes = r.AGUARDANDO || 0;
+        $('tituloTesteRobo').innerText = d.concluido ? '🤖 Teste no robô: concluído' : '🤖 Teste no robô: em andamento';
+
+        var html = '<div class="p-3 bg-white border rounded mb-3">' +
+            '<div class="fw-bold">' + (d.concluido ? 'Concluído' : 'Rodando') + ': ' + (total - pendentes) + ' de ' + total + ' caso(s) com resposta ' +
+                (d.concluido ? '' : '<span class="spinner-border spinner-border-sm ms-2"></span>') + '</div>' +
+            '<div class="text-muted">' + (r.OK || 0) + ' ok · ' + (r.ERRO || 0) + ' ainda com erro · ' +
+                ((r.NAO_PROCESSADO || 0) + (r.SEM_REGISTRO || 0) + (r.FALHA_ROBO || 0) + (r.NAO_INICIADO || 0)) + ' sem resposta</div>' +
+        '</div>';
+
+        Object.keys(d.robos || {}).forEach(function(k) {
+            var info = d.robos[k];
+            if (info.msg) html += alertaTeste('warning', info.msg);
+        });
+
+        html += tabelaSimples(['Imóvel', 'Robô', 'Resultado', 'Detalhe'], d.resultados.map(function(x) {
+            var rot = ROTULO_RESULTADO[x.estado] || ['bg-secondary', x.estado];
+            var spin = x.estado === 'AGUARDANDO' ? '<span class="spinner-border spinner-border-sm me-1"></span>' : '';
+            return '<tr>' +
+                '<td class="fw-bold">#' + esc(x.imovel) + '<div class="fw-normal text-muted">' + esc(x.empreendimento) + '</div></td>' +
+                '<td>' + esc(x.robo) + '</td>' +
+                '<td><span class="badge ' + rot[0] + '">' + spin + esc(rot[1]) + '</span><div class="fw-semibold mt-1">' + esc(x.titulo) + '</div></td>' +
+                '<td class="text-muted" style="max-width: 320px; word-break: break-word;">' + esc(x.detalhe) + '</td>' +
+            '</tr>';
+        }));
+
+        $('corpoTesteRobo').innerHTML = html;
+    }
+
+    function verUltimoTeste() {
+        if (!jobTeste) return;
+        clearTimeout(timerTeste);
+        $('corpoTesteRobo').innerHTML = SPINNER_TESTE;
+        rodapeTeste('nenhum');
+        bootstrap.Modal.getOrCreateInstance($('modalTesteRobo')).show();
+        consultarTeste();
+    }
+
+    function atualizarAposTeste() {
+        if (ultimoResultadoTeste) {
+            ultimoResultadoTeste.resultados.forEach(function(x) {
+                if (x.estado === 'OK') selecionados.delete(String(x.imovel));
+            });
+        }
+        bootstrap.Modal.getOrCreateInstance($('modalTesteRobo')).hide();
+        carregarDados();
+    }
+
+    function abrirModalAjuste(imovelNum) {
+        var item = dadosCarregados.find(function(x) { return String(x.imovel) === String(imovelNum); });
+        if (!item) return;
+
+        $('ajuste_imovel').value = item.imovel;
+        $('modalSubtitulo').innerText = 'Imóvel #' + item.imovel + ' — ' + (item.empreendimento || '') + ' (Resp: ' + item.responsavel + ')';
+        $('modalErroDetalhe').innerText = item.ultimo_detalhe_erro || 'Faltam dados essenciais no cadastro.';
+
+        $('ajuste_portal').value = item.portal || 'WINKER';
+        $('ajuste_emp').value = item.emp_site || '';
+        $('ajuste_bloco').value = item.bloco_site || '';
+        $('ajuste_unid').value = item.unid_site || '';
+        $('ajuste_login').value = item.login_acesso || '';
+        $('ajuste_senha').value = item.senha_acesso || '';
+
+        bootstrap.Modal.getOrCreateInstance($('modalAjuste')).show();
+    }
+
+    function salvarAjuste() {
+        var payload = {
+            imovel: $('ajuste_imovel').value,
+            portal: $('ajuste_portal').value,
+            emp_site: $('ajuste_emp').value,
+            bloco_site: $('ajuste_bloco').value,
+            unid_site: $('ajuste_unid').value,
+            login_acesso: $('ajuste_login').value,
+            senha_acesso: $('ajuste_senha').value
+        };
+
+        fetch('/api/raio_x/salvar_ajuste', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.sucesso) {
+                bootstrap.Modal.getOrCreateInstance($('modalAjuste')).hide();
+                selecionados.add(String(payload.imovel));
+                atualizarBarraSelecao();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cadastro Ajustado!',
+                    text: 'O caso foi marcado como resolvido e retirado da fila de erros.',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+                carregarDados();
+            } else {
+                Swal.fire('Erro', res.msg || 'Não foi possível salvar', 'error');
+            }
+        })
+        .catch(function(err) { Swal.fire('Erro de Rede', String(err), 'error'); });
+    }
+
+    function ligar(id, evento, fn) {
+        var el = $(id);
+        if (el) el.addEventListener(evento, fn);
+    }
+
+    function iniciar() {
+        ['change', 'input', 'blur'].forEach(function(ev) {
+            ligar('filtroResponsavel', ev, sincronizar);
+            ligar('filtroPortal', ev, sincronizar);
+        });
+        ligar('campoPesquisa', 'input', agendarBusca);
+        ligar('campoPesquisa', 'keydown', function(e) { if (e.key === 'Enter') { clearTimeout(timerBusca); carregarDados(); } });
+        ligar('btnBuscar', 'click', carregarDados);
+        ligar('btnAtualizar', 'click', carregarDados);
+        ligar('btnDiagnostico', 'click', abrirDiagnostico);
+        ligar('btnLimparFiltros', 'click', limparFiltros);
+        ligar('checkVerAjustados', 'change', alternarAjustados);
+        ligar('btnCopiarDiag', 'click', copiarDiagnostico);
+        ligar('btnSalvarAjuste', 'click', salvarAjuste);
+        ligar('chkSelecionarTodos', 'change', function(e) { selecionarTodosDaLista(e.target.checked); });
+        ligar('btnLimparSelecao', 'click', limparSelecao);
+        ligar('btnTestarRobo', 'click', abrirTesteRobo);
+        ligar('btnRemoverErrosLote', 'click', removerErrosEmLote);
+        ligar('btnIniciarTeste', 'click', iniciarTeste);
+        ligar('btnAtualizarAposTeste', 'click', atualizarAposTeste);
+        ligar('btnVerTeste', 'click', verUltimoTeste);
+
+        $('containerLista').addEventListener('change', function(e) {
+            var cb = e.target && e.target.closest ? e.target.closest('[data-acao="selecionar"]') : null;
+            if (cb) alternarSelecao(cb.dataset.imovel, cb.checked);
+        });
+
+        document.querySelectorAll('.kpi-card').forEach(function(c) {
+            c.addEventListener('click', function() { filtrarCategoria(c.dataset.cat); });
+        });
+
+        $('containerLista').addEventListener('click', function(e) {
+            var alvo = e.target && e.target.closest ? e.target.closest('[data-acao]') : null;
+            if (!alvo) return;
+            if (alvo.dataset.acao === 'ajustar') abrirModalAjuste(alvo.dataset.imovel);
+            else if (alvo.dataset.acao === 'remover_erro') removerErroIndividual(alvo.dataset.imovel);
+            else if (alvo.dataset.acao === 'limpar') limparFiltros();
+        });
+
+        setInterval(sincronizar, 400);
+        console.log('[Raio-X] tela ' + VERSAO_TELA);
+        carregarDados();
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+    else iniciar();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% for imovel in imoveis %}
+<!-- PEGA DATA COM DESCONTO -->
+{% set raw_dt = imovel['Dt.ComDesc'] if 'Dt.ComDesc' in imovel.keys() else (imovel['dt_comdesc'] if 'dt_comdesc' in imovel.keys() else '') %}
+{% set v_dt = raw_dt | string %}
+{% set v_dt = '-' if v_dt in ['None', 'NaN', 'nan', ''] else v_dt %}
+
+<!-- PEGA SACADO -->
+{% set raw_sacado = imovel['Sacado'] if 'Sacado' in imovel.keys() else (imovel['sacado'] if 'sacado' in imovel.keys() else '') %}
+{% set v_sacado = raw_sacado | string %}
+{% set v_sacado = '-' if v_sacado in ['None', 'NaN', 'nan', ''] else v_sacado %}
+
+<!-- RASTREADOR DE ACESSO -->
+{% set raw_acesso = imovel['Acesso'] if 'Acesso' in imovel.keys() else (imovel['acesso'] if 'acesso' in imovel.keys() else '') %}
+{% set v_acesso = raw_acesso | string %}
+{% set v_acesso = '-' if v_acesso in ['None', 'NaN', 'nan', 'null', ''] else v_acesso %}
+
+<!-- RASTREADOR UNIVERSAL DE OBSERVAÇÃO (OBS FICHA) - MODO SQLITE -->
+{% set raw_obs = imovel['Observação'] if 'Observação' in imovel.keys() else (imovel['observacao'] if 'observacao' in imovel.keys() else (imovel['observacao_planilha'] if 'observacao_planilha' in imovel.keys() else (imovel['OBS'] if 'OBS' in imovel.keys() else (imovel['Obs'] if 'Obs' in imovel.keys() else (imovel['obs'] if 'obs' in imovel.keys() else (imovel['observacoes'] if 'observacoes' in imovel.keys() else '')))))) %}
+{% set v_obs = raw_obs | string %}
+{% set v_obs_limpa = '' if v_obs in ['None', 'NaN', 'nan', 'null', ''] else v_obs %}
+
+<!-- RASTREADOR DE INÍCIO DE CONTRATO (Coluna H) - MODO SQLITE CORRIGIDO -->
+{% set raw_ini = imovel['Ini.Vig.Contr.'] if 'Ini.Vig.Contr.' in imovel.keys() else (imovel['ini_vig_contr'] if 'ini_vig_contr' in imovel.keys() else (imovel['Inicio Contrato'] if 'Inicio Contrato' in imovel.keys() else '')) %}
+{% set v_ini_contrato = raw_ini | string %}
+{% set v_ini_contrato = '' if v_ini_contrato in ['None', 'NaN', 'nan', 'null', '-'] else v_ini_contrato %}
+
+<tr id="linha_imovel_{{ imovel['id'] }}" class="{% if imovel['status_interno'] in ['ERRO PAGAMENTO', 'EMAIL RECEBIDO', 'ERRO DE REDE'] %}linha-erro{% endif %}">
+    <td class="text-center">
+        <input type="checkbox" class="form-check-input check-imovel" value="{{ imovel['id'] }}" 
+               data-adm="{{ imovel['administradora'] }}"
+               data-email="{{ imovel['email_adm'] if imovel['email_adm'] else '' }}"
+               data-resp="{{ imovel['colaborador'] if imovel['colaborador'] else 'Não Atribuído' }}"
+               data-coletor="{{ imovel['coletor_mes'] if imovel['coletor_mes'] else 'Não registrado' }}"
+               data-venc="{{ imovel['vencimento'] }}"
+               data-imovelnum="{{ imovel['imovel'] }}"
+               data-emp="{{ imovel['empreendimento'] }}"
+               data-sacado="{{ v_sacado }}"
+               data-endereco="{{ imovel['endereco'] }}"
+               data-cpf="{{ imovel['cpf_cnpj'] }}"
+               data-inicontrato="{{ v_ini_contrato }}"> 
+    </td>
+
+    <td class="text-center">
+        <select class="form-select form-select-sm select-emissao mx-auto" onchange="alterarMediaEmissao({{ imovel['id'] }}, this)">
+            <option value="" {% if not imovel['media_emissao'] %}selected{% endif %}>-</option>
+            {% for i in range(1, 32) %}
+                {% set val = '%02d' % i %}
+                <option value="{{ val }}" {% if imovel['media_emissao'] == val or imovel['media_emissao'] == (i|string) %}selected{% endif %}>{{ val }}</option>
+            {% endfor %}
+        </select>
+    </td>
+
+    <td class="fw-bold text-secondary text-nowrap text-center">{{ imovel['vencimento'] }}</td>
+    <td class="fw-semibold text-dark text-center">{{ imovel['administradora'] }}</td>
+    
+    <td class="text-center position-relative">
+        <a class="imovel-link" 
+           data-id="{{ imovel['id'] }}" data-imovel="{{ imovel['imovel'] }}" data-adm="{{ imovel['administradora'] }}"
+           data-venc="{{ imovel['vencimento'] }}" data-cart="{{ imovel['carteira'] }}" data-lote="{{ imovel['d_lote'] }}"
+           data-emp="{{ imovel['empreendimento'] }}" data-end="{{ imovel['endereco'] }}" data-sac="{{ v_sacado }}" data-cpf="{{ imovel['cpf_cnpj'] }}"
+           data-obs="{{ v_obs_limpa }}" data-dtcomdesc="{{ v_dt }}" data-acesso="{{ v_acesso }}"
+           onclick="abrirDetalhesImovel(this)" title="Ver Detalhes e Histórico">
+            {{ imovel['imovel'] }}
+        </a>
+        <span id="selo_novo_{{ imovel['id'] }}"></span>
+    </td>
+    
+    <td class="text-secondary text-center">{{ imovel['endereco'] }}</td> 
+    <td class="text-muted text-center">{{ imovel['empreendimento'] }}</td>
+    <td class="text-muted text-center">{{ v_sacado }}</td>
+    
+   <td class="text-center fw-bold text-secondary cell-acesso" style="font-size: 0.75rem;" title="Clique para ler tudo e selecionar" onclick="this.classList.toggle('expandida')">
+        {{ v_acesso }}
+    </td>
+    
+    <td class="text-center"><span class="badge bg-light text-secondary border px-2 py-1 fw-bold">{{ imovel['colaborador'] if imovel['colaborador'] else 'Pendente' }}</span></td>
+    
+    <td class="text-center" style="max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.8rem; vertical-align: middle;" title="{{ v_obs_limpa }}">
+        {% if v_obs_limpa %}
+            {% if 'mail.google.com' in v_obs_limpa %}
+                <div class="d-flex justify-content-center">
+                    <a href="{{ v_obs_limpa }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold" style="font-size: 0.65rem;" title="Abre no Gmail">🔗 Link</a>
+                </div>
+            {% else %}
+                <span class="text-danger fw-medium">📋 {{ v_obs_limpa }}</span>
+            {% endif %}
+        {% else %}
+            <span class="text-muted">-</span>
+        {% endif %}
+    </td>
+
+    <td title="{{ imovel['ultima_nota'] or 'Sem observações internas gravadas.' }}" style="max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: help; font-size: 0.8rem; vertical-align: middle;" class="text-center">
+        {% if imovel['ultima_nota'] %}
+            <span class="text-primary fw-bold">💬 {{ imovel['ultima_nota'] }}</span>
+        {% else %}
+            <span class="text-muted">-</span>
+        {% endif %}
+    </td>
+
+   <td class="text-center">
+        <div class="d-flex align-items-center justify-content-center gap-1">
+            <select id="select_status_{{ imovel['id'] }}" class="form-select form-select-sm select-status
+                {% if imovel['status_interno'] in ['PAGO', 'PAGO NA 275', 'PAGO NA ADM'] %}status-pago
+                {% elif imovel['status_interno'] == 'SOLICITADO' %}status-solicitado
+                {% elif imovel['status_interno'] == 'COLETADO' %}status-coletado
+                {% elif imovel['status_interno'] == 'CHEQUE/DOC' %}status-cheque
+                {% elif imovel['status_interno'] in ['ERRO PAGAMENTO', 'EMAIL RECEBIDO', 'ERRO DE REDE'] %}status-erro
+                {% elif imovel['status_interno'] == 'AUTOMAÇÃO' %}status-robo
+                {% elif imovel['status_interno'] == 'NÃO EMITIDO' %}status-nao-emitido
+                {% else %}status-branco{% endif %}" 
+                onchange="acionarTrocaStatus(this, '{{ imovel['id'] }}', '{{ imovel['status_interno'] or '' }}')">
+                
+                <option value="" {% if not imovel['status_interno'] %}selected{% endif %}>Status...</option>
+                <option value="AUTOMAÇÃO" {% if imovel['status_interno'] in ['AUTOMAÇÃO', 'ROBÔ', 'ROBO'] %}selected{% endif %}>🤖 AUTOMAÇÃO</option>
+                <option value="NÃO EMITIDO" {% if imovel['status_interno'] == 'NÃO EMITIDO' %}selected{% endif %}>NÃO EMITIDO</option>
+                <option value="COLETADO" {% if imovel['status_interno'] == 'COLETADO' %}selected{% endif %}>COLETADO</option>
+                <option value="SOLICITADO" {% if imovel['status_interno'] == 'SOLICITADO' %}selected{% endif %}>SOLICITADO</option>
+                <option value="CHEQUE/DOC" {% if imovel['status_interno'] == 'CHEQUE/DOC' %}selected{% endif %}>CHEQUE/DOC</option>
+                <option value="PAGO" {% if imovel['status_interno'] == 'PAGO' %}selected{% endif %}>PAGO</option>
+                
+                <option value="PAGO NA 275" {% if imovel['status_interno'] == 'PAGO NA 275' %}selected{% endif %}>PAGO NA 275</option>
+                <option value="PAGO NA ADM" {% if imovel['status_interno'] == 'PAGO NA ADM' %}selected{% endif %}>PAGO NA ADM</option>
+                
+                <option value="ERRO PAGAMENTO" {% if imovel['status_interno'] == 'ERRO PAGAMENTO' %}selected{% endif %}>ERRO PGTO</option>
+                <option value="EMAIL RECEBIDO" {% if imovel['status_interno'] == 'EMAIL RECEBIDO' %}selected{% endif %}>EMAIL REC</option>
+            </select>
+            
+            {% if imovel['status_interno'] == 'COLETADO' %}
+                <button onclick="abrirVisualizadorPDF('{{ imovel['imovel'] }}')" class="btn btn-sm btn-outline-primary border-0 p-1 shadow-none" title="Ver Boleto" style="font-size: 0.9rem;">👁️</button>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% endfor %}

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Relacionamento e Comunicados - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .card-resumo { border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .badge-tipo { font-size: 0.75rem; letter-spacing: 0.5px; padding: 5px 10px; border-radius: 6px; font-weight: 700; }
+    
+    .tipo-comunicado { background-color: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+    .tipo-ata { background-color: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; }
+    .tipo-sorteio { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .tipo-multa { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    
+    .table-container { border: 1px solid #e2e8f0; border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.03); overflow: hidden; }
+    .table-wrapper { max-height: 70vh; overflow-y: auto; }
+    .table thead th { background-color: #0f172a; color: #f8fafc; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; padding: 15px 12px; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #1e293b; text-align: center; }
+    .table tbody td { font-size: 0.85rem; color: #334155; padding: 12px; vertical-align: middle; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Central de Relacionamento (CRM)</h4>
+        <span class="text-muted small">Atas, Sorteios e Notificações de Multas capturados automaticamente da Caixa de Entrada.</span>
+    </div>
+</div>
+
+<div class="card-resumo bg-white p-3 mb-4 d-flex justify-content-between align-items-end flex-wrap gap-3">
+    <div class="d-flex gap-3 flex-grow-1">
+        <div style="min-width: 250px;">
+            <label class="form-label small fw-bold text-secondary mb-1">🔍 Pesquisar (Imóvel / Condomínio):</label>
+            <input type="text" id="campoBuscaCRM" class="form-control form-control-sm border-secondary shadow-sm" placeholder="Digite para filtrar..." onkeyup="filtrarCRM()">
+        </div>
+        <div style="width: 180px;">
+            <label class="form-label small fw-bold text-secondary mb-1">📂 Tipo de Arquivo:</label>
+            <select id="filtroTipo" class="form-select form-select-sm border-secondary shadow-sm" onchange="filtrarCRM()">
+                <option value="">Todos os Tipos</option>
+                <option value="COMUNICADO">Comunicados Gerais</option>
+                <option value="ATA">Atas / Assembleias</option>
+                <option value="SORTEIO">Sorteios / Vagas</option>
+                <option value="MULTA">Multas / Avisos</option>
+            </select>
+        </div>
+        <div style="width: 150px;">
+            <label class="form-label small fw-bold text-secondary mb-1">📅 Mês de Captura:</label>
+            <select id="filtroMes" class="form-select form-select-sm border-secondary shadow-sm" onchange="filtrarCRM()">
+                <option value="">Todos os Meses</option>
+                <option value="01">Janeiro</option>
+                <option value="02">Fevereiro</option>
+                <option value="03">Março</option>
+                <option value="04">Abril</option>
+                <option value="05">Maio</option>
+                <option value="06">Junho</option>
+                <option value="07">Julho</option>
+                <option value="08">Agosto</option>
+                <option value="09">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+    </div>
+    <div class="small fw-bold text-muted text-end">
+        Exibindo os últimos 1000 registros.
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-wrapper">
+        <table class="table table-hover m-0" id="tabelaCRM">
+            <thead>
+                <tr>
+                    <th style="width: 140px;">Data de Captura</th>
+                    <th>Nº Imóvel</th>
+                    <th>Carteira</th>
+                    <th>Administradora</th>
+                    <th>Condomínio</th>
+                    <th>Responsável</th>
+                    <th>Tipo de Arquivo</th>
+                    <th>Assunto Original do E-mail</th>
+                    <th class="text-center" style="width: 150px;">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr id="linha_crm_{{ r['id'] }}">
+                    <td class="text-muted fw-bold">{{ r['data_hora'] }}</td>
+                    <td class="fw-bold text-primary">{{ r['imovel'] }}</td>
+                    <td class="fw-bold text-secondary">{{ r['carteira'] if r['carteira'] else '-' }}</td>
+                    <td class="fw-semibold text-dark text-start">{{ r['administradora'] if r['administradora'] else 'Não Identificada' }}</td>
+                    <td class="text-muted text-start">{{ r['empreendimento'] if r['empreendimento'] else '-' }}</td>
+                    <td><span class="badge bg-light text-secondary border px-2 py-1">{{ r['colaborador'] if r['colaborador'] else 'Geral' }}</span></td>
+                    
+                    <td>
+                        <span class="badge-tipo 
+                            {% if 'ATA' in r['tipo'] %}tipo-ata
+                            {% elif 'SORTEIO' in r['tipo'] %}tipo-sorteio
+                            {% elif 'MULTA' in r['tipo'] %}tipo-multa
+                            {% else %}tipo-comunicado{% endif %}">
+                            {{ r['tipo'] }}
+                        </span>
+                    </td>
+                    
+                    <td class="text-truncate text-start" style="max-width: 250px;" title="{{ r['assunto'] }}">{{ r['assunto'] }}</td>
+                    
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            {% if r['link'] %}
+                            <a href="{{ r['link'] }}" target="_blank" class="btn btn-sm btn-dark py-1 px-3 fw-bold" style="font-size: 0.75rem; border-radius: 6px;">Ler Original</a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-danger py-1 px-2 fw-bold" style="font-size: 0.75rem; border-radius: 6px;" title="Excluir Registro" onclick="excluirRegistroCRM({{ r['id'] }})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if not registros %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <h5 class="fw-bold mb-1">Nenhum documento documento registrado ainda</h5>
+                        <small>Os avisos importantes capturados pelo FinMail aparecerão aqui automaticamente.</small>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 border rounded shadow-sm" style="background-color: #f8fafc; font-size: 0.80rem;">
+    <div class="text-muted fw-semibold">
+        Mostrando <span id="qtdVisivelCRM" class="text-primary fw-bold mx-1" style="font-size: 0.85rem;">0</span> de <span class="text-dark fw-bold mx-1" style="font-size: 0.85rem;">{{ registros|length }}</span> comunicados localizados nesta página
+    </div>
+</div>
+
+<script>
+// Força a contagem inicial assim que a tela abre
+document.addEventListener("DOMContentLoaded", function() {
+    filtrarCRM();
+});
+
+function filtrarCRM() {
+    const texto = document.getElementById('campoBuscaCRM').value.trim().toLowerCase();
+    const tipo = document.getElementById('filtroTipo').value.toLowerCase();
+    const mes = document.getElementById('filtroMes').value; 
+    
+    const tabela = document.getElementById('tabelaCRM');
+    const linhas = tabela.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    let linhasVisiveis = 0;
+
+    for (let i = 0; i < linhas.length; i++) {
+        if (linhas[i].cells.length < 2) continue; // Pula a linha de aviso "Nenhum documento localizado"
+        
+        const colData = linhas[i].cells[0].innerText || ""; 
+        // 🎯 AJUSTADO: Índice alterado de 5 para 6 devido à inclusão da coluna Carteira
+        const colTipo = linhas[i].cells[6].innerText.toLowerCase() || "";
+        const textoLinha = linhas[i].innerText.toLowerCase() || "";
+
+        let mostrar = true;
+
+        // 1. Filtro de Busca Livre
+        if (texto && !textoLinha.includes(texto)) {
+            mostrar = false;
+        }
+        
+        // 2. Filtro por Tipo de Documento
+        if (tipo && !colTipo.includes(tipo)) {
+            mostrar = false;
+        }
+
+        // 3. Filtro por Mês (Extrai o mês do formato YYYY-MM-DD)
+        if (mes) {
+            const partesData = colData.split('-');
+            if (partesData.length > 1) {
+                const mesLinha = partesData[1];
+                if (mesLinha !== mes) {
+                    mostrar = false;
+                }
+            }
+        }
+
+        linhas[i].style.display = mostrar ? "" : "none";
+        if (mostrar) {
+            linhasVisiveis++;
+        }
+    }
+
+    // 🎯 AJUSTADO: Alimenta o totalizador dinamicamente conforme os filtros rodam
+    const contador = document.getElementById('qtdVisivelCRM');
+    if (contador) {
+        contador.innerText = linhasVisiveis;
+    }
+}
+
+function excluirRegistroCRM(id) {
+    if (confirm("⚠️ ATENÇÃO: Tem certeza que deseja eliminar permanentemente este comunicado do CRM? Esta ação não pode ser desfeita.")) {
+        fetch(`/api/relacionamento/excluir/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.sucesso) {
+                const linha = document.getElementById(`linha_crm_${id}`);
+                if (linha) {
+                    linha.remove();
+                    // Refaz a contagem imediatamente na tela após deletar
+                    filtrarCRM();
+                }
+            } else {
+                alert("Erro ao tentar eliminar do banco de dados: " + data.msg);
+            }
+        })
+        .catch(err => {
+            alert("Erro crítico de comunicação com a rede Lello.");
+        });
+    }
+}
+</script>
+{% endblock %}

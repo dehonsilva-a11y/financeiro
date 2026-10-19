@@ -1,0 +1,3582 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel de Gestão Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* 1. FORÇA A PÁGINA A USAR A TELA TODA (Reduz o scroll lateral) */
+    .container {
+        max-width: 98% !important;
+        width: 98% !important;
+    }
+
+    .filter-card { background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 6px 16px rgba(15,23,42,0.05); margin-bottom: 25px; border: 1px solid #e5e7eb; }
+    
+    /* 2. AJUSTE DO STATUS (Mais largo e com espaço para a setinha) */
+    .select-status { 
+        font-weight: 600; 
+        font-size: 0.65rem; 
+        padding: 4px 16px 4px 6px; /* Dá um respiro na direita para a seta */
+        border-radius: 6px; 
+        cursor: pointer; 
+        width: 135px; /* Aumentado para caber o texto inteiro */
+        max-width: 135px; 
+        text-align: center; 
+        text-overflow: ellipsis; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        transition: all 0.15s; 
+    }
+    
+    /* Botão em Branco (Padrão) */
+    .status-branco { background-color: #ffffff; color: #64748b; border: 1px solid #cbd5e1; }
+    
+    /* Verde (Coletado) - Mesma cor da bg-planilha-verde */
+    .status-coletado { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; font-weight: bold; }
+    
+    /* Amarelo (Solicitado e Não Emitido) - Mesma cor da bg-planilha-amarelo */
+    .status-solicitado { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; font-weight: bold; }
+    .status-nao-emitido { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; font-weight: bold; }
+    
+    /* Laranja (Pago) - Mesma cor da bg-planilha-laranja */
+    .status-pago { background-color: #ffedd5; color: #c2410c; border: 1px solid #fdba74; font-weight: bold; }
+    
+    /* Azul (Cheque/Doc) - Mesma cor da bg-planilha-azul */
+    .status-cheque { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; font-weight: bold; }
+    
+    /* Roxo (Automação) - Mesma cor da bg-planilha-roxo */
+    .status-robo { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-weight: bold; }
+    
+    /* Vermelho (Erros) - Mesma cor da bg-planilha-vermelho */
+    .status-erro { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: bold; }
+    .linha-erro { background-color: #fff1f2 !important; transition: background-color 0.3s ease;}
+    .linha-erro td { border-bottom: 1px solid #fecaca !important; }
+
+    .status-robo { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-weight: bold; }
+
+    /* TABELA SUPER COMPACTA E INTELIGENTE */
+    .table-container { border: 1px solid #e5e7eb; border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 20px rgba(15,23,42,0.04); position: relative; transition: all 0.3s ease; }
+    .table-wrapper { max-height: 65vh; min-height: 380px; overflow-y: auto; overflow-x: auto; }
+    .table thead th { background-color: #1f2937; color: #f9fafb; font-weight: 600; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 4px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #374151; white-space: nowrap; vertical-align: middle; text-align: center; }
+    .table tbody td { font-size: 0.68rem; color: #334155; padding: 6px 4px; vertical-align: middle; }
+    .table tbody tr:hover { filter: brightness(0.98); }
+    
+    /* MENUS SUSPENSOS DE FILTRO */
+    .icone-filtro-btn { background: transparent; border: none; font-size: 0.85rem; color: #64748b; margin-left: 6px; margin-top: 0; transition: all 0.2s; padding: 0; }
+    .icone-filtro-btn:hover { color: #0ea5e9; transform: scale(1.1); }
+    .icone-filtro-btn.ativo { background-color: #0ea5e9; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: bold; margin-left: 6px; margin-top: 0; box-shadow: 0 2px 4px rgba(14,165,233,0.3); }
+    .dropdown-menu-filtro { min-width: 220px; font-size: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .dropdown-item-filtro { padding: 6px 10px; border-radius: 6px; cursor: pointer; color: #334155; font-weight: 500; transition: background 0.1s; }
+    .dropdown-item-filtro:hover { background-color: #f1f5f9; color: #0ea5e9; }
+
+    /* EFEITOS DA TABELA MAXIMIZADA E AJUSTE DA EMISSÃO */
+    .select-emissao { 
+        background-color: transparent; 
+        border: 1px solid transparent; 
+        color: #0f172a; 
+        font-weight: 700; 
+        font-size: 0.75rem; 
+        cursor: pointer; 
+        width: 55px; /* Aumentado para caber o número sem conflito */
+        text-align: center; 
+        box-shadow: none !important; 
+        transition: all 0.2s ease; 
+        padding: 2px 12px 2px 4px; /* O 12px aqui evita que o número suma embaixo da setinha */
+    }
+    .select-emissao:hover, .select-emissao:focus { background-color: #f1f5f9; border: 1px solid #cbd5e1; outline: none; }
+    .table-container.maximizada { position: fixed; top: 2%; left: 2%; width: 96%; height: 96%; z-index: 1050; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); border-radius: 12px; margin: 0; }
+    .table-container.maximizada .table-wrapper { max-height: 100%; flex-grow: 1; }
+    .fundo-desfocado { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(4px); z-index: 1040; }
+    body.travado { overflow: hidden; }
+    
+    .btn-maximizar { font-size: 0.75rem; font-weight: bold; border-radius: 6px; padding: 4px 12px; }
+    .btn-fechar-maximizada { display: none; position: absolute; top: -10px; right: -10px; z-index: 1060; background-color: #ef4444; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); align-items: center; justify-content: center; transition: background-color 0.2s; }
+    .btn-fechar-maximizada:hover { background-color: #dc2626; transform: scale(1.1); }
+
+    .btn-lello { background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.85rem; border: none; padding: 10px 24px; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(37,99,235,0.16); }
+    .btn-lello:hover { background-color: #1d4ed8; color: #ffffff; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(37,99,235,0.2); }
+    
+    .imovel-link { color: #1f2937; text-decoration: none; font-weight: 700; cursor: pointer; transition: color 0.2s ease; background-color: #f8fafc; padding: 4px 8px; border-radius: 4px; white-space: nowrap; border: 1px solid #e5e7eb;}
+    .imovel-link:hover { color: #111827; text-decoration: underline; background-color: #f1f5f9; }
+    
+    .detalhe-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; height: 100%; }
+    .detalhe-label { font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .detalhe-valor { font-size: 0.95rem; color: #0f172a; font-weight: 600; }
+
+    /* ESTILOS DA MATRIZ EMISSÃO X VENCIMENTO */
+    #tabelaMatriz { font-size: 0.72rem; }
+    #tabelaMatriz th { background-color: #0f172a; color: white; border: 1px solid #1e293b; text-align: center; vertical-align: middle; padding: 4px; position: sticky; top: 0; z-index: 2; }
+    #tabelaMatriz th.col-emissao { position: sticky; left: 0; z-index: 3; background-color: #0f172a; white-space: nowrap; }
+    #tabelaMatriz td { border: 1px solid #cbd5e1; text-align: center; vertical-align: middle; padding: 4px; cursor: help; transition: background-color 0.2s; }
+    #tabelaMatriz td:hover { background-color: #f1f5f9; font-weight: bold; transform: scale(1.1); }
+    #tabelaMatriz td.celula-vazia { color: transparent; pointer-events: none; }
+    #tabelaMatriz td.total-col { background-color: #0f172a; color: white; font-weight: bold; }
+    #tabelaMatriz th.total-corner { background-color: #1e293b; position: sticky; right: 0; z-index: 4; }
+    #tabelaMatriz td.total-linha { background-color: #0f172a; color: white; font-weight: bold; position: sticky; right: 0; }
+
+    /* =========================================
+       ESTILO PLANILHA: BORDAS E CORES DE LINHA 
+       ========================================= */
+    
+    /* Força as bordas parecendo grade do Excel */
+    #tabelaImoveisCob th, 
+    #tabelaImoveisCob td {
+        border: 1px solid #cbd5e1 !important; 
+    }
+
+   /* Cores de fundo aplicadas diretamente nas células da linha inteira */
+    .bg-planilha-verde td { background-color: #dcfce7 !important; border-color: #bbf7d0 !important; }
+    .bg-planilha-amarelo td { background-color: #fef9c3 !important; border-color: #fef08a !important; }
+    .bg-planilha-laranja td { background-color: #ffedd5 !important; border-color: #fed7aa !important; }
+    .bg-planilha-azul td { background-color: #e0f2fe !important; border-color: #bae6fd !important; }
+    
+    /* AS DUAS CORES NOVAS */
+    .bg-planilha-roxo td { background-color: #f3e8ff !important; border-color: #d8b4fe !important; }
+    .bg-planilha-vermelho td { background-color: #fee2e2 !important; border-color: #fca5a5 !important; }
+
+    /* Mantém o efeito de hover sutil nas linhas pintadas */
+    #tabelaImoveisCob tbody tr:hover td {
+        filter: brightness(0.96);
+    }
+
+    .main-wrapper {
+        max-width: 98% !important; /* Estica para usar o monitor todo com uma bordinha */
+        width: 100% !important;
+        padding: 20px 10px !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* 2. REMOVE A LARGURA FIXA E ADEQUA A TABELA (Adeus scroll horizontal de vez!) */
+    #tabelaImoveisCob {
+        width: 100%;
+        min-width: 100% !important; /* Tira os 1550px que forçavam a barra a aparecer */
+    }
+
+    /* 3. ESPAÇAMENTOS E FONTES (Mantém legível mas encaixa tudo) */
+    .table thead th { 
+        background-color: #1f2937; 
+        color: #f9fafb; 
+        font-weight: 600; 
+        font-size: 0.60rem; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        padding: 8px 4px !important; 
+        position: sticky; 
+        top: 0; 
+        z-index: 10; 
+        border-bottom: 1px solid #374151; 
+        white-space: nowrap; 
+        vertical-align: middle; 
+        text-align: center; 
+    }
+    
+    .table tbody td { 
+        font-size: 0.68rem; 
+        color: #334155; 
+        padding: 6px 4px !important; 
+        vertical-align: middle; 
+    }
+
+    /* 4. TRAVA INTELIGENTE DAS OBSERVAÇÕES (Usa porcentagem do monitor em vez de px) */
+    .table tbody td[title] {
+        max-width: 12vw !important; /* Segura os textos grandes para não estourar a tela */
+    }
+    
+    /* 5. TAMANHO DO BOTÃO DE STATUS */
+    .select-status { 
+        font-weight: 600; 
+        font-size: 0.65rem; 
+        padding: 4px 10px 4px 6px; 
+        border-radius: 6px; 
+        cursor: pointer; 
+        width: 125px; 
+        max-width: 125px; 
+        text-align: center; 
+        text-overflow: ellipsis; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        transition: all 0.15s; 
+    }
+
+    /* Efeito para expandir a coluna de acesso ao clicar */
+.cell-acesso {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: text;
+    transition: background-color 0.2s;
+}
+
+.cell-acesso:hover {
+    background-color: #f1f5f9;
+}
+
+/* Essa é a classe que vai fazer a mágica de quebrar a linha e mostrar tudo */
+.cell-acesso.expandida {
+    white-space: normal !important;
+    word-break: break-word;
+    background-color: #f8fafc;
+    color: #0ea5e9 !important;
+    box-shadow: inset 0 0 0 1px #bae6fd;
+}
+
+/* =========================================
+       🚀 OTIMIZAÇÃO EXTREMA (RENDERIZAÇÃO PREGUIÇOSA)
+       Garante que o navegador não congele ao desenhar 6.000 linhas
+       ========================================= */
+    #tabelaImoveisCob tbody tr {
+        content-visibility: auto;
+        contain-intrinsic-size: 55px; /* Diz ao navegador a altura média da linha oculta */
+    }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Painel operacional</h4>
+            <span class="text-muted small">Acompanhe pendências, status e ações de cobrança em uma visão consolidada.</span>
+        </div>
+        <div class="d-flex gap-2">
+    <button type="button" class="btn btn-success shadow-sm fw-bold" onclick="exportarParaExcel()" style="background-color: #10b981; border-color: #10b981;">Exportar XLSX</button>
+    
+    <a href="/relatorio_avancado" class="btn btn-dark shadow-sm fw-bold" style="background-color: #1e293b;">Dashboard mensal</a>
+    
+    <button type="button" class="btn btn-lello shadow-sm" onclick="abrirModalDisparoEmail(event)">Executar Disparos</button>
+</div>
+    </div>
+
+    <div id="cardHistorico" class="card mb-3 shadow-sm {% if mes_historico %}bg-warning bg-opacity-10 border-warning{% else %}border-0 bg-light{% endif %}">
+        <div class="card-body d-flex justify-content-between align-items-center py-2 px-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge {% if mes_historico %}bg-danger{% else %}bg-dark{% endif %}">
+                    {% if mes_historico %}⏳ MODO HISTÓRICO ATIVADO{% else %}Gestão de histórico{% endif %}
+                </span>
+                <small class="{% if mes_historico %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                    {% if mes_historico %}
+                        Você está visualizando a base congelada de {{ mes_historico }}.
+                    {% else %}
+                        Consulta de meses anteriores.
+                    {% endif %}
+                </small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                
+                {% if usuario_atual and usuario_atual.upper() in ['RYAN', 'MARCIO', 'PAULO', 'ALESSANDRA'] and not mes_historico %}
+                <button class="btn btn-dark fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#modalArquivarMes" onclick="carregarMesDetectado()">
+                    Arquivar mês atual
+                </button>
+                {% endif %}
+                
+                <!-- 🎯 O NOVO MENU DE VIAGEM NO TEMPO DIRETO NA TELA -->
+                <select class="form-select form-select-sm border-dark fw-bold shadow-sm" style="width: 220px; cursor: pointer;" onchange="ativarLoading(); window.location.href='/?mes_historico=' + this.value;">
+                    <option value="">🟢 Mês Atual Vigente</option>
+                    {% for mes in meses_arquivados %}
+                        <option value="{{ mes }}" {% if mes == mes_historico %}selected{% endif %}>📜 Arquivo: {{ mes }}</option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+        </div>
+    </div>
+
+    <div id="cardEmissoes" class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="filter-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <div class="detalhe-label">Emissões Previstas Hoje</div>
+                        <div class="detalhe-valor">{{ emissao_hoje_count }}</div>
+                    </div>
+                    {% if emissao_hoje_count > 0 %}
+                    <button class="btn btn-sm btn-warning fw-bold" type="button" data-bs-toggle="modal" data-bs-target="#modalEmissaoHojeUsuario">Ver meus casos</button>
+                    {% endif %}
+                </div>
+                <p class="mb-0 text-muted" style="font-size: 0.85rem;">Somente você vê aqui os boletos com potencial de emissão no dia.</p>
+            </div>
+        </div>
+    </div>
+    
+   <div class="filter-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark m-0">Filtros e pesquisa</h5>
+            <button id="btnToggleFiltros" type="button" class="btn btn-sm btn-light fw-bold border shadow-sm" onclick="toggleFiltros()">
+                Ocultar
+            </button>
+        </div>
+
+       <div id="areaFiltros">
+            <form method="GET" action="/" class="row g-3 align-items-end" id="formFiltros">
+                
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-secondary mb-1">Responsável pelo Imóvel:</label>
+                    <div class="dropdown">
+                        <button class="btn border bg-light text-dark shadow-sm dropdown-toggle w-100 text-start text-truncate fw-bold" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="btnResponsavel">
+                            Todos os responsáveis
+                        </button>
+                        <div class="dropdown-menu p-2 shadow-sm w-100" style="max-height: 250px; overflow-y: auto;">
+                            <div class="form-check mb-2 pb-2 border-bottom">
+                                <input class="form-check-input" type="checkbox" id="chk_resp_todos" onchange="marcarTodosFiltros(this, 'responsavel'); atualizarTextoFiltro('chk-resp', 'btnResponsavel', '🏠 Todos os Responsáveis')">
+                                <label class="form-check-label small fw-bold text-dark" style="cursor: pointer;" for="chk_resp_todos">✔️ Marcar Todos</label>
+                            </div>
+                            
+                            {% for resp in responsaveis %}
+                            <div class="form-check mb-1">
+                                <input class="form-check-input chk-resp" type="checkbox" name="responsavel" value="{{ resp['colaborador'] }}" id="chk_resp_{{ loop.index }}" onchange="verificarStatusTodos('responsavel', 'chk_resp_todos'); atualizarTextoFiltro('chk-resp', 'btnResponsavel', '🏠 Todos os Responsáveis')">
+                                <label class="form-check-label small fw-medium text-dark" style="cursor: pointer;" for="chk_resp_{{ loop.index }}">{{ resp['colaborador'] }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-secondary mb-1">Dia de Vencimento:</label>
+                    <div class="dropdown">
+                        <button class="btn border bg-light text-dark shadow-sm dropdown-toggle w-100 text-start text-truncate fw-bold" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="btnPeriodo">
+                            Todos os dias
+                        </button>
+                        <div class="dropdown-menu p-2 shadow-sm w-100" style="max-height: 250px; overflow-y: auto;">
+                            <div class="form-check mb-2 pb-2 border-bottom">
+                                <input class="form-check-input" type="checkbox" id="chk_per_todos" onchange="marcarTodosFiltros(this, 'periodo'); atualizarTextoFiltro('chk-per', 'btnPeriodo', '📅 Todos os Dias')">
+                                <label class="form-check-label small fw-bold text-dark" style="cursor: pointer;" for="chk_per_todos">✔️ Marcar Todos</label>
+                            </div>
+                            
+                            {% for dia in range(1, 32) %}
+                            {% set val = '%02d' % dia %}
+                            <div class="form-check mb-1">
+                                <input class="form-check-input chk-per" type="checkbox" name="periodo" value="{{ val }}" id="chk_per_{{ dia }}" onchange="verificarStatusTodos('periodo', 'chk_per_todos'); atualizarTextoFiltro('chk-per', 'btnPeriodo', '📅 Todos os Dias')">
+                                <label class="form-check-label small fw-medium text-dark" style="cursor: pointer;" for="chk_per_{{ dia }}">Dia {{ val }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+               <div class="col-md-3">
+    <label class="form-label small fw-bold text-secondary mb-1">Pesquisar (Imóvel, Sacado, Emp.):</label>
+    <input type="text" id="campoBuscaImovel" name="busca" class="form-control border-light bg-light fw-medium text-dark shadow-sm" placeholder="Digite o termo..." value="{{ request.args.get('busca', '') }}" onkeyup="aoDigitarBusca()">
+</div>
+                
+                <div class="col-md-3 d-flex gap-2">
+                    <input type="hidden" name="filtrar" value="1"> <button type="submit" class="btn btn-dark px-4 fw-bold shadow-sm w-100" style="background-color: #1e293b;" onclick="ativarLoading()">Filtrar Base</button>
+                    {% if filtro_resp or filtro_per or request.args.get('busca') %}
+                    <a href="/?limpar=1" class="btn btn-outline-danger fw-bold shadow-sm" onclick="ativarLoading()">Limpar</a>
+                    {% endif %}
+                </div>
+            </form>
+            {% if filtro_automatico %}
+            <div class="alert alert-info border-0 mt-3 mb-0" style="background-color: #e0f2fe; color: #0369a1; border-left: 4px solid #0ea5e9;">
+                <small class="fw-bold">Filtro automático aplicado:</small> Exibindo imóveis de <strong>{{ usuario_atual | title }}</strong> nos dias <strong>01 a 04</strong> para acelerar o carregamento. <a href="/" style="color: #0369a1; text-decoration: underline;" onclick="ativarLoading()">Clique aqui</a> para ver todos.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+<style>
+    #overlayProcessando { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem; }
+    #overlayProcessando.ativo { display: flex; }
+    #overlayProcessando .overlay-card { background: #ffffff; border-radius: 16px; padding: 2rem 2.25rem; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); }
+</style>
+<div id="overlayProcessando" role="alertdialog" aria-modal="true" aria-live="assertive" aria-labelledby="overlayProcessandoTitulo">
+    <div class="overlay-card">
+        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h5 id="overlayProcessandoTitulo" class="fw-bold mb-1">Processando...</h5>
+        <p id="overlayProcessandoDetalhe" class="text-muted mb-3"></p>
+        <p class="small text-secondary mb-0">Não feche nem atualize esta página. Tempo decorrido: <b id="overlayProcessandoTempo">0s</b></p>
+    </div>
+</div>
+
+    <!-- Disparo de e-mails de outros colaboradores (aparece ao filtrar por responsável) -->
+    <div id="painelDisparoColaboradores" class="row g-3 mb-3" style="display: none;"></div>
+
+    <div class="modal fade" id="modalDisparoColaborador" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header text-white" style="background-color: #0f172a;">
+                    <h6 class="modal-title fw-bold" id="tituloModalDisparoColaborador">Disparar e-mails</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light" id="corpoModalDisparoColaborador"></div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary fw-bold px-4" id="btnConfirmarDisparoColaborador" style="background-color: #0ea5e9; border: none;" onclick="confirmarDisparoColaborador()">Disparar agora</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // TELA DE PROCESSAMENTO (bloqueia cliques duplos)
+    // ==========================================
+    let processandoAgora = false;
+    let timerOverlayProcessando = null;
+
+    function avisarAntesDeSair(e) { e.preventDefault(); e.returnValue = ''; }
+
+    function mostrarOverlayProcessando(titulo, detalhe) {
+        processandoAgora = true;
+        document.getElementById('overlayProcessandoTitulo').innerText = titulo;
+        document.getElementById('overlayProcessandoDetalhe').innerText = detalhe || '';
+        const tempo = document.getElementById('overlayProcessandoTempo');
+        tempo.innerText = '0s';
+        const inicio = Date.now();
+        clearInterval(timerOverlayProcessando);
+        timerOverlayProcessando = setInterval(() => { tempo.innerText = Math.floor((Date.now() - inicio) / 1000) + 's'; }, 1000);
+        document.getElementById('overlayProcessando').classList.add('ativo');
+        window.addEventListener('beforeunload', avisarAntesDeSair);
+    }
+
+    function esconderOverlayProcessando() {
+        processandoAgora = false;
+        clearInterval(timerOverlayProcessando);
+        document.getElementById('overlayProcessando').classList.remove('ativo');
+        window.removeEventListener('beforeunload', avisarAntesDeSair);
+    }
+
+    // ==========================================
+    // DISPARO DE E-MAILS: texto do resultado (usado aqui e na autorização do RPA)
+    // ==========================================
+    function textoResultadoDisparo(d) {
+        const enc = d.qtd_encontrados || 0, env = d.qtd_enviados || 0;
+        const semEmail = d.qtd_sem_email || 0, falhas = d.qtd_falhas || 0, ja = d.qtd_ja_disparados || 0;
+
+        if (enc === 0) {
+            return ja > 0
+                ? `Nada a enviar: ${ja} caso(s) já tiveram e-mail disparado hoje.`
+                : 'Nenhum caso com emissão prevista para hoje.';
+        }
+        const linhas = [];
+        if (env === enc) linhas.push(`✔️ ${env} e-mail(s) enviado(s) às administradoras.`);
+        else if (env > 0) linhas.push(`⚠️ ${env} de ${enc} e-mails foram enviados.`);
+        else linhas.push('❌ Nenhum e-mail foi enviado.');
+        if (semEmail > 0) linhas.push(`• ${semEmail} sem e-mail cadastrado na administradora`);
+        if (falhas > 0) linhas.push(`• ${falhas} falharam no envio (Gmail)`);
+        if (ja > 0) linhas.push(`• ${ja} já tinham sido disparados hoje e foram ignorados`);
+        if (env !== enc) linhas.push('\nOs detalhes ficam no prontuário de cada imóvel.');
+        return linhas.join('\n');
+    }
+
+    // ==========================================
+    // DISPARO DE E-MAILS DE OUTROS COLABORADORES
+    // ==========================================
+    const FILTRO_RESP_APLICADO = {{ filtro_resp|tojson }};
+    const TOTAL_RESPONSAVEIS = {{ responsaveis|length }};
+    const EM_MODO_HISTORICO = {{ 'true' if mes_historico else 'false' }};
+    const OPERADOR_ATUAL = {{ (usuario_atual or '')|tojson }};
+    let resumoDisparoPorNome = {};
+    let alvoDisparoAtual = null;
+    let modalDisparoColab = null;
+
+    function semAcento(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+    function escaparHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (EM_MODO_HISTORICO) return;
+        const nomes = (FILTRO_RESP_APLICADO || []).filter(n => n && semAcento(n) !== 'nao atribuido');
+        // Só mostra quando a pessoa realmente filtrou (se estão todos marcados, não há "carteira" específica)
+        if (nomes.length === 0 || nomes.length >= TOTAL_RESPONSAVEIS) return;
+        carregarPainelDisparo(nomes);
+    });
+
+    function carregarPainelDisparo(nomes) {
+        const qs = nomes.map(n => 'responsavel=' + encodeURIComponent(n)).join('&');
+        fetch('/api/sistema/emissoes_hoje_colaboradores?' + qs)
+            .then(r => r.json())
+            .then(d => {
+                if (!d.sucesso) return;
+                resumoDisparoPorNome = {};
+                d.resumo.forEach(x => { resumoDisparoPorNome[x.responsavel] = x; });
+                desenharPainelDisparo(d.resumo);
+            })
+            .catch(err => console.log('Não foi possível carregar o resumo de disparos:', err));
+    }
+
+    function desenharPainelDisparo(resumo) {
+        const painel = document.getElementById('painelDisparoColaboradores');
+        painel.innerHTML = resumo.map(x => {
+            const nome = escaparHtml(x.responsavel);
+            const ehVoce = semAcento(x.responsavel) === semAcento(OPERADOR_ATUAL);
+            const notas = [];
+            if (x.ja_disparados > 0) notas.push(`${x.ja_disparados} já disparado(s) hoje`);
+            if (x.sem_email > 0) notas.push(`${x.sem_email} sem e-mail na administradora`);
+            const botao = x.enviaveis > 0
+                ? `<button type="button" class="btn btn-sm btn-primary fw-bold" style="background-color: #0ea5e9; border: none;" onclick="abrirDisparoColaborador(this.dataset.nome)" data-nome="${nome}">✉️ Disparar ${x.enviaveis} e-mail(s)</button>`
+                : `<button type="button" class="btn btn-sm btn-outline-secondary fw-bold" disabled>Nada a disparar</button>`;
+            return `
+            <div class="col-md-4">
+                <div class="filter-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <div>
+                            <div class="detalhe-label">Emissões previstas hoje: ${nome}${ehVoce ? ' (você)' : ''}</div>
+                            <div class="detalhe-valor">${x.total}</div>
+                        </div>
+                        ${botao}
+                    </div>
+                    <p class="mb-0 text-muted" style="font-size: 0.85rem;">${x.total === 0 ? 'Nenhum caso com emissão prevista para hoje.' : (notas.length ? notas.join(', ') + '.' : 'Nenhum e-mail disparado ainda hoje.')}</p>
+                </div>
+            </div>`;
+        }).join('');
+        painel.style.display = 'flex';
+    }
+
+    function abrirDisparoColaborador(nome) {
+        const x = resumoDisparoPorNome[nome];
+        if (!x) return;
+        alvoDisparoAtual = nome;
+        const ehVoce = semAcento(nome) === semAcento(OPERADOR_ATUAL);
+
+        document.getElementById('tituloModalDisparoColaborador').innerText = `Disparar e-mails de ${nome}`;
+        let html = `<p class="mb-2">Serão enviados <b>${x.enviaveis}</b> e-mail(s) às administradoras, um por imóvel, referentes às emissões previstas para hoje.</p>`;
+        html += ehVoce
+            ? `<p class="small text-secondary mb-2">Os imóveis passam para <b>SOLICITADO</b>.</p>`
+            : `<p class="small text-secondary mb-2">Os imóveis passam para <b>SOLICITADO</b> e o disparo fica registrado em seu nome (${escaparHtml(OPERADOR_ATUAL.charAt(0).toUpperCase() + OPERADOR_ATUAL.slice(1))}), na carteira de ${escaparHtml(nome)}.</p>`;
+        if (x.ja_disparados > 0) html += `<p class="small text-muted mb-1">• ${x.ja_disparados} caso(s) já tiveram e-mail disparado hoje e serão ignorados.</p>`;
+        if (x.sem_email > 0) html += `<p class="small text-muted mb-1">• ${x.sem_email} caso(s) não serão enviados: a administradora não tem e-mail cadastrado.</p>`;
+        document.getElementById('corpoModalDisparoColaborador').innerHTML = html;
+
+        document.getElementById('btnConfirmarDisparoColaborador').disabled = false;
+        modalDisparoColab = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDisparoColaborador'));
+        modalDisparoColab.show();
+    }
+
+    async function confirmarDisparoColaborador() {
+        if (processandoAgora || !alvoDisparoAtual) return;
+        const nome = alvoDisparoAtual;
+        const x = resumoDisparoPorNome[nome];
+        document.getElementById('btnConfirmarDisparoColaborador').disabled = true;
+        if (modalDisparoColab) modalDisparoColab.hide();
+
+        mostrarOverlayProcessando(`Disparando e-mails de ${nome}...`, `${x ? x.enviaveis : ''} e-mail(s) estão sendo enviados um a um às administradoras.`);
+        try {
+            const r = await fetch('/api/sistema/enviar_disparos_hoje', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ responsavel: nome })
+            });
+            if (!r.ok) throw new Error('Status ' + r.status);
+            const d = await r.json();
+            esconderOverlayProcessando();
+            if (d.sucesso) {
+                alert(textoResultadoDisparo(d));
+                window.location.reload();
+            } else {
+                alert('❌ ' + (d.msg || 'Falha ao executar os disparos.'));
+            }
+        } catch (e) {
+            console.error(e);
+            esconderOverlayProcessando();
+            alert('⚠️ Falha de conexão ou tempo de resposta excedido.\n\nParte dos e-mails pode ter sido enviada. Atualize a página para ver o que ainda está pendente antes de tentar de novo.');
+        }
+    }
+</script>
+
+    <div id="fundoMax" class="fundo-desfocado" onclick="toggleMaximizar()"></div>
+
+    <div class="modal fade" id="modalResumoDisparosHoje" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h6 class="modal-title fw-bold">Resumo diário de disparos</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">Os imóveis elegíveis para hoje foram encaminhados ao fluxo de solicitação automática.</p>
+                    <div id="conteudoResumoDisparosHoje" class="small text-muted">Carregando resumo...</div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if emissao_hoje_count > 0 %}
+<div class="modal fade" id="modalEmissaoHojeUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom-0">
+                <h6 class="modal-title fw-bold text-dark">📌 Minhas Emissões Agendadas para Hoje</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-4">Acompanhe abaixo os seus boletos com potencial de emissão, organizados por período:</p>
+
+                {% if casos_vencidos %}
+                <h6 class="fw-bold text-danger mt-4 mb-3">🚨 Vencidos ({{ casos_vencidos|length }})</h6>
+                <div class="list-group mb-4">
+                    {% for caso in casos_vencidos %}
+                        <a href="#" class="list-group-item list-group-item-action border-danger text-danger py-2">
+                            <span class="fw-medium">{{ caso.imovel }}</span>
+                            <small class="text-muted ms-2">Admin: {{ caso.administradora }}</small>
+                            <span class="badge bg-danger float-end">Vencido em {{ caso.vencimento_str }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if casos_vencem_hoje %}
+                <h6 class="fw-bold text-warning mt-4 mb-3">⚠️ Vencem Hoje ({{ casos_vencem_hoje|length }})</h6>
+                <div class="list-group mb-4">
+                    {% for caso in casos_vencem_hoje %}
+                        <a href="#" class="list-group-item list-group-item-action border-warning text-warning py-2">
+                            <span class="fw-medium">{{ caso.imovel }}</span>
+                            <small class="text-muted ms-2">Admin: {{ caso.administradora }}</small>
+                            <span class="badge bg-warning text-dark float-end">Vence Hoje</span>
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if casos_proximos_7 %}
+                <h6 class="fw-bold text-primary mt-4 mb-3">🗓️ Próximos 7 Dias ({{ casos_proximos_7|length }})</h6>
+                <div class="list-group mb-4">
+                    {% for caso in casos_proximos_7 %}
+                        <a href="#" class="list-group-item list-group-item-action border-primary text-primary py-2">
+                            <span class="fw-medium">{{ caso.imovel }}</span>
+                            <small class="text-muted ms-2">Admin: {{ caso.administradora }}</small>
+                            <span class="badge bg-primary float-end">Vence em {{ caso.vencimento_str }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if casos_proximos_15 %}
+                <h6 class="fw-bold text-info mt-4 mb-3">📆 Próximos 15 Dias ({{ casos_proximos_15|length }})</h6>
+                <div class="list-group mb-4">
+                    {% for caso in casos_proximos_15 %}
+                        <a href="#" class="list-group-item list-group-item-action border-info text-info py-2">
+                            <span class="fw-medium">{{ caso.imovel }}</span>
+                            <small class="text-muted ms-2">Admin: {{ caso.administradora }}</small>
+                            <span class="badge bg-info text-dark float-end">Vence em {{ caso.vencimento_str }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if not (casos_vencidos or casos_vencem_hoje or casos_proximos_7 or casos_proximos_15 or emissao_hoje_lista) %}
+                <p class="text-center text-muted my-5">🎉 Parabéns! Não há casos de emissão previstos ou vencidos para os próximos 15 dias para você.</p>
+                {% endif %}
+                
+                {% if emissao_hoje_lista %}
+                <h6 class="fw-bold text-dark mt-4 mb-3">📅 Detalhamento de Emissões para Hoje</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-sm align-middle" style="font-size: 0.75rem;">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Imóvel</th>
+                                <th>Administradora</th>
+                                <th class="text-center">Média Emissão</th>
+                                <th class="text-center">Vencimento</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in emissao_hoje_lista %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ item.imovel }}</td>
+                                <td class="text-secondary">{{ item.administradora }}</td>
+                                <td class="fw-bold text-warning text-center" style="color: #d97706 !important;">{{ item.media_emissao or 'Hoje' }}</td>
+                                <td class="text-muted text-center">{{ item.vencimento }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.status_interno or 'Sem Status' }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <div class="d-flex align-items-center gap-2" id="containerAcoesLote" style="display: none;">
+            <span class="small fw-bold text-muted">Ações em Lote:</span>
+            <select id="statusLote" class="form-select form-select-sm fw-bold border-secondary text-secondary shadow-sm" style="width: 200px;">
+                <option value="" disabled selected>Alterar status para...</option>
+                <option value="AUTOMAÇÃO">🤖 AUTOMAÇÃO</option>
+                <option value="NÃO EMITIDO">NÃO EMITIDO</option>
+                <option value="COLETADO">COLETADO</option>
+                <option value="SOLICITADO">SOLICITADO</option>
+                <option value="CHEQUE/DOC">CHEQUE/DOC</option>
+                <option value="PAGO">PAGO</option>
+                <option value="ERRO PAGAMENTO">ERRO PAGAMENTO</option>
+                <option value="EMAIL RECEBIDO">EMAIL RECEBIDO</option>
+            </select>
+            <button class="btn btn-sm btn-dark fw-bold px-3 shadow-sm" onclick="aplicarStatusLote()">Aplicar a Selecionados</button>
+        </div>
+        
+     <a href="/matriz_emissao" target="_blank" class="btn btn-sm btn-outline-danger fw-bold border-0 d-flex align-items-center gap-1" style="box-shadow: none; text-decoration: none;">
+            📅 Relatório Emissão ↗
+      </a>
+
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <div class="small fw-bold text-primary" id="contadorSelecionados">0 selecionados</div>
+            <button class="btn btn-outline-secondary btn-maximizar shadow-sm bg-white" onclick="toggleMaximizar()" title="Ver tabela em tela cheia">⛶ Expandir</button>
+        </div>
+    </div>
+
+    <div class="table-container" id="containerPrincipalTabela">
+        <button id="btnMinimizar" class="btn-fechar-maximizada" onclick="toggleMaximizar()" title="Fechar Tela Cheia">&times;</button>
+        
+        <div class="table-wrapper">
+            <table class="table table-hover m-0 align-middle" id="tabelaImoveisCob">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 30px;">
+                            <input type="checkbox" id="checkTodos" class="form-check-input" onclick="selecionarTodos(this)">
+                        </th>
+                       
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Emissão</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-1" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Vencimento</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-2" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Administradora</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-3" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+                       
+                       <th>Nº Imóvel</th>
+                       
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Endereço / Unidade</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-5" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-5" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th> 
+
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Empreendimento</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-6" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-6" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Sacado</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-7" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-7" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <!-- COLUNA NOVA: ACESSO (8) -->
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Acesso</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-8" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-8" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <!-- COLUNA: RESPONSÁVEL (Agora é 9) -->
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Responsável</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-9" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-9" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <!-- COLUNA NOVA: OBS FICHA (10) -->
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Obs Ficha</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-10" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-10" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <!-- COLUNA: OBSERVAÇÕES INTERNAS (Agora é 11) -->
+                       <th><div class="d-flex align-items-center justify-content-center"><span>Observações</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-11" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-11" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+
+                       <!-- COLUNA: STATUS (Agora é 12) -->
+                       <th class="text-center"><div class="d-flex align-items-center justify-content-center"><span>Status Interno</span><div class="dropdown d-inline-block"><button class="icone-filtro-btn" id="btn-filtro-12" type="button" data-bs-toggle="dropdown" aria-expanded="false">🔍</button><div class="dropdown-menu dropdown-menu-filtro" onclick="event.stopPropagation()"><input type="text" class="form-control form-control-sm mb-2 border-primary" placeholder="Buscar filtro..." onkeyup="pesquisarDentroDoFiltro(this)"><div id="opcoes-col-12" style="max-height: 200px; overflow-y: auto;"></div></div></div></div></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyImoveis">
+                    <!-- O Flask injeta as primeiras 100 linhas aqui -->
+                    {% include 'linhas_tabela.html' %}
+                    
+                    <tr id="linhaNenhumRegistro" style="{% if imoveis|length > 0 %}display: none;{% endif %}">
+                        <td colspan="12" class="text-center py-5 text-muted">
+                            <h5 class="fw-bold mb-1">Nenhum registro encontrado</h5>
+                            <small>Nenhum imóvel atende aos filtros atuais.</small>
+                        </td>
+                    </tr>
+                    
+                    <!-- 🎯 Sentinela de Rolagem Infinita (o JS lê os data-* para saber quantas páginas existem) -->
+                    <tr id="linhaLoadingScroll" data-total-paginas="{{ total_paginas }}" data-pagina-inicial="{{ pagina_atual }}" style="{% if total_paginas <= 1 %}display: none;{% endif %}">
+                        <td colspan="12" class="text-center py-4 text-muted border-0">
+                            <div id="scrollCarregando">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                <span class="fw-bold small">Carregando mais imóveis...</span>
+                            </div>
+                            <div id="scrollErro" class="d-none">
+                                <span class="fw-bold small text-danger" id="scrollErroMsg">Não foi possível carregar mais imóveis.</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary ms-2 fw-bold" onclick="carregarMaisLinhas()">Tentar novamente</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+{% if precisa_confirmar_rpa %}
+<div class="modal fade" id="modalConfirmarRPA" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white" style="background-color: #0f172a;">
+                <h6 class="modal-title fw-bold">🤖 Autorização de Automação</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+           <div class="modal-body p-4 bg-light text-center">
+                <!-- Nome dinâmico com a primeira letra maiúscula e variável correta de contagem -->
+                <p class="mb-3">Bom dia, <b style="text-transform: capitalize;">{{ usuario_atual }}</b>! O sistema identificou <strong>{{ emissao_hoje_count }}</strong> casos previstos para emissão hoje.</p>
+                <p class="text-secondary small fw-bold">Deseja autorizar o RPA a fazer o envio de e-mails individuais para as administradoras agora?</p>
+            </div>
+            <div class="modal-footer bg-light justify-content-center border-0">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Lembrar depois</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="autorizarRPA()" style="background-color: #0ea5e9; border: none;">Autorizar Disparos 🚀</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Verifica se o usuário já fez um disparo hoje pelo navegador
+        const dataHoje = new Date().toISOString().slice(0, 10);
+        const jaDisparouHoje = localStorage.getItem('disparo_realizado_' + dataHoje);
+        
+        // Só abre o modal se ele ainda não tiver disparado hoje
+        if (!jaDisparouHoje) {
+            new bootstrap.Modal(document.getElementById('modalConfirmarRPA')).show();
+        }
+    });
+
+    function autorizarRPA() {
+    const btn = document.querySelector('#modalConfirmarRPA .btn-primary');
+    if (processandoAgora) return;
+    btn.innerText = "Processando Disparos...";
+    btn.disabled = true;
+    mostrarOverlayProcessando('Disparando seus e-mails...', 'Os e-mails estão sendo enviados um a um às administradoras.');
+    
+    // Grava no navegador que ele já disparou hoje para não exibir o pop-up de novo
+    const dataHoje = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('disparo_realizado_' + dataHoje, 'true');
+    
+    // Chama a rota que você já tinha criada para forçar o envio
+    fetch('/api/sistema/enviar_disparos_hoje', { method: 'POST' })
+    .then(r => {
+        if (!r.ok) throw new Error("Erro de comunicação com o servidor (Status: " + r.status + ")");
+        return r.json();
+    })
+    .then(data => {
+        esconderOverlayProcessando();
+        if(data.sucesso) {
+            alert(textoResultadoDisparo(data));
+            window.location.reload();
+        } else {
+            alert("Falha ao executar os disparos: " + (data.msg || "Erro desconhecido"));
+            btn.innerText = "Tentar Novamente";
+            btn.disabled = false;
+        }
+    })
+    .catch(e => {
+        console.error(e);
+        esconderOverlayProcessando();
+        alert("⚠️ Erro Crítico: Falha de conexão ou tempo de resposta excedido ao processar os e-mails.");
+        btn.innerText = "Tentar Novamente";
+        btn.disabled = false;
+    });
+}
+
+
+</script>
+{% endif %}
+       
+    <div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 border rounded shadow-sm" style="background-color: #f8fafc; font-size: 0.80rem;">
+        <div class="text-muted fw-semibold">
+            Mostrando <span id="qtdVisivelPagina" class="text-primary fw-bold mx-1" style="font-size: 0.85rem;">0</span> de <span class="text-dark fw-bold mx-1" style="font-size: 0.85rem;">{{ total_registros }}</span> imóveis localizados
+        </div>
+            </div> 
+
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #0f172a; padding: 20px;">
+                <h6 class="modal-title fw-bold" id="tituloModalDetalhes">Detalhamento Operacional do Imóvel</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-white p-4">
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5"><div class="detalhe-box"><div class="detalhe-label">Administradora</div><div class="detalhe-valor" id="detAdm"></div></div></div>
+                    <div class="col-md-3"><div class="detalhe-box"><div class="detalhe-label">Vencimento</div><div class="detalhe-valor text-danger" id="detVenc"></div></div></div>
+                    <div class="col-md-4"><div class="detalhe-box"><div class="detalhe-label">Imóvel / Lote</div><div class="detalhe-valor text-primary" id="detCartLote"></div></div></div>
+                    
+                    <div class="col-md-6"><div class="detalhe-box"><div class="detalhe-label">Empreendimento</div><div class="detalhe-valor" id="detEmp"></div></div></div>
+                    <div class="col-md-6"><div class="detalhe-box"><div class="detalhe-label">Endereço Completo</div><div class="detalhe-valor" id="detEnd" style="font-size: 0.85rem;"></div></div></div>
+                    
+                    <div class="col-md-5"><div class="detalhe-box"><div class="detalhe-label">Sacado</div><div class="detalhe-valor" id="detSac" style="font-size: 0.85rem;"></div></div></div>
+                    <div class="col-md-4"><div class="detalhe-box"><div class="detalhe-label">Documento (CPF/CNPJ)</div><div class="detalhe-valor font-monospace" id="detCpf" style="font-size: 0.85rem;"></div></div></div>
+                    <div class="col-md-3"><div class="detalhe-box"><div class="detalhe-label">Dt.ComDesc</div><div class="detalhe-valor text-success" id="detDtComDesc" style="font-size: 0.85rem;"></div></div></div>
+                    
+                    <div class="col-md-12 mt-2">
+                        <div class="card bg-dark text-white border-0 shadow" style="border-radius: 12px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 8px 20px rgba(0,167,225,0.15) !important;">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+                                    <h6 class="m-0 fw-bold text-info" style="font-size: 0.8rem; letter-spacing: 0.5px;">🔐 Credenciais Secretas do Portal ADM</h6>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-info m-0" style="font-size: 0.7rem;">URL do Portal (Acesso Rápido):</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-black text-info border-secondary" style="background-color: rgba(0,0,0,0.4) !important;">🔗</span>
+                                            <input type="url" id="cred_link" class="form-control bg-black text-white border-secondary shadow-none font-monospace" placeholder="" style="background-color: rgba(0,0,0,0.4) !important;">
+                                            <button class="btn btn-info fw-bold text-white px-3" type="button" onclick="abrirUrlPortalIndex()" style="border-top-right-radius: 4px; border-bottom-right-radius: 4px;">
+                                                Acessar Site ↗️
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-info m-0" style="font-size: 0.7rem;">Portal:</label>
+                                        <select id="cred_portal" class="form-select form-select-sm bg-black text-white border-secondary shadow-none" style="background-color: rgba(0,0,0,0.4) !important;" onchange="atualizarUrlPorPortalIndex()">
+    <option value="WEBWARE">Webware</option>
+    <option value="WINKER">Winker</option>
+    <option value="DIVERSOS">Diversos</option>
+</select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-info m-0" style="font-size: 0.7rem;">Usuário / Login:</label>
+                                        <input type="text" id="cred_login" class="form-control form-control-sm bg-black text-white border-secondary shadow-none font-monospace" placeholder="Não configurado" style="background-color: rgba(0,0,0,0.4) !important;">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold text-info m-0" style="font-size: 0.7rem;">Senha de Acesso:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="password" id="cred_senha" class="form-control bg-black text-white border-secondary shadow-none font-monospace" placeholder="Não configurada" style="background-color: rgba(0,0,0,0.4) !important;">
+                                            <button class="btn btn-outline-secondary border-secondary text-white" type="button" onclick="toggleSenhaVisualizacao(this)" style="background-color: rgba(0,0,0,0.4) !important;">👁️</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-info text-white fw-bold py-1 px-3 shadow-sm w-100 h-100" onclick="salvarCredenciaisSecretas()" style="font-size: 0.75rem; border-radius: 6px; min-height: 31px;"> Atualizar Acesso</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary mb-1">Observação do Cadastro Original:</label>
+                    <textarea id="detObservacaoPlanilha" class="form-control form-control-sm bg-light" rows="2" readonly style="resize: none; font-size: 0.85rem; color: #334155; font-weight: 500;"></textarea>
+                </div>
+                
+                <div class="p-4 bg-light rounded" style="border: 1px solid #e2e8f0;">
+                    <label class="form-label fw-bold text-dark mb-3"><span style="color: #00a7e1;">|</span> Anotações e Histórico de Acompanhamento</label>
+                    <div class="d-flex gap-2 mb-4">
+                        <input type="text" id="campoNovaObs" class="form-control" placeholder="Inserir nova anotação interna sobre este caso..." style="border-radius: 6px;">
+                        <button class="btn btn-dark fw-bold text-nowrap px-4" style="background-color: #1e293b; border-radius: 6px;" onclick="salvarNovaObservacao()">Gravar Nota</button>
+                    </div>
+                    <div id="listaHistorico" class="overflow-auto pe-2" style="max-height: 200px; font-size: 0.85rem; line-height: 1.5;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEmail" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #0f172a; padding: 20px;">
+                <h6 class="modal-title fw-bold">Processador de Notificações Individuais em Massa</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="btnFecharModalEmail"></button>
+            </div>
+            <div class="modal-body bg-light p-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-bold text-dark">Fila de Transmissão:</span>
+                    <span class="badge bg-primary rounded-pill"><span id="txtQtdFalta">0</span> restantes</span>
+                </div>
+                <div class="progress mb-3" style="height: 10px; border-radius: 5px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" id="barraProgressoEmail" role="progressbar" style="width: 0%;"></div>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <div class="bg-white border rounded p-2 overflow-auto shadow-sm" style="height: 250px; font-size: 0.85rem;" id="listaFilaEnvio"></div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="bg-dark text-light border rounded p-3 overflow-auto shadow-sm font-monospace" style="height: 250px; font-size: 0.8rem;" id="statusConsoleEnvio">
+                            Aguardando inicialização do motor...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #f8fafc;">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal" id="btnCancelarEnvio">Cancelar</button>
+                <button type="button" class="btn btn-lello fw-bold px-4" id="btnIniciarDisparos" onclick="processarFilaEmails()">🚀 Iniciar Disparos Agora</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVisualizadorPDF" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
+            <div class="modal-header text-white" style="background-color: #0f172a; padding: 15px 20px;">
+                <h6 class="modal-title fw-bold" id="tituloModalPDF">Boleto Digitalizado - Imóvel </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="background-color: #525659; position: relative; height: 100%;">
+                <iframe id="iframeVisualizadorPDF" src="" width="100%" height="100%" style="border: none; z-index: 1056;"></iframe>
+                <div id="loaderPDF" class="position-absolute top-50 start-50 translate-middle text-white text-center" style="display: none; z-index: 1057;">
+                    <div class="spinner-border text-info mb-2" role="status"></div>
+                    <p class="m-0 fw-bold">Buscando arquivo na rede Lello...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEmissaoHojeIndex" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom-0">
+                <h6 class="modal-title fw-bold text-dark">📌 Possibilidade de Emissão para Hoje</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-3">Hoje você tem <strong>{{ emissao_hoje_count }}</strong> boletos com possibilidade de emissão. Analise os casos abaixo e registre a ação em produtividade quando concluir.</p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Imóvel</th>
+                                <th>Administradora</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in emissao_hoje_lista %}
+                            <tr>
+                                <td>{{ item.imovel }}</td>
+                                <td>{{ item.administradora }}</td>
+                                <td>{{ item.vencimento }}</td>
+                                <td>{{ item.status_interno or 'Sem Status' }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not emissao_hoje_lista %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Nenhum registro com emissão prevista para hoje.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button class="btn btn-primary fw-bold" onclick="registrarEmissaoHojeIndex({{ emissao_hoje_count }})">Registrar em Produtividade</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// =========================================================
+// INTELIGÊNCIA UX: MAXIMIZAR TABELA OPERACIONAL
+// =========================================================
+function toggleMaximizar() {
+    const tabelaContainer = document.getElementById('containerPrincipalTabela');
+    const fundo = document.getElementById('fundoMax');
+    const btnMinimizar = document.getElementById('btnMinimizar');
+    
+    tabelaContainer.classList.toggle('maximizada');
+    document.body.classList.toggle('travado');
+    
+    if (tabelaContainer.classList.contains('maximizada')) {
+        fundo.style.display = 'block';
+        btnMinimizar.style.display = 'flex';
+    } else {
+        fundo.style.display = 'none';
+        btnMinimizar.style.display = 'none';
+    }
+}
+
+// =========================================================
+// SALVAR MÉDIA DE EMISSÃO VIA AJAX
+// =========================================================
+function alterarMediaEmissao(idImovel, elementoSelect) {
+    const novaMedia = elementoSelect.value;
+    fetch('/atualizar_media_emissao', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idImovel, media: novaMedia })
+    });
+}
+
+// =========================================================
+// INTELIGÊNCIA EXCEL: EXPORTAÇÃO PARA XLSX VERDADEIRO
+// =========================================================
+function exportarParaExcel() {
+    const linhas = document.querySelectorAll('#tabelaImoveisCob tbody tr');
+    let dadosExcel = [];
+    
+    dadosExcel.push(["Emissão", "Vencimento", "Dt.ComDesc", "Administradora", "Nº Imóvel", "Empreendimento", "Endereço", "Sacado", "CPF/CNPJ", "Acesso", "Responsável", "Observação Planilha", "Status Interno"]);
+    
+    let qtdExportada = 0;
+
+    linhas.forEach(linha => {
+        if (linha.style.display !== 'none' && linha.id !== 'linhaNenhumRegistro') {
+            const cb = linha.querySelector('.check-imovel');
+            const link = linha.querySelector('.imovel-link');
+            const select = linha.querySelector('select.select-status');
+            const emissaoSelect = linha.querySelector('td:nth-child(2) select');
+            
+            if (cb && link && select) {
+                const emissao = emissaoSelect && emissaoSelect.value ? emissaoSelect.value : '';
+                const venc = cb.getAttribute('data-venc') || '';
+                const dt = link.getAttribute('data-dtcomdesc') || '';
+                const adm = cb.getAttribute('data-adm') || '';
+                const imov = cb.getAttribute('data-imovelnum') || '';
+                const emp = cb.getAttribute('data-emp') || '';
+                const end = cb.getAttribute('data-endereco') || '';
+                const sac = cb.getAttribute('data-sacado') || '';
+                const cpf = cb.getAttribute('data-cpf') || '';
+                const acesso = link.getAttribute('data-acesso') || '';
+                const resp = cb.getAttribute('data-resp') || '';
+                const obs = link.getAttribute('data-obs') || '';
+                
+                let status = select.options[select.selectedIndex].text;
+                if (status === "Status..." || status === "Selecione...") status = "EM BRANCO";
+                
+                dadosExcel.push([emissao, venc, dt, adm, imov, emp, end, sac, cpf, acesso, resp, obs, status]);
+                qtdExportada++;
+            }
+        }
+    });
+    
+    if(qtdExportada === 0) {
+        alert("⚠️ Não há dados visíveis para exportar com os filtros atuais.");
+        return;
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Base Operacional");
+    
+    const dataHoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+    XLSX.writeFile(workbook, `Base_Operacional_Lello_${dataHoje}.xlsx`);
+}
+
+function registrarEmissaoHojeIndex(count) {
+    fetch('/api/sistema/registrar_emissao_hoje', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert(`Produtividade registrada: ${data.count} boletos de emissão hoje.`);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEmissaoHojeIndex'));
+            if (modal) modal.hide();
+        } else {
+            alert('Falha ao registrar produtividade para emissão de hoje.');
+        }
+    })
+    .catch(() => alert('Falha ao registrar produtividade para emissão de hoje.'));
+}
+
+function abrirResumoDisparosHoje() {
+    const storageKey = `resumoDisparosHoje_${new Date().toISOString().slice(0, 10)}`;
+    if (sessionStorage.getItem(storageKey) === '1') {
+        return;
+    }
+
+    fetch('/api/sistema/resumo_disparos_hoje')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.sucesso || !data.total) {
+                return;
+            }
+
+            const container = document.getElementById('conteudoResumoDisparosHoje');
+            if (!container) {
+                return;
+            }
+
+            if (data.por_responsavel && data.por_responsavel.length) {
+                const lista = data.por_responsavel.map(item => `
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="fw-semibold text-dark">${item.responsavel}</span>
+                        <span class="badge bg-dark">${item.qtd_imoveis} imóveis</span>
+                    </div>
+                `).join('');
+
+                container.innerHTML = `
+                    <div class="alert alert-success py-2 px-3 mb-3">
+                        <strong>${data.total}</strong> imóveis foram processados hoje para solicitação automática.
+                    </div>
+                    <div class="list-group list-group-flush">${lista}</div>
+                `;
+            } else {
+                container.innerHTML = '<div class="text-muted">Nenhum disparo foi registrado hoje.</div>';
+            }
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalResumoDisparosHoje'));
+            modal.show();
+            sessionStorage.setItem(storageKey, '1');
+        })
+        .catch(() => {});
+}
+
+// =========================================================
+// INTELIGÊNCIA EXCEL: FILTROS SUSPENSOS
+// =========================================================
+let filtrosAtivos = {};
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.dropdown-menu-filtro').forEach(menu => {
+        menu.dataset.bsAutoClose = 'outside';
+    });
+    preencherDropdownsCustomizados();
+    
+    const modalEmail = document.getElementById('modalEmail');
+    if (modalEmail) document.body.appendChild(modalEmail);
+    
+    // 🎯 A CORREÇÃO DA TELA CINZA: Arranca os modais da tabela e joga pro corpo da página!
+    const modalPDF = document.getElementById('modalVisualizadorPDF');
+    if (modalPDF) document.body.appendChild(modalPDF);
+    
+    const modalAdm = document.getElementById('modalPagoAdm');
+    if (modalAdm) document.body.appendChild(modalAdm);
+    
+    const modal275 = document.getElementById('modalPago275');
+    if (modal275) document.body.appendChild(modal275);
+
+    const modalEmissao = document.getElementById('modalEmissaoFaltante');
+    if (modalEmissao) document.body.appendChild(modalEmissao);
+
+    // Movendo os modais de histórico para evitar a tela cinza
+    const modalArquivar = document.getElementById('modalArquivarMes');
+    if (modalArquivar) document.body.appendChild(modalArquivar);
+    
+    const modalConsultar = document.getElementById('modalEscolherMesConsulta');
+    if (modalConsultar) document.body.appendChild(modalConsultar);
+    
+    const modalHistorico = document.getElementById('modalVerHistorico');
+    if (modalHistorico) document.body.appendChild(modalHistorico);
+    
+    const emissaoHojeElement = document.getElementById('dadosEmissaoHoje');
+    const emissaoHojeCount = parseInt(emissaoHojeElement?.dataset.count || 0);
+    if (emissaoHojeCount > 0) {
+        const modal = new bootstrap.Modal(document.getElementById('modalEmissaoHojeIndex'));
+        modal.show();
+    }
+
+    abrirResumoDisparosHoje();
+    
+const modalEmailElement = document.getElementById('modalEmail');
+    if (modalEmailElement) {
+        modalEmailElement.addEventListener('hidden.bs.modal', function () {
+            document.querySelectorAll('.check-imovel').forEach(cb => cb.checked = false);
+            const checkTodos = document.getElementById('checkTodos');
+            if (checkTodos) checkTodos.checked = false;
+            const contador = document.getElementById('contadorSelecionados');
+            if (contador) contador.innerText = "0 imóvel(is) selecionado(s)";
+            const menuLote = document.getElementById('containerAcoesLote');
+            if (menuLote) menuLote.style.display = 'none';
+        });
+    }
+
+    // 🎯 A MÁGICA AQUI: Inicializa a contagem da tela na hora que abre o painel
+    filtrarTabelaCompleta();
+});
+
+
+function preencherDropdownsCustomizados() {
+    const colunasComFiltro = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12]; 
+    const tabela = document.getElementById('tabelaImoveisCob');
+    const linhas = tabela.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    const headers = tabela.getElementsByTagName('thead')[0].getElementsByTagName('th');
+
+    colunasComFiltro.forEach(colIndex => {
+        const valoresUnicos = new Set();
+        
+        // 🎯 Identifica se é a coluna de Status pelo texto do cabeçalho
+        const isStatusCol = headers[colIndex] && headers[colIndex].textContent.toLowerCase().includes('status');
+
+        // Se for a coluna de status, já injetamos todos os status oficiais do sistema!
+        if (isStatusCol) {
+            const todosStatus = [
+                "(Em Branco)", // 🎯 Modificado de "Status..." para unificar o padrão
+                "🤖 AUTOMAÇÃO", 
+                "NÃO EMITIDO", 
+                "COLETADO", 
+                "SOLICITADO", 
+                "CHEQUE/DOC", 
+                "PAGO", 
+                "PAGO NA 275", 
+                "PAGO NA ADM", 
+                "ERRO PGTO", 
+                "EMAIL REC"
+            ];
+            todosStatus.forEach(st => valoresUnicos.add(st));
+        }
+
+        // Loop para ler as linhas (puxa dinâmico para as outras colunas)
+        for (let i = 0; i < linhas.length; i++) {
+            if (linhas[i].id === "linhaNenhumRegistro" || linhas[i].id === "linhaLoadingScroll") continue;
+            const celula = linhas[i].getElementsByTagName('td')[colIndex];
+            
+            if (celula) {
+                let texto = "";
+                const selectElement = celula.querySelector('select');
+                
+                if (selectElement) {
+                    texto = selectElement.options[selectElement.selectedIndex].text.trim();
+                } else {
+                    texto = (celula.textContent || celula.innerText).trim();
+                }
+                
+                if(texto === "🔗 Link") texto = "Possui Link"; 
+
+                // Só adiciona dinamicamente se NÃO for a coluna de Status
+                if (!isStatusCol) {
+                    // 🎯 MÁGICA: Mapeia células vazias ou com traço para a nova opção
+                    if (texto === "" || texto === "-" || texto === "Status...") {
+                        valoresUnicos.add("(Em Branco)");
+                    } else {
+                        valoresUnicos.add(texto);
+                    }
+                }
+            }
+        }
+
+        const container = document.getElementById('opcoes-col-' + colIndex);
+        if (container) {
+            // Novos botões com textos intuitivos
+            container.innerHTML = `
+                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                    <span class="badge bg-primary shadow-sm" style="cursor:pointer;" onclick="aplicarFiltroColuna(${colIndex}, '')">✔️ Selecionar Todos</span>
+                    <span class="badge bg-danger shadow-sm" style="cursor:pointer;" onclick="desmarcarTodosFiltroColuna(${colIndex})">❌ Desmarcar Todos</span>
+                </div>
+            `;
+            
+            let valoresOrdenados = Array.from(valoresUnicos);
+            
+            // Ordena alfabeticamente apenas se não for a coluna de Status (para manter nossa ordem lógica)
+            if (!isStatusCol) {
+                valoresOrdenados = valoresOrdenados.sort();
+            }
+
+            valoresOrdenados.forEach(valor => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item-filtro d-flex align-items-center gap-2';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.value = valor;
+                
+                // 💡 A MÁGICA: Se a coluna não tem filtro ativo, a caixinha VEM MARCADA POR PADRÃO
+                const valorIgual = valor.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                const isFiltrado = filtrosAtivos[colIndex] !== undefined;
+                checkbox.checked = !isFiltrado || (filtrosAtivos[colIndex] && filtrosAtivos[colIndex].includes(valorIgual));
+                
+                checkbox.onchange = (event) => {
+                    event.stopPropagation();
+                    aplicarFiltroColuna(colIndex, valor, event.target.checked);
+                };
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label mb-0';
+                
+                // 🎯 Se for o valor vazio, mostramos um texto bonito pro operador
+                if (valor === "Status..." || valor === "(Em Branco)") {
+                    label.innerHTML = " <span class='text-secondary fw-bold'>Em Branco (Vazios)</span>";
+                } else {
+                    label.textContent = valor;
+                }
+                label.style.cursor = 'pointer';
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                item.onclick = (event) => {
+                    if (event.target.tagName !== 'INPUT') {
+                        checkbox.checked = !checkbox.checked;
+                        aplicarFiltroColuna(colIndex, valor, checkbox.checked);
+                    }
+                };
+
+                container.appendChild(item);
+            });
+        }
+    });
+}
+
+
+// =========================================================
+// INTELIGÊNCIA UX: FILTROS MULTI-SELECT (COMPLETO)
+// =========================================================
+function marcarTodosFiltros(masterCheckbox, nomeGrupo) {
+    const caixinhas = document.querySelectorAll(`input[name="${nomeGrupo}"]`);
+    caixinhas.forEach(cb => {
+        cb.checked = masterCheckbox.checked;
+    });
+}
+
+function verificarStatusTodos(nomeGrupo, idMaster) {
+    const caixinhas = document.querySelectorAll(`input[name="${nomeGrupo}"]`);
+    const todasMarcadas = Array.from(caixinhas).every(cb => cb.checked);
+    const master = document.getElementById(idMaster);
+    if (master) master.checked = todasMarcadas;
+}
+
+function atualizarTextoFiltro(classeCheckbox, idBotao, textoTodos) {
+    const checkboxesMarcadas = document.querySelectorAll('.' + classeCheckbox + ':checked');
+    const totalCheckboxes = document.querySelectorAll('.' + classeCheckbox);
+    const botao = document.getElementById(idBotao);
+    if (!botao) return;
+    
+    // Se o usuário não marcar nada, ou se marcar todas as opções disponíveis, significa "Todos"
+    if (checkboxesMarcadas.length === 0 || checkboxesMarcadas.length === totalCheckboxes.length) {
+        botao.innerHTML = textoTodos;
+        botao.classList.remove('text-primary');
+        botao.classList.add('text-dark', 'fw-bold');
+    } else if (checkboxesMarcadas.length === 1) {
+        // Se escolheu 1, mostra exatamente o nome da pessoa/período
+        botao.innerHTML = '✔️ ' + checkboxesMarcadas[0].nextElementSibling.innerText.trim();
+        botao.classList.add('fw-bold', 'text-primary');
+        botao.classList.remove('text-dark');
+    } else {
+        // Se escolheu 2 ou mais, mostra a contagem
+        botao.innerHTML = '✔️ ' + checkboxesMarcadas.length + ' Selecionados';
+        botao.classList.add('fw-bold', 'text-primary');
+        botao.classList.remove('text-dark');
+    }
+}
+
+// 🎯 Inicialização e sincronização automática com o servidor (Python/Jinja)
+document.addEventListener("DOMContentLoaded", function() {
+    // Captura os dados que o servidor filtrou e enviou na URL
+    const pythonFiltroResp = [{% for r in filtro_resp %}"{{ r }}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const pythonFiltroPer = [{% for p in filtro_per %}"{{ p }}"{% if not loop.last %},{% endif %}{% endfor %}];
+
+    // 1. Varre e marca automaticamente as caixinhas dos responsáveis filtrados
+    const chkResps = document.querySelectorAll('.chk-resp');
+    if (pythonFiltroResp && pythonFiltroResp.length > 0) {
+        chkResps.forEach(cb => {
+            if (pythonFiltroResp.some(r => r.toLowerCase() === cb.value.toLowerCase())) {
+                cb.checked = true;
+            }
+        });
+    }
+
+    // 2. Varre e marca automaticamente as caixinhas os períodos filtrados
+    const chkPers = document.querySelectorAll('.chk-per');
+    if (pythonFiltroPer && pythonFiltroPer.length > 0) {
+        chkPers.forEach(cb => {
+            if (pythonFiltroPer.includes(cb.value)) {
+                cb.checked = true;
+            }
+        });
+    }
+
+    // 3. Atualiza o status do checkbox de "Marcar Todos"
+    verificarStatusTodos('responsavel', 'chk_resp_todos');
+    verificarStatusTodos('periodo', 'chk_per_todos');
+    
+    // 4. Altera o texto do botão principal para mostrar os selecionados reais
+    atualizarTextoFiltro('chk-resp', 'btnResponsavel', '🏠 Todos os Responsáveis');
+    atualizarTextoFiltro('chk-per', 'btnPeriodo', '📅 Todos os Dias');
+});
+
+function pesquisarDentroDoFiltro(input) {
+    // Normaliza o termo digitado: remove acentos e converte para minúsculo
+    const termo = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const container = input.nextElementSibling;
+    const itens = container.querySelectorAll('.dropdown-item-filtro');
+    
+    itens.forEach(item => {
+        if(item.textContent.includes("Limpar Filtro")) return; 
+        
+        // Normaliza o texto da opção para comparar justamente
+        const textoItem = item.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        
+        if(textoItem.includes(termo)) {
+            // Se encontrou, tira a trava e deixa o item aparecer normalmente (restaura o d-flex)
+            item.style.setProperty("display", "", ""); 
+        } else {
+            // Se NÃO encontrou, empurra um "display: none !important" para vencer o Bootstrap
+            item.style.setProperty("display", "none", "important"); 
+        }
+    });
+}
+
+function desmarcarTodosFiltroColuna(colIndex) {
+    filtrosAtivos[colIndex] = []; // Lista vazia significa ocultar tudo
+    const btn = document.getElementById('btn-filtro-' + colIndex);
+    if (btn) {
+        btn.innerHTML = '🔍 (0)';
+        btn.classList.add('ativo');
+    }
+    atualizarCheckboxes(colIndex);
+    filtrarTabelaCompleta();
+}
+
+
+function aplicarFiltroColuna(colIndex, valor, selecionado) {
+    const btn = document.getElementById('btn-filtro-' + colIndex);
+    
+    // Se o valor for vazio (botão Selecionar Todos), remove o filtro daquela coluna
+    if (valor === "") {
+        delete filtrosAtivos[colIndex];
+        if (btn) {
+            btn.innerHTML = "🔍";
+            btn.classList.remove('ativo');
+        }
+        atualizarCheckboxes(colIndex);
+        filtrarTabelaCompleta();
+        return;
+    }
+
+    const valorIgual = valor.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    
+    // 💡 INTELIGÊNCIA: Se a pessoa clicar pra desmarcar a 1ª caixinha, o sistema 
+    // primeiro salva TODAS na memória para depois remover só a que ela clicou
+    if (filtrosAtivos[colIndex] === undefined) {
+        const container = document.getElementById('opcoes-col-' + colIndex);
+        const todosInputs = container.querySelectorAll('input[type="checkbox"]');
+        filtrosAtivos[colIndex] = Array.from(todosInputs).map(cb => cb.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim());
+    }
+
+    const valoresAtuais = filtrosAtivos[colIndex];
+    const index = valoresAtuais.indexOf(valorIgual);
+    
+    if (selecionado && index === -1) {
+        valoresAtuais.push(valorIgual);
+    } else if (!selecionado && index !== -1) {
+        valoresAtuais.splice(index, 1);
+    }
+
+    // Se o usuário acabar marcando todas as caixinhas na mão de novo, o sistema limpa o filtro
+    const container = document.getElementById('opcoes-col-' + colIndex);
+    const totalOpcoes = container.querySelectorAll('input[type="checkbox"]').length;
+    
+    if (valoresAtuais.length === totalOpcoes) {
+        delete filtrosAtivos[colIndex];
+    }
+
+    // Atualiza o botão da Lupa visualmente
+    if (filtrosAtivos[colIndex] && filtrosAtivos[colIndex].length > 0) {
+        if (btn) {
+            btn.innerHTML = '🔍 (' + filtrosAtivos[colIndex].length + ')';
+            btn.classList.add('ativo');
+        }
+    } else if (!filtrosAtivos[colIndex]) {
+        if (btn) {
+            btn.innerHTML = "🔍";
+            btn.classList.remove('ativo');
+        }
+    } else if (filtrosAtivos[colIndex].length === 0) {
+        if (btn) {
+            btn.innerHTML = '🔍 (0)';
+            btn.classList.add('ativo');
+        }
+    }
+
+    atualizarCheckboxes(colIndex);
+    filtrarTabelaCompleta();
+}
+
+function atualizarCheckboxes(colIndex) {
+    const container = document.getElementById('opcoes-col-' + colIndex);
+    if (!container) return;
+
+    const isFiltrado = filtrosAtivos[colIndex] !== undefined;
+    const valoresSelecionados = filtrosAtivos[colIndex] || [];
+    
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        const valIgual = checkbox.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        // Marca se não tiver filtro (padrão) OU se estiver na lista de selecionados
+        checkbox.checked = !isFiltrado || valoresSelecionados.includes(valIgual);
+    });
+}
+
+function fecharDropdownBootstrap(btnElement) {
+    if(btnElement.getAttribute('aria-expanded') === 'true') {
+        btnElement.click();
+    }
+}
+
+// 🎯 SOLUÇÃO DA PESQUISA GLOBAL COM ACENTOS
+function filtrarTabelaCompleta() {
+    const tabela = document.getElementById('tabelaImoveisCob');
+    const linhas = tabela.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    // Normaliza o termo da busca global (Imóvel/Sacado/Empreendimento)
+    const buscaGlobal = document.getElementById('campoBuscaImovel').value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    
+    let linhasVisiveis = 0;
+
+    for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        // 🛑 A sentinela da rolagem infinita NÃO é linha de dado: não pode ser filtrada, escondida nem contada
+        if (linha.id === "linhaNenhumRegistro" || linha.id === "linhaLoadingScroll") continue;
+        
+        let exibir = true;
+
+        if (buscaGlobal) {
+            // Índices baseados no thead: 4 = Nº Imóvel | 6 = Empreendimento | 7 = Sacado
+            const celImovel = linha.getElementsByTagName('td')[4];
+            const celEmp = linha.getElementsByTagName('td')[6];
+            const celSacado = linha.getElementsByTagName('td')[7];
+            
+            // Pega o texto e normaliza, caso a célula exista
+            const txtImovel = celImovel ? (celImovel.textContent || celImovel.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+            const txtEmp = celEmp ? (celEmp.textContent || celEmp.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+            const txtSacado = celSacado ? (celSacado.textContent || celSacado.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+            
+            // Se o termo pesquisado não estiver em NENHUMA das três colunas, ele oculta a linha
+            if (!txtImovel.includes(buscaGlobal) && !txtEmp.includes(buscaGlobal) && !txtSacado.includes(buscaGlobal)) {
+                exibir = false;
+            }
+        }
+
+        if (exibir) {
+            for (const colIndex in filtrosAtivos) {
+                const termos = filtrosAtivos[colIndex] || [];
+                const celula = linha.getElementsByTagName('td')[colIndex];
+                
+                if (celula) {
+                    let textoCelula = "";
+                    const selectElement = celula.querySelector('select');
+                    
+                    if (selectElement) {
+                        textoCelula = selectElement.options[selectElement.selectedIndex].text.trim();
+                    } else {
+                        textoCelula = (celula.textContent || celula.innerText).trim();
+                    }
+                    
+                    if(textoCelula === "🔗 Link") textoCelula = "Possui Link";
+                    
+                    // 🎯 SEGREDO AQUI: Mapeia o visual da célula para a tag do filtro
+                    if (textoCelula === "" || textoCelula === "-" || textoCelula === "Status...") {
+                        textoCelula = "(Em Branco)";
+                    }
+                    
+                    // Aplica a normalização após o tratamento acima
+                    textoCelula = textoCelula.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                    
+                    if (!termos.includes(textoCelula)) {
+                        exibir = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        linha.style.display = exibir ? "" : "none";
+        if (exibir) linhasVisiveis++;
+    }
+    
+    document.getElementById('linhaNenhumRegistro').style.display = (linhasVisiveis === 0) ? "" : "none";
+    
+    // Atualiza o contador na tela em tempo real
+    const contadorVisivel = document.getElementById('qtdVisivelPagina');
+    if (contadorVisivel) {
+        contadorVisivel.innerText = linhasVisiveis;
+    }
+}
+
+function copiarLink(btn, linkTexto) {
+    navigator.clipboard.writeText(linkTexto).then(() => {
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = "✔️ Copiado!";
+        btn.classList.replace("btn-outline-secondary", "btn-success");
+        btn.classList.add("text-white");
+        setTimeout(() => {
+            btn.innerHTML = textoOriginal;
+            btn.classList.replace("btn-success", "btn-outline-secondary");
+            btn.classList.remove("text-white");
+        }, 2000);
+    });
+}
+
+// ==========================================
+// CONTROLE CENTRAL DE STATUS E MODAIS
+// ==========================================
+let selectStatusAberto = null;
+let statusAntigoMembro = "";
+
+function acionarTrocaStatus(selectObj, imovelId, statusAnteriorDoBanco) {
+    const statusEscolhido = selectObj.value;
+
+    // 1. Mágica Visual: Troca a cor visual na tabela instantaneamente
+    selectObj.classList.remove('status-pago', 'status-solicitado', 'status-coletado', 'status-cheque', 'status-erro', 'status-robo', 'status-nao-emitido', 'status-branco');
+    
+    if (['PAGO', 'PAGO NA 275', 'PAGO NA ADM'].includes(statusEscolhido)) selectObj.classList.add('status-pago');
+    else if (statusEscolhido === 'SOLICITADO') selectObj.classList.add('status-solicitado');
+    else if (statusEscolhido === 'COLETADO') selectObj.classList.add('status-coletado');
+    else if (statusEscolhido === 'CHEQUE/DOC') selectObj.classList.add('status-cheque');
+    else if (['ERRO PAGAMENTO', 'EMAIL RECEBIDO', 'ERRO DE REDE'].includes(statusEscolhido)) selectObj.classList.add('status-erro');
+    else if (statusEscolhido === 'AUTOMAÇÃO') selectObj.classList.add('status-robo');
+    else if (statusEscolhido === 'NÃO EMITIDO') selectObj.classList.add('status-nao-emitido');
+    else selectObj.classList.add('status-branco');
+
+    // 🎯 GATILHO INTELIGENTE: Pede a data de emissão se estiver vazia ao coletar!
+    if (statusEscolhido === "COLETADO") {
+        const linha = document.getElementById('linha_imovel_' + imovelId);
+        const selectEmissao = linha ? linha.querySelector('.select-emissao') : null;
+        
+        if (selectEmissao && (!selectEmissao.value || selectEmissao.value.trim() === '')) {
+            selectStatusAberto = selectObj;
+            statusAntigoMembro = statusAnteriorDoBanco;
+            
+            document.getElementById('inputImovelIdEmissao').value = imovelId;
+            document.getElementById('selectNovaEmissao').value = ""; // Limpa escolhas antigas
+            
+            // 👇 TROQUE A LINHA DE CHAMAR O MODAL POR ESTA AQUI 👇
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEmissaoFaltante'));
+            modal.show();
+            return; // 🛑 Para a execução aqui e espera o usuário preencher o pop-up
+        }
+    }
+    // 2. Trava de Modais (ADM e 275)
+    if (statusEscolhido === "PAGO NA ADM") {
+        selectStatusAberto = selectObj;
+        statusAntigoMembro = statusAnteriorDoBanco;
+        
+        document.getElementById('inputImovelIdAdm').value = imovelId;
+        document.getElementById('textoMotivoAdm').value = "";
+        document.getElementById('arquivoAnexoAdm').value = "";
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalPagoAdm'));
+        modal.show();
+        
+    } else if (statusEscolhido === "PAGO NA 275") {
+        // 🎯 GATILHO DA 275 FUNCIONANDO!
+        selectStatusAberto = selectObj;
+        statusAntigoMembro = statusAnteriorDoBanco;
+        
+        document.getElementById('inputImovelId275').value = imovelId;
+        document.getElementById('textoMotivo275').value = "";
+        document.getElementById('arquivoAnexo275').value = "";
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalPago275'));
+        modal.show();
+        
+    } else {
+        // Segue o fluxo normal salvando direto no banco para os outros status
+        atualizarStatusDireto(imovelId, statusEscolhido, selectObj);
+    }
+}
+
+// ==========================================
+// FUNÇÕES DO POP-UP DE EMISSÃO FALTANTE
+// ==========================================
+function cancelarColetaEmissao() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        // Chama a função de novo só pra devolver a cor original da caixinha (mantendo o seu padrão)
+        acionarTrocaStatus(selectStatusAberto, document.getElementById('inputImovelIdEmissao').value, statusAntigoMembro);
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalEmissaoFaltante'));
+        if(modal) modal.hide();
+    }
+}
+
+function confirmarColetaComEmissao() {
+    const imovelId = document.getElementById('inputImovelIdEmissao').value;
+    const novaEmissao = document.getElementById('selectNovaEmissao').value;
+    
+    if (!novaEmissao) {
+        alert("⚠️ Por favor, selecione o dia de emissão na lista para continuar!");
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    // 1. Salva a nova Média de Emissão primeiro
+    fetch('/atualizar_media_emissao', {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: imovelId, media: novaEmissao })
+    }).then(() => {
+        // Atualiza visualmente o número na tabela sem precisar dar F5 na página
+        const linha = document.getElementById('linha_imovel_' + imovelId);
+        if (linha) {
+            const selectEmissao = linha.querySelector('.select-emissao');
+            if(selectEmissao) selectEmissao.value = novaEmissao;
+        }
+        
+        // 2. Agora sim, salva o status como COLETADO
+        return fetch('/atualizar_status_imovel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: imovelId, status: "COLETADO" })
+        });
+    })
+    .then(r => r.json())
+    .then(d => {
+        if(d.sucesso) {
+            // Atualiza a memória oculta para futuros cliques
+            selectStatusAberto.setAttribute('onchange', `acionarTrocaStatus(this, '${imovelId}', 'COLETADO')`);
+            
+            // Esconde modal e tela preta
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEmissaoFaltante'));
+            if(modal) modal.hide();
+            
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+            
+            // Efeitinho visual bonito de sucesso
+            const optionSelecionada = selectStatusAberto.options[selectStatusAberto.selectedIndex];
+            const textoOriginal = optionSelecionada.text;
+            optionSelecionada.text = "✔️ Coletado e Salvo!";
+            setTimeout(() => { optionSelecionada.text = textoOriginal; }, 2000);
+
+        } else {
+            alert('⚠️ Erro ao atualizar status no servidor: ' + d.msg);
+            cancelarColetaEmissao();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert('⚠️ Erro de conexão com o servidor.');
+        cancelarColetaEmissao();
+    });
+}
+
+// ==========================================
+// FUNÇÕES DO PAGO NA 275
+// ==========================================
+function cancelarPago275() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        // Chama a função de novo só pra devolver a cor original da caixinha
+        acionarTrocaStatus(selectStatusAberto, document.getElementById('inputImovelId275').value, statusAntigoMembro);
+    }
+}
+
+function confirmarPago275() {
+    const imovelId = document.getElementById('inputImovelId275').value;
+    const motivo = document.getElementById('textoMotivo275').value.trim();
+    const arquivoInput = document.getElementById('arquivoAnexo275');
+    
+    // Trava de Texto (Obrigatório)
+    if (!motivo) {
+        alert("⚠️ O motivo ou detalhamento é OBRIGATÓRIO para registrar o pagamento na 275!");
+        document.getElementById('textoMotivo275').focus();
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    const formData = new FormData();
+    formData.append('id', imovelId);
+    formData.append('motivo', motivo);
+    if (arquivoInput.files.length > 0) {
+        formData.append('anexo', arquivoInput.files[0]);
+    }
+    
+    fetch('/api/sistema/status_pago_275', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            bootstrap.Modal.getInstance(document.getElementById('modalPago275')).hide();
+            window.location.reload(); 
+        } else {
+            alert("Erro ao salvar: " + data.msg);
+            cancelarPago275();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// FUNÇÕES DO PAGO NA ADM
+// ==========================================
+function cancelarPagoAdm() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        // Chama a função de novo só pra devolver a cor original da caixinha
+        acionarTrocaStatus(selectStatusAberto, document.getElementById('inputImovelIdAdm').value, statusAntigoMembro);
+    }
+}
+
+function confirmarPagoAdm() {
+    const imovelId = document.getElementById('inputImovelIdAdm').value;
+    const motivo = document.getElementById('textoMotivoAdm').value.trim();
+    const arquivoInput = document.getElementById('arquivoAnexoAdm');
+    
+    if (!motivo) {
+        alert("⚠️ O motivo é obrigatório para registrar o pagamento na ADM!");
+        document.getElementById('textoMotivoAdm').focus();
+        return;
+    }
+
+    // 🎯 TRAVA: O anexo agora é 100% obrigatório!
+    if (arquivoInput.files.length === 0) {
+        alert("⚠️ O comprovante em anexo é OBRIGATÓRIO para registrar o pagamento na ADM!");
+        arquivoInput.focus();
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    const formData = new FormData();
+    formData.append('id', imovelId);
+    formData.append('motivo', motivo);
+    formData.append('anexo', arquivoInput.files[0]);
+    
+    fetch('/api/sistema/status_pago_adm', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            bootstrap.Modal.getInstance(document.getElementById('modalPagoAdm')).hide();
+            window.location.reload(); 
+        } else {
+            alert("Erro ao salvar: " + data.msg);
+            cancelarPagoAdm();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    });
+}
+
+function salvarCredenciaisSecretas() {
+    const loginVal = document.getElementById('cred_login').value.trim();
+    const senhaVal = document.getElementById('cred_senha').value.trim();
+    const portalVal = document.getElementById('cred_portal').value;
+    const linkVal = document.getElementById('cred_link').value.trim(); // 🎯 NOVO
+    
+    const btnSalvar = document.querySelector('button[onclick="salvarCredenciaisSecretas()"]');
+    let textoOriginal = " Atualizar Acesso";
+    
+    if (btnSalvar) {
+        textoOriginal = btnSalvar.innerText;
+        btnSalvar.innerText = " Gravando...";
+        btnSalvar.disabled = true;
+    }
+
+    fetch('/api/imovel/salvar_credenciais', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            imovel: numeroImovelMemoria,
+            login: loginVal,
+            senha: senhaVal,
+            portal: portalVal,
+            link: linkVal // 🎯 ENVIANDO PARA O BANCO
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            if(btnSalvar) {
+                btnSalvar.innerText = "✔️ Salvo!";
+                btnSalvar.classList.remove('btn-info');
+                btnSalvar.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    btnSalvar.innerText = textoOriginal;
+                    btnSalvar.classList.remove('btn-success');
+                    btnSalvar.classList.add('btn-info');
+                    btnSalvar.disabled = false;
+                }, 2000);
+            } else {
+                alert("✔️ Credenciais salvas com sucesso!");
+            }
+        } else {
+            alert(" Falha ao salvar no banco: " + data.msg);
+            if(btnSalvar) { btnSalvar.innerText = textoOriginal; btnSalvar.disabled = false; }
+        }
+    })
+    .catch(err => {
+        alert(" Erro de conexão com o servidor.");
+        if(btnSalvar) { btnSalvar.innerText = textoOriginal; btnSalvar.disabled = false; }
+    });
+}
+
+// ==========================================
+// ATUALIZAÇÃO DIRETA (OUTROS STATUS)
+// ==========================================
+function atualizarStatusDireto(id, status, selectElement) {
+    const optionSelecionada = selectElement.options[selectElement.selectedIndex];
+    const textoOriginal = optionSelecionada.text;
+
+    fetch('/atualizar_status_imovel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, status: status })
+    }).then(r => r.json()).then(d => {
+        if(d.sucesso) {
+            // Atualiza a memória oculta do botão
+            selectElement.setAttribute('onchange', `acionarTrocaStatus(this, '${id}', '${status}')`);
+            
+            // Feedback visual rápido
+            optionSelecionada.text = "✔️ Salvo!";
+            setTimeout(() => {
+                optionSelecionada.text = textoOriginal;
+            }, 1500);
+
+            // Atualiza contadores do card
+            if (status === 'COLETADO' || status.includes('PAGO')) {
+                const contadorEmissao = document.querySelector('.detalhe-valor'); 
+                if (contadorEmissao && !isNaN(parseInt(contadorEmissao.innerText))) {
+                    let atual = parseInt(contadorEmissao.innerText);
+                    if (atual > 0) contadorEmissao.innerText = atual - 1;
+                }
+            }
+        } else {
+            alert('⚠️ Erro ao atualizar status no servidor: ' + d.msg);
+        }
+    }).catch(error => {
+        console.error('Erro:', error);
+        alert('⚠️ Erro de conexão com o servidor.');
+    });
+}
+
+function abrirUrlPortalIndex() {
+    let url = document.getElementById('cred_link').value.trim();
+    if (!url) {
+        alert("⚠️ Nenhuma URL cadastrada para este portal.");
+        return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
+    window.open(url, '_blank');
+}
+
+let imovelIdAtual = null;
+let numeroImovelMemoria = null;
+
+function toggleSenhaVisualizacao(botao) {
+    const input = document.getElementById('cred_senha');
+    if (!input) return;
+
+    const visivel = input.type === 'text';
+    input.type = visivel ? 'password' : 'text';
+
+    if (botao) {
+        botao.innerHTML = visivel ? '👁️' : '🙈';
+        botao.title = visivel ? 'Mostrar senha' : 'Ocultar senha';
+        botao.setAttribute('aria-label', visivel ? 'Mostrar senha' : 'Ocultar senha');
+    }
+}
+
+function abrirDetalhesImovel(elemento) {
+    imovelIdAtual = elemento.getAttribute('data-id');
+    numeroImovelMemoria = elemento.getAttribute('data-imovel');
+    
+    // 1. CARREGA INSTANTANEAMENTE OS DADOS DA TELA (Sem esperar o servidor!)
+    document.getElementById('tituloModalDetalhes').innerText = "Imóvel Selecionado: " + numeroImovelMemoria;
+    document.getElementById('detAdm').innerText = elemento.getAttribute('data-adm') || "-";
+    document.getElementById('detVenc').innerText = elemento.getAttribute('data-venc') || "-";
+    document.getElementById('detCartLote').innerText = (elemento.getAttribute('data-cart') || "-") + " / " + (elemento.getAttribute('data-lote') || "-");
+    document.getElementById('detEmp').innerText = elemento.getAttribute('data-emp') || "-";
+    document.getElementById('detEnd').innerText = elemento.getAttribute('data-end') || "Não cadastrado";
+    document.getElementById('detSac').innerText = elemento.getAttribute('data-sac') || "-";
+    document.getElementById('detCpf').innerText = elemento.getAttribute('data-cpf') || "Não informado";
+    document.getElementById('detDtComDesc').innerText = elemento.getAttribute('data-dtcomdesc') || "-";
+    
+    let obsFicha = elemento.getAttribute('data-obs');
+    document.getElementById('detObservacaoPlanilha').value = obsFicha ? obsFicha : "Nenhuma observação cadastrada na planilha original para este imóvel.";
+    
+    // 2. PREPARA OS CAMPOS DE CREDENCIAIS (Esses precisam do servidor)
+    document.getElementById('cred_login').value = "Buscando...";
+    document.getElementById('cred_senha').value = "";
+    document.getElementById('cred_link').value = ""; 
+    document.getElementById('cred_portal').value = "DIVERSOS";
+    
+    document.getElementById('listaHistorico').innerHTML = "<p class='text-muted text-center my-3'>Carregando anotações deste vencimento...</p>";
+
+    // Abre o Modal imediatamente para dar sensação de velocidade
+    new bootstrap.Modal(document.getElementById('modalDetalhes')).show();
+
+    // 3. BUSCA LOGIN E SENHA
+    fetch('/obter_detalhes_imovel?imovel=' + encodeURIComponent(numeroImovelMemoria))
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso && data.imovel) {
+            const i = data.imovel;
+            document.getElementById('cred_login').value = (i.login_acesso && i.login_acesso !== "None") ? i.login_acesso : "";
+            document.getElementById('cred_senha').value = (i.senha_acesso && i.senha_acesso !== "None") ? i.senha_acesso : "";
+            
+            const portalDb = i.portal || "DIVERSOS";
+            const selectPortal = document.getElementById('cred_portal');
+            if (Array.from(selectPortal.options).some(opt => opt.value === portalDb)) {
+                selectPortal.value = portalDb;
+            } else {
+                selectPortal.value = "DIVERSOS";
+            }
+
+            document.getElementById('cred_link').value = (i.link_portal && i.link_portal !== "None") ? i.link_portal : "";
+            if (document.getElementById('cred_link').value.trim() === "") {
+                if (portalDb === "WINKER") document.getElementById('cred_link').value = "https://app.winker.com.br/intra/default/login";
+                else if (portalDb === "WEBWARE") document.getElementById('cred_link').value = "https://portalwm.webware.com.br/Account/Login";
+            }
+        } else {
+            // Se o imóvel não tiver credenciais no banco, zera o campo
+            document.getElementById('cred_login').value = "";
+        }
+    })
+    .catch(err => {
+        console.error("Erro na busca de credenciais:", err);
+        document.getElementById('cred_login').value = "";
+    });
+
+    // 4. CHAMA O HISTÓRICO COM TRATAMENTO DE ERRO
+    carregarHistorico(imovelIdAtual);
+    document.getElementById('campoNovaObs').value = "";
+}
+
+function editarObservacao(idObs, textoAntigo) {
+    const novoTexto = prompt("Edite o conteúdo da sua anotação:", textoAntigo);
+    if (novoTexto !== null && novoTexto.trim() !== "" && novoTexto !== textoAntigo) {
+        fetch('/api/sistema/editar_observacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_obs: idObs, texto: novoTexto })
+        }).then(r=>r.json()).then(data => {
+            if(data.sucesso) {
+                // Força a tela a piscar e buscar o dado novo na mesma hora
+                const imovelLink = document.querySelector(`.imovel-link[data-id="${imovelIdAtual}"]`);
+                if(imovelLink) abrirDetalhesImovel(imovelLink);
+            } else {
+                alert(" Erro ao editar anotação: " + data.msg);
+            }
+        });
+    }
+}
+
+function salvarNovaObservacao() {
+    const texto = document.getElementById('campoNovaObs').value.trim();
+    if(!texto) return;
+    fetch('/salvar_observacao', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imovel_id: imovelIdAtual, texto: texto })
+    }).then(() => { 
+        document.getElementById('campoNovaObs').value = "";
+        // Atualiza a tela puxando o dado do banco
+        const imovelLink = document.querySelector(`.imovel-link[data-id="${imovelIdAtual}"]`);
+        if(imovelLink) abrirDetalhesImovel(imovelLink);
+    });
+}
+
+function carregarHistorico(id) {
+    const box = document.getElementById('listaHistorico');
+    box.innerHTML = "<p class='text-muted text-center my-3'>Buscando dados no servidor...</p>";
+    
+    fetch('/buscar_observacoes/' + id)
+    .then(r => r.json())
+    .then(dados => {
+        if (dados.length === 0) {
+            box.innerHTML = "<p class='text-muted text-center my-3'>Nenhuma anotação prévia localizada para este imóvel.</p>";
+            return;
+        }
+        
+        box.innerHTML = "";
+        dados.forEach(item => { 
+            // 🛡️ Proteção: Se a anotação vier vazia do banco, não quebra o Javascript
+            let textoFormatado = item.texto || "";
+            if (textoFormatado.includes("⚠️ FALHA NO PAGAMENTO")) textoFormatado = `<span class="text-danger fw-bold">${textoFormatado}</span>`;
+            
+            let botaoEditarHTML = "";
+            let nomeUsuario = item.usuario || "Sistema";
+            
+            if (!nomeUsuario.toUpperCase().includes('AUTOMAÇÃO') && !textoFormatado.includes("<a href")) {
+                const textoSafe = textoFormatado.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                botaoEditarHTML = `<button class="btn btn-sm btn-light border py-0 px-2 shadow-sm text-primary" style="font-size:0.7rem;" title="Editar Anotação" onclick="editarObservacao(${item.id}, '${textoSafe}')">✏️ Editar</button>`;
+            }
+
+            box.innerHTML += `
+            <div class='border-bottom pb-2 mb-2'>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <span class='badge bg-dark fw-normal'>${nomeUsuario}</span>
+                        <span class='text-muted ms-1' style='font-size: 0.75rem;'>${item.data_hora || ""}</span>
+                    </div>
+                    ${botaoEditarHTML}
+                </div>
+                <div class="text-dark fw-medium mt-1">${textoFormatado}</div>
+            </div>`; 
+        });
+    })
+    .catch(err => {
+        console.error("Erro ao carregar o histórico:", err);
+        box.innerHTML = "<p class='text-danger text-center my-3'>⚠️ Falha ao carregar as anotações do servidor.</p>";
+    });
+}
+
+// 🎯 NOVA FUNÇÃO: EDITA A OBSERVAÇÃO
+function editarObservacao(idObs, textoAntigo) {
+    // Usa um pop-up nativo do navegador para facilitar a vida do operador
+    const novoTexto = prompt("Edite o conteúdo da sua anotação:", textoAntigo);
+    
+    if (novoTexto !== null && novoTexto.trim() !== "" && novoTexto !== textoAntigo) {
+        fetch('/api/sistema/editar_observacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_obs: idObs, texto: novoTexto })
+        }).then(r=>r.json()).then(data => {
+            if(data.sucesso) {
+                // Se der certo, recarrega o histórico na mesma hora pra ele ver a mudança!
+                carregarHistorico(imovelIdAtual);
+            } else {
+                alert(" Erro ao editar anotação: " + data.msg);
+            }
+        });
+    }
+}
+
+function salvarNovaObservacao() {
+    const texto = document.getElementById('campoNovaObs').value.trim();
+    if(!texto) return;
+    fetch('/salvar_observacao', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imovel_id: imovelIdAtual, texto: texto })
+    }).then(() => { document.getElementById('campoNovaObs').value = ""; carregarHistorico(imovelIdAtual); });
+}
+
+function selecionarTodos(checkboxMaster) { 
+    document.querySelectorAll('.check-imovel').forEach(cb => cb.checked = checkboxMaster.checked); 
+}
+
+let filaDeEnvio = [];
+let indiceFilaAtual = 0;
+
+function abrirModalDisparoEmail(event) {
+    // 🛑 TRAVÃO ABSOLUTO: Impede o clique de subir e ativar a tela cinza global
+    if (event) {
+        if (typeof event.preventDefault === "function") event.preventDefault();
+        if (typeof event.stopPropagation === "function") event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
+    }
+
+    // 💡 DESLIGAMENTO FORÇADO: Caso a tela cinza tente piscar por um milissegundo, desliga-a com prioridade máxima
+    const overlay = document.getElementById('overlayCarregamento');
+    if (overlay) {
+        overlay.style.setProperty('display', 'none', 'important');
+    }
+
+    const selecionados = document.querySelectorAll('.check-imovel:checked');
+    if(selecionados.length === 0) { 
+        alert("⚠️ Selecione os registros que deseja cobrar marcando a caixa ao lado do Vencimento."); 
+        return; 
+    }
+    
+    filaDeEnvio = []; 
+    indiceFilaAtual = 0;
+    
+    const boxFila = document.getElementById('listaFilaEnvio');
+    if(boxFila) boxFila.innerHTML = "";
+    
+    selecionados.forEach(cb => {
+        const item = {
+            id: cb.value, imovel: cb.getAttribute('data-imovelnum'), adm: cb.getAttribute('data-adm'), email: cb.getAttribute('data-email'),
+            resp: cb.getAttribute('data-resp'), venc: cb.getAttribute('data-venc'), emp: cb.getAttribute('data-emp'),
+            sacado: cb.getAttribute('data-sacado'), endereco: cb.getAttribute('data-endereco') || "Não consta", cpf: cb.getAttribute('data-cpf') || "Não consta",
+            coletor: cb.getAttribute('data-coletor') || 'Não registrado'
+        };
+        filaDeEnvio.push(item);
+        
+        if(boxFila){
+            let emailHTML = '';
+            if (!item.email) {
+                emailHTML = '<span class="text-danger fw-bold">📧 Sem e-mail parametrizado</span>';
+            } else if (item.email.includes(',') || item.email.includes(';')) {
+                let emailsArray = item.email.split(/[,;]+/).map(e => e.trim()).filter(e => e !== '');
+                let optionsHTML = emailsArray.map(e => `<option value="${e}">${e}</option>`).join('');
+                emailHTML = `<span class="text-primary fw-bold" style="font-size: 0.8rem;">📧 Escolha: </span>
+                    <select id="select_email_fila_${item.id}" class="form-select form-select-sm d-inline-block shadow-sm border-primary" style="font-size: 0.75rem; width: 220px; padding: 2px 10px;">${optionsHTML}</select>`;
+            } else {
+                emailHTML = `<span class="text-secondary">📧 ${item.email}</span>`;
+            }
+
+            // Condicional: mostra coletor apenas quando estiver disponível e válido
+            let coletorHTML = '';
+            if (item.coletor && item.coletor !== 'undefined' && item.coletor !== 'Não registrado') {
+                coletorHTML = ` <span class="text-muted">|</span>  <strong>${item.coletor}</strong>`;
+            }
+
+            boxFila.innerHTML += `<div class="p-2 border-bottom" id="item_fila_${item.id}">
+                <span style="color: #00a7e1;">●</span> Imóvel <b>${item.imovel}</b> <span class="text-muted">|</span> ADM: ${item.adm}${coletorHTML}<br>
+                <div class="mt-1">${emailHTML}</div>
+                <input type="email" id="input_email_fila_${item.id}" class="form-control form-control-sm mt-2" placeholder="Digite outro e-mail ou informe um novo e-mail" style="font-size: 0.78rem; max-width: 380px;">
+                <div class="form-check form-check-inline mt-2">
+                    <input class="form-check-input" type="checkbox" id="checkbox_salvar_email_${item.id}" value="1">
+                    <label class="form-check-label small" for="checkbox_salvar_email_${item.id}">Salvar este e-mail na administradora</label>
+                </div>
+            </div>`;
+        }
+    });
+    document.getElementById('barraProgressoEmail').style.width = "0%";
+    document.getElementById('statusConsoleEnvio').innerHTML = "Fila estruturada com sucesso.<br>Pronto para iniciar a transmissão em lote.";
+    document.getElementById('btnIniciarDisparos').disabled = false;
+    
+  // Abre o pop-up do Bootstrap
+    try {
+        const modalEl = document.getElementById('modalEmail');
+        // Usando o comando correto e blindado do Bootstrap 5
+        const modalEmail = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalEmail.show();
+    } catch (e) {
+        console.error("Erro ao abrir o modal:", e);
+        alert("Erro ao abrir o pop-up de envio: " + e.message);
+    }
+}
+
+function processarFilaEmails() {
+    // Adicione estas duas linhas logo no começo da função:
+    const dataHoje = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('disparo_realizado_' + dataHoje, 'true');
+
+    if (indiceFilaAtual >= filaDeEnvio.length) {
+        document.getElementById('statusConsoleEnvio').innerHTML += "<br><span style='color:#38bdf8;'>✔️ PROCESSO TOTALMENTE CONCLUÍDO.</span>";
+        // ... restante da sua função continua igualzinho
+        document.getElementById('btnIniciarDisparos').disabled = true;
+        return;
+    }
+    document.getElementById('btnIniciarDisparos').disabled = true;
+    const item = filaDeEnvio[indiceFilaAtual];
+    const consoleBox = document.getElementById('statusConsoleEnvio');
+    
+    let emailDestino = item.email;
+    const selectDrop = document.getElementById(`select_email_fila_${item.id}`);
+    const inputEmail = document.getElementById(`input_email_fila_${item.id}`);
+    if(inputEmail && inputEmail.value.trim() !== "") {
+        emailDestino = inputEmail.value.trim();
+    } else if(selectDrop && selectDrop.value) {
+        emailDestino = selectDrop.value;
+    }
+    
+    if(!emailDestino || emailDestino.trim() === "") {
+        consoleBox.innerHTML += `<br><span class="text-warning">⚠️ Ignorado: Imóvel ${item.imovel} não possui e-mail cadastrado.</span>`;
+        avancarFila(); return;
+    }
+
+    consoleBox.innerHTML += `<br><span style="color:#cbd5e1;"> Transmitindo caso Imóvel ${item.imovel} para ${emailDestino}...</span>`;
+    consoleBox.scrollTop = consoleBox.scrollHeight;
+
+    const assuntoStr = `Solicitação de Boleto - Envio - Referência de Cobrança`;
+    const tabelaIndividualHtml = `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-family: Arial, sans-serif; font-size: 13px;">
+        <thead><tr style="background-color: #0f172a; color: white; text-align: left;">
+        <th style="padding: 10px; border: 1px solid #dee2e6;">Nº Imóvel</th><th style="padding: 10px; border: 1px solid #dee2e6;">Sacado</th><th style="padding: 10px; border: 1px solid #dee2e6;">Empreendimento</th><th style="padding: 10px; border: 1px solid #dee2e6;">Endereço</th><th style="padding: 10px; border: 1px solid #dee2e6;">CPF/CNPJ</th></tr></thead>
+        <tbody><tr>
+        <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center;"><b>${item.imovel}</b></td><td style="padding: 8px; border: 1px solid #dee2e6;">${item.sacado}</td><td style="padding: 8px; border: 1px solid #dee2e6;">${item.emp}</td><td style="padding: 8px; border: 1px solid #dee2e6;">${item.endereco}</td><td style="padding: 8px; border: 1px solid #dee2e6;">${item.cpf}</td></tr></tbody></table>`;
+
+    const corpoMensagemHtml = `Prezados,<br><br>Solicitamos o envio do boleto de condomínio para liquidação do imóvel listado abaixo:<br><br>${tabelaIndividualHtml}<br>Ficamos no aguardo da documentação para a respectiva liquidação bancária.<br><br>Atenciosamente,<br><b>Gestão de Cobrança - Lello</b>`;
+
+    const salvarEmailAdm = document.getElementById(`checkbox_salvar_email_${item.id}`)?.checked || false;
+    fetch('/disparar_emails', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, destinatario: emailDestino, assunto: assuntoStr, mensagem: corpoMensagemHtml, adm: item.adm, resp: item.resp, salvar_email_adm: salvarEmailAdm })
+    }).then(r => r.json()).then(data => {
+        if(data.sucesso) {
+            consoleBox.innerHTML += `<br><span class="text-success fw-bold">✔️ Sucesso! Imóvel ${item.imovel} processado.</span>`;
+            const selectStatus = document.getElementById(`select_status_${item.id}`);
+            if(selectStatus) { selectStatus.value = "SOLICITADO"; selectStatus.className = "form-select form-select-sm select-status mx-auto status-solicitado"; }
+            document.getElementById(`item_fila_${item.id}`).style.textDecoration = "line-through";
+            document.getElementById(`item_fila_${item.id}`).style.opacity = "0.5";
+        } else {
+            consoleBox.innerHTML += `<br><span class="text-danger fw-bold"> Erro no Imóvel ${item.imovel}: ${data.msg}</span>`;
+        }
+        avancarFila();
+    }).catch(err => { consoleBox.innerHTML += `<br><span class="text-danger fw-bold"> Erro de rede no Imóvel ${item.imovel}</span>`; avancarFila(); });
+}
+
+function avancarFila() {
+    indiceFilaAtual++;
+    document.getElementById('barraProgressoEmail').style.width = Math.round((indiceFilaAtual / filaDeEnvio.length) * 100) + "%";
+    document.getElementById('txtQtdFalta').innerText = filaDeEnvio.length - indiceFilaAtual;
+    const consoleBox = document.getElementById('statusConsoleEnvio');
+    consoleBox.scrollTop = consoleBox.scrollHeight;
+    setTimeout(processarFilaEmails, 1000);
+}
+
+function abrirVisualizadorPDF(imovel) {
+    document.getElementById('tituloModalPDF').innerText = "Boleto Digitalizado - Imóvel " + imovel;
+    const iframe = document.getElementById('iframeVisualizadorPDF');
+    const loader = document.getElementById('loaderPDF');
+    iframe.src = ""; loader.style.display = "block";
+    new bootstrap.Modal(document.getElementById('modalVisualizadorPDF')).show();
+    iframe.src = `/api/visualizar_boleto/${imovel}`;
+    iframe.onload = function() { loader.style.display = "none"; };
+}
+
+document.addEventListener('change', function(e) {
+    if(e.target.classList.contains('check-imovel') || e.target.id === 'checkTodos') {
+        const qtd = document.querySelectorAll('.check-imovel:checked').length;
+        document.getElementById('contadorSelecionados').innerText = qtd + " imóvel(is) selecionado(s)";
+        document.getElementById('containerAcoesLote').style.display = qtd > 0 ? "flex" : "none";
+    }
+});
+
+function aplicarStatusLote() {
+    const checkboxes = document.querySelectorAll('.check-imovel:checked');
+    const novoStatus = document.getElementById('statusLote').value;
+    if (checkboxes.length === 0) { alert("⚠️ Selecione pelo menos um imóvel."); return; }
+    if (!novoStatus) { alert("⚠️ Selecione qual status deseja aplicar."); return; }
+    if(!confirm(`Confirma a alteração do status de ${checkboxes.length} imóveis para "${novoStatus}"?`)) return;
+
+    fetch('/api/sistema/atualizar_status_lote', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ ids: Array.from(checkboxes).map(cb => cb.value), status: novoStatus })
+    }).then(r => r.json()).then(data => {
+        if(data.sucesso) window.location.reload();
+        else alert(" Falha ao atualizar lote: " + data.msg);
+    });
+}
+
+// 🎯 AUTO-PREENCHIMENTO DE URL POR PORTAL (INDEX)
+function atualizarUrlPorPortalIndex() {
+    const portal = document.getElementById('cred_portal').value;
+    const campoLink = document.getElementById('cred_link');
+    
+    if (campoLink.value.trim() === "") {
+        if (portal === "WINKER") {
+            campoLink.value = "https://app.winker.com.br/intra/default/login";
+        } else if (portal === "WEBWARE") {
+            campoLink.value = "https://portalwm.webware.com.br/Account/Login";
+        }
+    }
+}
+
+</script>
+
+{% if usuario_atual and usuario_atual.upper() in ['RYAN', 'MARCIO', 'PAULO', 'ALESSANDRA'] %}
+<div class="modal fade" id="modalArquivarMes" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold">📦 Virada de Mês: Arquivar Histórico</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning style-sm" style="font-size: 0.82rem;">
+                    <strong>Como funciona:</strong> ao importar a planilha do mês seguinte, o sistema <b>já arquiva o mês anterior sozinho</b> (e congela a nova meta). Use este botão só para fechar o mês manualmente, por exemplo para conferência ou reprocessamento.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-secondary">Selecione o mês que está sendo encerrado:</label>
+                    <select id="inputMesReferencia" class="form-select form-select-sm fw-bold border-secondary shadow-sm">
+                        <option value="" disabled selected>-- Carregando... --</option>
+                    </select>
+                    <div id="infoMesDetectado" class="small text-secondary mt-2"></div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnSalvarCofre" class="btn btn-sm btn-success fw-bold" onclick="salvarHistoricoMes()">Salvar no Cofre</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="modalEscolherMesConsulta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold">Consultar Histórico</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <label class="form-label fw-bold small text-secondary">Selecione o mês arquivado:</label>
+                <select id="selectMesHistoricoConsulta" class="form-select border-dark shadow-sm fw-bold">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+            <div class="modal-footer p-2">
+                <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-sm btn-primary fw-bold" onclick="carregarTabelaHistorico()">Buscar Dados</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVerHistorico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h6 class="modal-title fw-bold" id="tituloModalHistorico">🕰️ Histórico de Fechamento</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover m-0 align-middle" style="font-size: 0.8rem;">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="ps-3">Imóvel</th>
+                                <th>Administradora</th>
+                                <th>Responsável</th>
+                                <th>Vencimento</th>
+                                <th class="pe-3">Status no Fechamento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabelaHistorico">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+{% if usuario_atual and usuario_atual.upper() in ['RYAN', 'MARCIO', 'PAULO', 'ALESSANDRA'] %}
+function opcoesMesesFallback() {
+    const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const ano = new Date().getFullYear();
+    const lista = [];
+    for (let a = ano - 1; a <= ano + 1; a++) nomes.forEach(n => lista.push(n + '/' + a));
+    return lista;
+}
+
+function preencherMesesArquivar(opcoes, selecionado) {
+    const sel = document.getElementById('inputMesReferencia');
+    if (!sel) return;
+    sel.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = ''; ph.disabled = true; ph.textContent = '-- Selecione o Mês --';
+    sel.appendChild(ph);
+    opcoes.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m; o.textContent = m;
+        sel.appendChild(o);
+    });
+    if (selecionado) sel.value = selecionado; else ph.selected = true;
+}
+
+// Ao abrir o modal: descobre o mês da base ativa e já deixa selecionado
+function carregarMesDetectado() {
+    const info = document.getElementById('infoMesDetectado');
+    if (info) info.textContent = 'Detectando o mês da base ativa...';
+    fetch('/api/sistema/mes_ativo_detectado')
+    .then(res => res.json())
+    .then(d => {
+        preencherMesesArquivar(d.opcoes || opcoesMesesFallback(), d.rotulo || '');
+        if (!info) return;
+        if (d.rotulo) {
+            info.textContent = 'Base ativa: ' + d.rotulo + ' (' + d.qtd_base + ' imóveis). ' +
+                (d.ja_arquivado ? '⚠️ Este mês já está arquivado (' + d.qtd_arquivado + ' registros).' : 'Ainda não arquivado.');
+        } else {
+            info.textContent = 'Não há base ativa para detectar o mês. Selecione manualmente.';
+        }
+    })
+    .catch(() => {
+        preencherMesesArquivar(opcoesMesesFallback(), '');
+        if (info) info.textContent = 'Não foi possível detectar o mês automaticamente. Selecione manualmente.';
+    });
+}
+
+let arquivandoMes = false;
+function salvarHistoricoMes(flags) {
+    if (arquivandoMes) return;
+    flags = flags || {};
+    const selectBox = document.getElementById('inputMesReferencia');
+    const mesInput = selectBox.value;
+
+    if (!mesInput) { alert("⚠️ Por favor, selecione o mês na lista."); return; }
+    if (!flags.confirmado && !confirm(`Confirma o arquivamento de todo o cenário atual como histórico do mês de "${mesInput}"?`)) return;
+
+    arquivandoMes = true;
+    const btn = document.getElementById('btnSalvarCofre');
+    if (btn) btn.disabled = true;
+
+    fetch('/api/arquivar_mes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            mes_referencia: mesInput,
+            substituir: !!flags.substituir,
+            confirmar_divergencia: !!flags.confirmar_divergencia
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        arquivandoMes = false;
+        if (btn) btn.disabled = false;
+        if (data.status === 'sucesso') {
+            alert(data.mensagem);
+            const modalEl = document.getElementById('modalArquivarMes');
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+            selectBox.value = "";
+        } else if (data.status === 'divergente') {
+            if (confirm(data.mensagem + '\n\nArquivar mesmo assim com o nome "' + mesInput + '"?')) {
+                salvarHistoricoMes({ confirmado: true, substituir: flags.substituir, confirmar_divergencia: true });
+            }
+        } else if (data.status === 'ja_existe') {
+            if (confirm(data.mensagem + '\n\nDeseja SUBSTITUIR o arquivo existente por uma nova fotografia da base atual?')) {
+                salvarHistoricoMes({ confirmado: true, substituir: true, confirmar_divergencia: flags.confirmar_divergencia });
+            }
+        } else {
+            alert(data.mensagem || "Erro ao arquivar o mês.");
+        }
+    })
+    .catch(err => {
+        arquivandoMes = false;
+        if (btn) btn.disabled = false;
+        console.error(err);
+        alert("Ocorreu um erro ao tentar salvar o histórico.");
+    });
+}
+{% endif %}
+
+// Abre a janelinha menor perguntando qual mês a pessoa quer ver
+// Abre a janelinha menor perguntando qual mês a pessoa quer ver
+function verHistoricoPassado() {
+    fetch('/api/meses_disponiveis_historico')
+    .then(res => res.json())
+    .then(meses => {
+        // SE NÃO TIVER NENHUM MÊS, MOSTRA O AVISO E NEM ABRE A JANELA!
+        if(meses.length === 0) {
+            alert("📭 Nenhum mês foi arquivado ainda. O histórico está vazio!");
+            return; 
+        }
+
+        // SE TIVER, PREENCHE A LISTA E ABRE O MODAL NORMALMENTE
+        const select = document.getElementById('selectMesHistoricoConsulta');
+        select.innerHTML = '<option value="" disabled selected>-- Escolha um Mês --</option>';
+        meses.forEach(m => {
+            select.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        
+        new bootstrap.Modal(document.getElementById('modalEscolherMesConsulta')).show();
+    })
+    .catch(err => {
+        console.error(err);
+        alert(" Erro ao buscar os meses arquivados.");
+    });
+}
+// Quando a pessoa clica em "Buscar Dados" na janelinha pequena
+function carregarTabelaHistorico() {
+    const mesRef = document.getElementById('selectMesHistoricoConsulta').value;
+    if(!mesRef) { alert("⚠️ Escolha um mês na lista!"); return; }
+
+    // Esconde o modal pequeno
+    const modalPequeno = bootstrap.Modal.getInstance(document.getElementById('modalEscolherMesConsulta'));
+    if(modalPequeno) modalPequeno.hide();
+
+    // Puxa a tabela completa do banco
+    fetch(`/api/consultar_historico/${encodeURIComponent(mesRef)}`)
+    .then(res => {
+        if (!res.ok) throw new Error(`Falha no servidor (Status: ${res.status})`);
+        return res.json();
+    })
+    .then(dados => {
+        // BLINDAGEM: Verifica se o servidor retornou um erro legível em formato de objeto
+        if (dados && dados.sucesso === false) throw new Error(dados.msg || dados.erro || "Erro desconhecido na API.");
+        
+        // BLINDAGEM: Verifica se 'dados' é realmente uma lista antes de usar o forEach
+        if (!Array.isArray(dados)) {
+            console.error("Retorno inesperado da API:", dados);
+            throw new Error("O servidor não retornou uma lista válida de imóveis.");
+        }
+
+        document.getElementById('tituloModalHistorico').innerText = `🕰️ Histórico de Fechamento: ${mesRef}`;
+        let htmlContent = '';
+        
+        // Se a lista vier vazia, avisa o usuário elegantemente
+        if (dados.length === 0) {
+            htmlContent = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum registro arquivado encontrado para este mês.</td></tr>`;
+        } else {
+            dados.forEach(item => {
+                let badgeClass = 'bg-secondary';
+                if(item.status_interno === 'PAGO') badgeClass = 'bg-success';
+                else if(item.status_interno === 'COLETADO') badgeClass = 'bg-primary';
+                else if(item.status_interno === 'SOLICITADO') badgeClass = 'bg-info text-dark';
+                
+                htmlContent += `<tr>
+                    <td class="fw-bold text-dark ps-3">${item.imovel || '-'}</td>
+                    <td>${item.administradora || '-'}</td>
+                    <td>${item.responsavel || 'Não Atribuído'}</td>
+                    <td>${item.vencimento || '-'}</td>
+                    <td class="pe-3"><span class="badge ${badgeClass}">${item.status_interno || 'PENDENTE'}</span></td>
+                </tr>`;
+            });
+        }
+        
+        document.getElementById('corpoTabelaHistorico').innerHTML = htmlContent;
+        
+        // Mostra o modal gigante com a tabela
+        new bootstrap.Modal(document.getElementById('modalVerHistorico')).show();
+    })
+    .catch(err => {
+        console.error("Erro no Histórico:", err);
+        // Agora o alerta vai te dizer EXATAMENTE o que deu errado!
+        alert("Erro ao montar a tabela de histórico: " + err.message);
+    });
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Função para converter data do formato BR (DD/MM/YYYY) para que o JS entenda
+    function calcularDiasParaVencimento(dataStr) {
+        if (!dataStr || dataStr === '-' || dataStr === 'None') return null;
+        const partes = dataStr.split('/');
+        if (partes.length !== 3) return null;
+        
+        const dataVenc = new Date(partes[2], partes[1] - 1, partes[0]);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zera as horas para calcular os dias certinho
+        
+        const diffTempo = dataVenc.getTime() - hoje.getTime();
+        return Math.ceil(diffTempo / (1000 * 3600 * 24)); // Retorna a diferença em dias
+    }
+
+    // Função para caçar os Contratos Novos e colocar o Emoji
+    function destacarContratosNovos() {
+        const linhas = document.querySelectorAll("#tabelaImoveisCob tbody tr");
+        
+        linhas.forEach(linha => {
+            if (linha.id === "linhaNenhumRegistro") return;
+            
+            const checkbox = linha.querySelector(".check-imovel");
+            if (!checkbox) return;
+            
+            const dataVencStr = checkbox.getAttribute("data-venc");
+            const dataIniStr = checkbox.getAttribute("data-inicontrato");
+            const imovelId = checkbox.value;
+            
+            // Se tiver as duas datas, faz a conta!
+            if (dataVencStr && dataIniStr && dataIniStr.trim() !== '') {
+                const vP = dataVencStr.split('/');
+                const iP = dataIniStr.split('/');
+                
+                if(vP.length === 3 && iP.length === 3) {
+                    const dataVenc = new Date(vP[2], vP[1] - 1, vP[0]);
+                    const dataIni = new Date(iP[2], iP[1] - 1, iP[0]);
+                    
+                    // Descobre a diferença em dias
+                    const diffTempo = dataVenc.getTime() - dataIni.getTime();
+                    const diffDias = Math.ceil(diffTempo / (1000 * 3600 * 24));
+                    
+                    // Se o contrato começou há 90 dias ou menos (3 meses)
+                    if (diffDias >= 0 && diffDias <= 90) {
+                        const selo = linha.querySelector(`#selo_novo_${imovelId}`);
+                        if (selo) {
+                            selo.innerHTML = ' <span title="Atenção: Contrato Novo (Menos de 3 meses)" style="cursor:help; font-size:1.15rem; margin-left: 3px;">🆕</span>';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chama a função logo depois de pintar a tabela
+    destacarContratosNovos();
+
+    // Função centralizada para aplicar a cor
+    function aplicarCorPlanilha(linha, statusTexto, dataVencimentoStr) {
+        // Limpa as cores anteriores
+        linha.classList.remove('bg-planilha-verde', 'bg-planilha-amarelo', 'bg-planilha-laranja', 'bg-planilha-azul', 'bg-planilha-roxo', 'bg-planilha-vermelho');
+
+        // Calcula quantos dias faltam pro vencimento
+        const diasFaltando = calcularDiasParaVencimento(dataVencimentoStr);
+        let isAlertaVermelho = (diasFaltando !== null && diasFaltando <= 5);
+
+        // APLICA AS REGRAS DE COR
+        if (statusTexto.includes("AUTOMAÇÃO") || statusTexto.includes("ROBÔ")) {
+            if (isAlertaVermelho) {
+                linha.classList.add('bg-planilha-vermelho'); // Estourou o prazo do Robô!
+            } else {
+                linha.classList.add('bg-planilha-roxo'); // Robô tá trabalhando (Tranquilo)
+            }
+        } 
+        else if (statusTexto === "STATUS..." || statusTexto === "EM BRANCO") {
+            if (isAlertaVermelho) {
+                linha.classList.add('bg-planilha-vermelho'); // Tá em branco e vai vencer, ALERTA!
+            }
+        }
+        else if (statusTexto.includes("COLETADO")) {
+            linha.classList.add('bg-planilha-verde');
+        } 
+        else if (statusTexto.includes("SOLICITADO") || statusTexto.includes("NÃO EMITIDO") || statusTexto.includes("NAO EMITIDO")) {
+            linha.classList.add('bg-planilha-amarelo');
+        } 
+        else if (statusTexto.includes("PAGO")) { 
+            linha.classList.add('bg-planilha-laranja');
+        } 
+        else if (statusTexto.includes("CHEQUE") || statusTexto.includes("DOC")) {
+            linha.classList.add('bg-planilha-azul');
+        }
+    }
+
+    function atualizarCoresDaTabela() {
+        const linhas = document.querySelectorAll("#tabelaImoveisCob tbody tr");
+
+        linhas.forEach(linha => {
+            const selectStatus = linha.querySelector("select.select-status");
+            const checkbox = linha.querySelector(".check-imovel");
+            const dataVenc = checkbox ? checkbox.getAttribute("data-venc") : null;
+
+            if (selectStatus) {
+                const statusSelecionado = selectStatus.options[selectStatus.selectedIndex].text.toUpperCase();
+                aplicarCorPlanilha(linha, statusSelecionado, dataVenc);
+            }
+        });
+    }
+
+    // 1. Pinta a tabela logo que o site abre
+    atualizarCoresDaTabela();
+
+    // 2. Cria o espião em tempo real
+    const todosSelectsStatus = document.querySelectorAll("select.select-status");
+    todosSelectsStatus.forEach(select => {
+        select.addEventListener("change", function() {
+            const linha = this.closest("tr");
+            const checkbox = linha.querySelector(".check-imovel");
+            const dataVenc = checkbox ? checkbox.getAttribute("data-venc") : null;
+            const statusSelecionado = this.options[this.selectedIndex].text.toUpperCase();
+            
+            aplicarCorPlanilha(linha, statusSelecionado, dataVenc);
+        });
+    });
+
+    // 🚀 Usado pela rolagem infinita: cor, selo 🆕 e "espião" de status para as linhas que chegam via AJAX
+    window.prepararLinhasNovas = function(linhasNovas) {
+        linhasNovas.forEach(linha => {
+            const selectStatus = linha.querySelector("select.select-status");
+            if (!selectStatus) return;
+            const cb = linha.querySelector(".check-imovel");
+            const dataVenc = cb ? cb.getAttribute("data-venc") : null;
+            aplicarCorPlanilha(linha, selectStatus.options[selectStatus.selectedIndex].text.toUpperCase(), dataVenc);
+            selectStatus.addEventListener("change", function() {
+                const cb2 = linha.querySelector(".check-imovel");
+                const dv2 = cb2 ? cb2.getAttribute("data-venc") : null;
+                aplicarCorPlanilha(linha, this.options[this.selectedIndex].text.toUpperCase(), dv2);
+            });
+        });
+        destacarContratosNovos();
+    };
+});
+</script>
+
+<script>
+function toggleFiltros() {
+    const area = document.getElementById('areaFiltros');
+    const historico = document.getElementById('cardHistorico');
+    const emissoes = document.getElementById('cardEmissoes');
+    const botao = document.getElementById('btnToggleFiltros');
+    
+    if (area.style.display === 'none') {
+        // MOSTRAR TUDO
+        area.style.display = '';
+        if (historico) historico.style.display = '';
+        if (emissoes) emissoes.style.display = '';
+        botao.innerHTML = '🔼 Ocultar';
+    } else {
+        // ESCONDER TUDO
+        area.style.display = 'none';
+        if (historico) historico.style.display = 'none';
+        if (emissoes) emissoes.style.display = 'none';
+        botao.innerHTML = '🔽 Mostrar';
+    }
+}
+</script>
+
+<div class="modal fade" id="modalMatriz" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0">
+            <div class="modal-header text-white" style="background-color: #0f172a;">
+                <h5 class="modal-title fw-bold">📅 Matriz de Emissão x Vencimento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light p-4">
+                
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body py-2 px-3 d-flex align-items-center gap-3">
+                        <span class="fw-bold text-secondary small">Filtrar por Responsável:</span>
+                        <div id="containerFiltrosMatriz" class="d-flex gap-2 flex-wrap flex-grow-1">
+                            </div>
+                        <button class="btn btn-dark btn-sm fw-bold px-4" onclick="carregarDadosMatriz()">Aplicar Filtro</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive border shadow-sm" style="max-height: 75vh; border-radius: 8px; overflow: auto; background: white;">
+                    <table class="table table-sm m-0" id="tabelaMatriz">
+                        </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPagoAdm" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white border-0">
+                    <h5 class="modal-title fw-bold">🏠 Registrar Pagamento na ADM</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelarPagoAdm()"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <input type="hidden" id="inputImovelIdAdm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Motivo Obrigatório <span class="text-danger">*</span></label>
+                        <textarea id="textoMotivoAdm" class="form-control shadow-sm" rows="3" placeholder="Explique por que este boleto foi pago na administradora..." required></textarea>
+                    </div>
+                    <div class="mb-2">
+                       <label class="form-label fw-bold text-secondary">Anexar Comprovante Obrigatório <span class="text-danger">*</span></label>
+                        <input type="file" id="arquivoAnexoAdm" class="form-control shadow-sm" accept="image/*,application/pdf">
+                        <small class="text-muted">Apenas fotos ou PDFs.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal" onclick="cancelarPagoAdm()">Cancelar</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" onclick="confirmarPagoAdm()">Salvar no Prontuário</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalPago275" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white border-0" style="background-color: #0f172a;">
+                <h5 class="modal-title fw-bold">🏢 Registrar Pagamento na 275</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelarPago275()"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <input type="hidden" id="inputImovelId275">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-secondary">Detalhes (Motivo Obrigatório) <span class="text-danger">*</span></label>
+                    <textarea id="textoMotivo275" class="form-control shadow-sm" rows="3" placeholder="Explique os detalhes de como ocorreu este pagamento na 275..." required></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold text-secondary">Anexar Comprovante (Opcional)</label>
+                    <input type="file" id="arquivoAnexo275" class="form-control shadow-sm" accept="image/*,application/pdf">
+                    <small class="text-muted">Apenas fotos ou PDFs, se houver.</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal" onclick="cancelarPago275()">Cancelar</button>
+                <button type="button" class="btn btn-success fw-bold px-4" onclick="confirmarPago275()">Salvar no Prontuário</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEmissaoFaltante" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white border-0" style="background-color: #0ea5e9;">
+                <h6 class="modal-title fw-bold">🎉 Eba! Boleto Coletado!</h6>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="cancelarColetaEmissao()"></button>
+            </div>
+            <div class="modal-body p-4 bg-light text-center">
+                <input type="hidden" id="inputImovelIdEmissao">
+                <p class="small text-secondary mb-3">Que bom que você coletou! Mas notamos que esse caso está <b>sem o dia de emissão</b> cadastrado na base.</p>
+                <p class="small fw-bold text-dark mb-2">Para ajudar o automação futuramente, qual é o dia de emissão padrão deste boleto?</p>
+                
+                <select id="selectNovaEmissao" class="form-select form-select-sm fw-bold border-primary shadow-sm mx-auto text-center" style="max-width: 120px;">
+                    <option value="" disabled selected>Dia...</option>
+                    {% for i in range(1, 32) %}
+                        {% set val = '%02d' % i %}
+                        <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer border-0 bg-light justify-content-center">
+                <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="cancelarColetaEmissao()">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-sm fw-bold px-4" style="background-color: #0ea5e9; border: none;" onclick="confirmarColetaComEmissao()">Salvar e Concluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// =========================================================
+// RELATÓRIO: MATRIZ DE EMISSÃO X VENCIMENTO
+// =========================================================
+let matrizResponsaveisDisponiveis = [];
+
+function abrirModalMatriz() {
+    new bootstrap.Modal(document.getElementById('modalMatriz')).show();
+    // Carrega a primeira vez sem filtros (todos)
+    carregarDadosMatriz(true); 
+}
+
+function carregarDadosMatriz(primeiroCarregamento = false) {
+    // Recolhe os filtros selecionados (se houver)
+    let selecionados = [];
+    document.querySelectorAll('.check-resp-matriz:checked').forEach(cb => {
+        selecionados.push(cb.value);
+    });
+
+    fetch('/api/relatorio_matriz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responsaveis: selecionados })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.sucesso) return;
+
+        // Na primeira vez, cria as checkboxes de filtro
+        if (primeiroCarregamento) {
+            matrizResponsaveisDisponiveis = data.responsaveis_disponiveis;
+            let containerFiltros = document.getElementById('containerFiltrosMatriz');
+            containerFiltros.innerHTML = '';
+            matrizResponsaveisDisponiveis.forEach(resp => {
+                containerFiltros.innerHTML += `
+                    <div class="form-check form-check-inline m-0">
+                        <input class="form-check-input check-resp-matriz" type="checkbox" id="chk_matriz_${resp}" value="${resp}">
+                        <label class="form-check-label small fw-medium" for="chk_matriz_${resp}">${resp}</label>
+                    </div>`;
+            });
+        }
+
+        construirTabelaMatriz(data.dados);
+    })
+    .catch(err => console.error("Erro ao carregar matriz:", err));
+}
+
+function construirTabelaMatriz(dadosBrutos) {
+    // 1. Prepara a estrutura de dados (Dias 1 a 31)
+    let matriz = {};
+    let totalColuna = {};
+    let totalLinha = {};
+    let totalGeral = 0;
+
+    for (let i = 1; i <= 31; i++) {
+        matriz[i] = {};
+        totalColuna[i] = 0;
+        totalLinha[i] = 0;
+        for (let j = 1; j <= 31; j++) {
+            matriz[i][j] = { total: 0, detalhe: {} };
+        }
+    }
+
+    // 2. Preenche a matriz com os dados do banco
+    dadosBrutos.forEach(item => {
+        let emi = parseInt(item.emissao, 10);
+        let ven = parseInt(item.vencimento, 10);
+        let qtd = parseInt(item.qtd, 10);
+        
+        // Ignora dados inválidos ou fora do intervalo 1-31
+        if (!isNaN(emi) && emi >= 1 && emi <= 31 && !isNaN(ven) && ven >= 1 && ven <= 31) {
+            matriz[emi][ven].total += qtd;
+            matriz[emi][ven].detalhe[item.responsavel] = (matriz[emi][ven].detalhe[item.responsavel] || 0) + qtd;
+            
+            totalLinha[emi] += qtd;
+            totalColuna[ven] += qtd;
+            totalGeral += qtd;
+        }
+    });
+
+    // 3. Constrói o HTML da Tabela
+    let html = '<thead><tr><th class="col-emissao">Emissão ↓ \\ Vencimento →</th>';
+    for (let d = 1; d <= 31; d++) html += `<th>${d}</th>`;
+    html += '<th class="total-corner">TOTAL</th></tr></thead><tbody>';
+
+    for (let emi = 1; emi <= 31; emi++) {
+        html += `<tr><th class="col-emissao">${emi}</th>`;
+        
+        for (let ven = 1; ven <= 31; ven++) {
+            let celula = matriz[emi][ven];
+            if (celula.total > 0) {
+                // Monta o texto que vai aparecer ao passar o rato!
+                let textoTooltip = "";
+                for (const [resp, qtd] of Object.entries(celula.detalhe)) {
+                    textoTooltip += `${resp}: ${qtd} caso(s)\n`;
+                }
+                
+                html += `<td title="${textoTooltip.trim()}">${celula.total}</td>`;
+            } else {
+                html += `<td class="celula-vazia">-</td>`;
+            }
+        }
+        // Total da linha
+        html += `<td class="total-linha">${totalLinha[emi]}</td></tr>`;
+    }
+
+    // Linha final de Totais das Colunas
+    html += '<tr><td class="total-col" style="position: sticky; left: 0; z-index: 3;">TOTAL</td>';
+    for (let ven = 1; ven <= 31; ven++) {
+        html += `<td class="total-col">${totalColuna[ven] > 0 ? totalColuna[ven] : ''}</td>`;
+    }
+    html += `<td class="total-col" style="position: sticky; right: 0;">${totalGeral}</td></tr>`;
+    
+    html += '</tbody>';
+    document.getElementById('tabelaMatriz').innerHTML = html;
+}
+
+// ==========================================
+// TELA DE CARREGAMENTO COM HALL DA FAMA (DADOS REAIS)
+// ==========================================
+let frasesDinamicas = ["Carregando base de imóveis..."];
+let loopCarregamento;
+
+// Puxa as curiosidades do banco assim que o painel abre
+fetch('/api/sistema/curiosidades_carregamento')
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso && data.frases.length > 0) {
+            frasesDinamicas = data.frases;
+        }
+    })
+    .catch(err => console.log("Aguardando comunicação com o banco de dados..."));
+
+function ativarLoading() {
+    const overlay = document.getElementById('overlayCarregamento');
+    const texto = document.getElementById('textoDistracao');
+    
+    if(overlay) overlay.style.display = 'flex';
+    
+    if(texto) {
+        let contador = 0;
+        texto.innerText = frasesDinamicas[0]; 
+        
+        loopCarregamento = setInterval(() => {
+            contador++;
+            if(contador >= frasesDinamicas.length) contador = 0; 
+            texto.innerText = frasesDinamicas[contador];
+        }, 3000); // Troca a cada 3 segundos
+    }
+}
+
+// ==========================================
+// ATIVAR CARREGAMENTO NA TROCA DE ABAS/LINKS
+// ==========================================
+document.addEventListener("DOMContentLoaded", function() {
+    // Pega todos os links da página
+    const linksNavegacao = document.querySelectorAll('a');
+
+    linksNavegacao.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            const target = this.getAttribute('target');
+            const toggle = this.getAttribute('data-bs-toggle'); // Modais do Bootstrap
+
+            // 1. Ignora links vazios, âncoras (#), modais ou javascript puro
+            if (!href || href === '#' || href.startsWith('javascript:') || toggle) {
+                return;
+            }
+
+            // 2. Ignora links que abrem em Nova Guia (target="_blank")
+            if (target === '_blank') {
+                return;
+            }
+
+            // 3. Ignora se o usuário clicou segurando o CTRL / SHIFT (para abrir em nova aba)
+            if (e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1) {
+                return;
+            }
+
+            // 4. Ignora links internos específicos do seu painel
+            if (this.classList.contains('imovel-link')) {
+                return; 
+            }
+
+            // 🛑 A MÁGICA ESTÁ AQUI: Driblando o congelamento do navegador
+            e.preventDefault(); // Trava a viagem instantânea
+            ativarLoading();    // Acende a tela preta
+
+            // Dá 50 milissegundos de respiro para a tela renderizar antes de viajar
+            setTimeout(() => {
+                window.location.href = href;
+            }, 50);
+        });
+    });
+});
+
+// 1. Ativa ao enviar o formulário de filtros
+const formFiltros = document.getElementById('formFiltros');
+if (formFiltros) {
+    formFiltros.addEventListener('submit', function() {
+        ativarLoading();
+    });
+}
+
+// 2. Limpa o contador e esconde a tela se o usuário clicar no "Voltar" do navegador
+window.addEventListener('pageshow', function(event) {
+    const overlay = document.getElementById('overlayCarregamento');
+    if (overlay) overlay.style.display = 'none';
+    if (loopCarregamento) clearInterval(loopCarregamento);
+});
+
+let selectStatusAberto = null;
+let statusAntigoMembro = "";
+
+function acionarTrocaStatus(selectObj, imovelId, statusAnteriorDoBanco) {
+    const statusEscolhido = selectObj.value;
+
+    // Mágica Visual: Pinta a caixinha na hora!
+    aplicarCorStatus(selectObj, statusEscolhido);
+
+    // 🎯 GATILHO INTELIGENTE: Pede a data de emissão se estiver vazia ao coletar!
+    if (statusEscolhido === "COLETADO") {
+        const linha = document.getElementById('linha_imovel_' + imovelId);
+        const selectEmissao = linha ? linha.querySelector('.select-emissao') : null;
+        
+        if (selectEmissao && (!selectEmissao.value || selectEmissao.value.trim() === '')) {
+            selectStatusAberto = selectObj;
+            statusAntigoMembro = statusAnteriorDoBanco;
+            
+            document.getElementById('inputImovelIdEmissao').value = imovelId;
+            document.getElementById('selectNovaEmissao').value = ""; // Limpa escolhas antigas
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalEmissaoFaltante'));
+            modal.show();
+            return; // 🛑 Para a execução aqui e espera o usuário preencher o pop-up
+        }
+    }
+
+    if (statusEscolhido === "PAGO NA ADM") {
+        selectStatusAberto = selectObj;
+        statusAntigoMembro = statusAnteriorDoBanco;
+        
+        document.getElementById('inputImovelIdAdm').value = imovelId;
+        document.getElementById('textoMotivoAdm').value = "";
+        document.getElementById('arquivoAnexoAdm').value = "";
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalPagoAdm'));
+        modal.show();
+        
+    } else if (statusEscolhido === "PAGO NA 275") {
+        // 🎯 GATILHO DA 275!
+        selectStatusAberto = selectObj;
+        statusAntigoMembro = statusAnteriorDoBanco;
+        
+        document.getElementById('inputImovelId275').value = imovelId;
+        document.getElementById('textoMotivo275').value = "";
+        document.getElementById('arquivoAnexo275').value = "";
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalPago275'));
+        modal.show();
+        
+    } else {
+        atualizarStatusDireto(imovelId, statusEscolhido, selectObj);
+    }
+}
+
+// ==========================================
+// FUNÇÕES DO POP-UP DE EMISSÃO FALTANTE
+// ==========================================
+function cancelarColetaEmissao() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        aplicarCorStatus(selectStatusAberto, statusAntigoMembro); // Devolve a cor original
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalEmissaoFaltante'));
+        if(modal) modal.hide();
+    }
+}
+
+function confirmarColetaComEmissao() {
+    const imovelId = document.getElementById('inputImovelIdEmissao').value;
+    const novaEmissao = document.getElementById('selectNovaEmissao').value;
+    
+    if (!novaEmissao) {
+        alert("⚠️ Por favor, selecione o dia de emissão na lista para continuar!");
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    // 1. Salva a nova Média de Emissão primeiro
+    fetch('/atualizar_media_emissao', {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: imovelId, media: novaEmissao })
+    }).then(() => {
+        // CORRIGIDO AQUI TAMBÉM: Para ele pintar o número na tela sem dar F5
+        const linha = document.getElementById('tr_imovel_' + imovelId);
+        if (linha) {
+            const selectEmissao = linha.querySelector('.select-emissao');
+            if(selectEmissao) selectEmissao.value = novaEmissao;
+        }
+        
+        // 2. Agora sim, salva o status como COLETADO
+        return fetch('/atualizar_status_imovel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: imovelId, status: "COLETADO" })
+        });
+    })
+    .then(r => r.json())
+    .then(d => {
+        if(d.sucesso) {
+            selectStatusAberto.setAttribute('onchange', `acionarTrocaStatus(this, '${imovelId}', 'COLETADO')`);
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEmissaoFaltante'));
+            if(modal) modal.hide();
+            
+            const overlay = document.getElementById('overlayCarregamento'); 
+            if (overlay) overlay.style.display = 'none';
+            
+            const optionSelecionada = selectStatusAberto.options[selectStatusAberto.selectedIndex];
+            const textoOriginal = optionSelecionada.text;
+            optionSelecionada.text = "✔️ Coletado e Salvo!";
+            setTimeout(() => { optionSelecionada.text = textoOriginal; }, 2000);
+
+        } else {
+            alert('⚠️ Erro ao atualizar status no servidor: ' + d.msg);
+            cancelarColetaEmissao();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert('⚠️ Erro de conexão com o servidor.');
+        cancelarColetaEmissao();
+    });
+}
+// ==========================================
+// FUNÇÕES DO PAGO NA 275
+// ==========================================
+function cancelarPago275() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        aplicarCorStatus(selectStatusAberto, statusAntigoMembro); // Devolve a cor original
+    }
+}
+
+function confirmarPago275() {
+    const imovelId = document.getElementById('inputImovelId275').value;
+    const motivo = document.getElementById('textoMotivo275').value.trim();
+    const arquivoInput = document.getElementById('arquivoAnexo275');
+    
+    // Trava de Texto (Obrigatório)
+    if (!motivo) {
+        alert("⚠️ O motivo ou detalhamento é OBRIGATÓRIO para registrar o pagamento na 275!");
+        document.getElementById('textoMotivo275').focus();
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    const formData = new FormData();
+    formData.append('id', imovelId);
+    formData.append('motivo', motivo);
+    if (arquivoInput.files.length > 0) {
+        formData.append('anexo', arquivoInput.files[0]);
+    }
+    
+    fetch('/api/sistema/status_pago_275', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            bootstrap.Modal.getInstance(document.getElementById('modalPago275')).hide();
+            window.location.reload(); 
+        } else {
+            alert("Erro ao salvar: " + data.msg);
+            cancelarPago275();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// FUNÇÕES DO PAGO NA ADM
+// ==========================================
+function cancelarPagoAdm() {
+    if(selectStatusAberto) {
+        selectStatusAberto.value = statusAntigoMembro; 
+        aplicarCorStatus(selectStatusAberto, statusAntigoMembro); // Devolve a cor original
+    }
+}
+
+function confirmarPagoAdm() {
+    const imovelId = document.getElementById('inputImovelIdAdm').value;
+    const motivo = document.getElementById('textoMotivoAdm').value.trim();
+    const arquivoInput = document.getElementById('arquivoAnexoAdm');
+    
+    if (!motivo) {
+        alert("⚠️ O motivo é obrigatório para registrar o pagamento na ADM!");
+        document.getElementById('textoMotivoAdm').focus();
+        return;
+    }
+
+    // 🎯 NOVA TRAVA: O anexo agora é 100% obrigatório!
+    if (arquivoInput.files.length === 0) {
+        alert("⚠️ O comprovante em anexo é OBRIGATÓRIO para registrar o pagamento na ADM!");
+        arquivoInput.focus();
+        return;
+    }
+    
+    if (typeof ativarLoading === "function") ativarLoading(); 
+    
+    const formData = new FormData();
+    formData.append('id', imovelId);
+    formData.append('motivo', motivo);
+    formData.append('anexo', arquivoInput.files[0]); // Manda o arquivo pro banco
+    
+    fetch('/api/sistema/status_pago_adm', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            bootstrap.Modal.getInstance(document.getElementById('modalPagoAdm')).hide();
+            window.location.reload(); 
+        } else {
+            alert("Erro ao salvar: " + data.msg);
+            cancelarPagoAdm();
+            const overlay = document.getElementById('overlayCarregamento');
+            if (overlay) overlay.style.display = 'none';
+        }
+    });
+}
+// ==========================================
+// ATUALIZAÇÃO DIRETA (OUTROS STATUS)
+// ==========================================
+function atualizarStatusDireto(id, status, selectElement) {
+    fetch('/atualizar_status_imovel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, status: status })
+    }).then(r => r.json()).then(d => {
+        if(d.sucesso) {
+            // Atualiza a memória caso ele tente trocar de novo sem recarregar
+            selectElement.setAttribute('onchange', `acionarTrocaStatus(this, '${id}', '${status}')`);
+        }
+    });
+}
+
+// =========================================================
+// 🚀 BUSCA INTELIGENTE (COM DELAY) NO BANCO DE DADOS
+// =========================================================
+let timerBusca;
+function aoDigitarBusca() {
+    clearTimeout(timerBusca);
+    timerBusca = setTimeout(() => {
+        ativarLoading();
+        document.getElementById('formFiltros').submit();
+    }, 800); // Aguarda 0.8s para pesquisar direto no banco
+}
+
+// =========================================================
+// 🚀 ROLAGEM INFINITA (AJAX INFINITE SCROLL) - versão blindada
+// =========================================================
+let paginaAtualScroll = 1;      // última página JÁ carregada
+let totalPaginasScroll = 1;     // vem do servidor (data-total-paginas)
+let carregandoScroll = false;
+let fimDosDadosScroll = false;
+let observadorScroll = null;
+
+function estadoScroll(estado, msg) {
+    const carregando = document.getElementById('scrollCarregando');
+    const erro = document.getElementById('scrollErro');
+    if (!carregando || !erro) return;
+    carregando.classList.toggle('d-none', estado !== 'carregando');
+    erro.classList.toggle('d-none', estado !== 'erro');
+    if (estado === 'erro' && msg) document.getElementById('scrollErroMsg').innerText = msg;
+}
+
+function finalizarScroll() {
+    fimDosDadosScroll = true;
+    if (observadorScroll) observadorScroll.disconnect();
+    const s = document.getElementById('linhaLoadingScroll');
+    if (s) s.style.display = 'none';
+}
+
+// Reavalia a sentinela: se ela AINDA estiver visível (ex.: filtros esconderam as linhas novas),
+// o IntersectionObserver não dispara sozinho, então forçamos uma nova checagem.
+function rearmarObservadorScroll() {
+    const s = document.getElementById('linhaLoadingScroll');
+    if (!observadorScroll || !s || fimDosDadosScroll) return;
+    setTimeout(() => {
+        if (fimDosDadosScroll) return;
+        observadorScroll.unobserve(s);
+        observadorScroll.observe(s);
+    }, 150);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const sentinela = document.getElementById('linhaLoadingScroll');
+    if (!sentinela) return;
+
+    paginaAtualScroll = parseInt(sentinela.dataset.paginaInicial, 10) || 1;
+    totalPaginasScroll = parseInt(sentinela.dataset.totalPaginas, 10) || 1;
+
+    // Só 1 página (ou filtros ativos = tudo já veio): não há nada a carregar
+    if (paginaAtualScroll >= totalPaginasScroll) { finalizarScroll(); return; }
+
+    observadorScroll = new IntersectionObserver((entradas) => {
+        if (entradas.some(e => e.isIntersecting)) carregarMaisLinhas();
+    }, { root: document.querySelector('.table-wrapper'), rootMargin: '300px', threshold: 0 });
+
+    observadorScroll.observe(sentinela);
+});
+
+async function carregarMaisLinhas() {
+    if (carregandoScroll || fimDosDadosScroll) return;
+    const sentinela = document.getElementById('linhaLoadingScroll');
+    if (!sentinela) return;
+
+    carregandoScroll = true;
+    estadoScroll('carregando');
+    const proximaPagina = paginaAtualScroll + 1;   // só "confirma" a página depois que der certo
+
+    try {
+        let url = new URL(window.location.href);
+        url.searchParams.set('pagina', proximaPagina);
+        url.searchParams.set('ajax', 'true');
+
+        const res = await fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!res.ok) throw new Error('O servidor respondeu com erro ' + res.status + '.');
+        const html = await res.text();
+
+        // Sessão/login expirado (ou página de erro) volta como HTML completo, não como linhas
+        if (res.redirected || /<(!doctype|html|body)\b/i.test(html)) {
+            throw new Error('Sessão expirada ou resposta inválida. Atualize a página (F5).');
+        }
+
+        const tmp = document.createElement('tbody');
+        tmp.innerHTML = html;
+        const recebidas = Array.from(tmp.children).filter(el => el.tagName === 'TR');
+
+        // Anti-duplicidade: ignora linhas cujo ID já está na tabela
+        const jaNaTela = new Set(Array.from(document.querySelectorAll('#tbodyImoveis .check-imovel')).map(cb => cb.value));
+        const novas = recebidas.filter(tr => {
+            const cb = tr.querySelector('.check-imovel');
+            return !cb || !jaNaTela.has(cb.value);
+        });
+
+        paginaAtualScroll = proximaPagina;
+
+        if (novas.length === 0) {
+            finalizarScroll();
+        } else {
+            novas.forEach(tr => sentinela.parentNode.insertBefore(tr, sentinela));
+
+            if (window.prepararLinhasNovas) window.prepararLinhasNovas(novas);   // cores, selo 🆕, espião de status
+            if (typeof filtrarTabelaCompleta === 'function') filtrarTabelaCompleta(); // reaplica busca/filtros + contador
+            if (typeof preencherDropdownsCustomizados === 'function' && !document.querySelector('.dropdown-menu-filtro.show')) {
+                preencherDropdownsCustomizados();                                     // novos valores nos filtros de coluna
+            }
+
+            if (paginaAtualScroll >= totalPaginasScroll) finalizarScroll();
+        }
+    } catch (err) {
+        console.error("Erro no Infinite Scroll:", err);
+        estadoScroll('erro', err.message);
+        carregandoScroll = false;
+        return;   // não rearma sozinho: o operador clica em "Tentar novamente"
+    }
+
+    carregandoScroll = false;
+    rearmarObservadorScroll();
+}
+
+</script>
+
+
+{% if aviso_virada %}
+<script>
+window.addEventListener('load', function () {
+    alert({{ aviso_virada|tojson }});
+});
+</script>
+{% endif %}
+
+{% endblock %}

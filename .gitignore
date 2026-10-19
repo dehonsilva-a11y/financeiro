@@ -1,0 +1,10 @@
+banco.db
+__pycache__/
+*.json
+# --- CHAVES DE INTELIGÊNCIA ARTIFICIAL (GEMINI) ---
+GEMINI_KEY_1=AIzaSyAoYWc6eMfJCHihi3prO9LrGphOhgOQUzA
+GEMINI_KEY_2=AIzaSyBYjhmR0gcU6C5TjN7u9nzlOnKFR0QmQbY
+GEMINI_KEY_3=AIzaSyAGWBDAXzlKNKniJjBX7E8pVsH9oWX7W10
+
+# --- INTEGRAÇÕES DO GOOGLE CHAT ---
+WEBHOOK_URL_CHAT=https://chat.googleapis.com/v1/spaces/AAQAdojcNRA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=RGzjUWzI1_hL6jgFgcnj7PH7jTbHtP4uePyoWeokwGc

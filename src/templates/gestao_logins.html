@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+
+{% block title %}Planilha de Logins - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* 🚀 A MÁGICA DA TELA CHEIA ABSOLUTA 🚀 */
+    /* Essa classe ignora os limites de margem do seu base.html e força 100% do monitor */
+    .breakout-tela-cheia {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        padding: 0 15px; /* Um pequeno respiro nas bordas do monitor */
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 75px); /* Preenche a altura toda, descontando só o menu preto do topo */
+        background-color: #f8fafc;
+    }
+
+    /* Estilo do Topo (Barra de Filtros) */
+    .painel-topo {
+        padding: 15px 20px;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        z-index: 20;
+        flex-shrink: 0; /* Garante que o menu superior nunca seja espremido */
+    }
+
+    /* Container rolável da Planilha */
+    .spreadsheet-wrapper {
+        width: 100%;
+        flex-grow: 1; /* Faz a tabela esticar e ocupar todo o espaço restante para baixo */
+        overflow: auto;
+        background-color: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .table-spreadsheet {
+        width: 100%;
+        border-collapse: separate; 
+        border-spacing: 0;
+        font-family: Arial, sans-serif;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    .table-spreadsheet th, .table-spreadsheet td {
+        border-right: 1px solid #cbd5e1;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 6px;
+        vertical-align: middle;
+    }
+    
+    .table-spreadsheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 10px 12px;
+        font-weight: bold;
+        box-shadow: 0 2px 2px -1px rgba(0,0,0,0.4);
+        border-top: 1px solid #cbd5e1;
+    }
+
+    /* Cores de Cabeçalho */
+    .header-blue { background-color: #1e3a8a; color: white; }
+    .header-yellow { background-color: #d97706; color: white; }
+    .header-grey { background-color: #64748b; color: white; }
+    .header-green { background-color: #166534; color: white; }
+
+    .table-spreadsheet tbody tr { background-color: #bbf7d0; transition: background-color 0.1s ease; }
+    .table-spreadsheet tbody tr:hover { background-color: #86efac; }
+    
+    /* Linhas faltando login em vermelho claro */
+    .table-spreadsheet tbody tr.falta-login { background-color: #fecaca; }
+    .table-spreadsheet tbody tr.falta-login:hover { background-color: #fca5a5; }
+
+    /* ESTILO DOS CAMPOS EDITÁVEIS NA CÉLULA */
+    .input-planilha {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        background: transparent;
+        font-size: 0.85rem;
+        padding: 6px 8px;
+        color: #0f172a;
+        font-weight: 500;
+    }
+    
+    /* Força as colunas a manterem uma largura agradável em monitores gigantes */
+    .input-largo { min-width: 250px; }
+    .input-medio { min-width: 150px; }
+    .input-curto { min-width: 90px; }
+
+    .input-planilha:focus {
+        border: 1px solid #2563eb;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Link do Imóvel para abrir Prontuário */
+    .link-imovel { color: #2563eb; text-decoration: underline; font-weight: bold; padding-left: 5px;}
+
+    /* Alerta de "Salvando" */
+    #toast-salvando {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+        background-color: #f59e0b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        display: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- MÁGICA: Engloba tudo na nova div que "fura" os limites da tela -->
+<div class="breakout-tela-cheia">
+
+    <!-- TOAST DE FEEDBACK -->
+    <div id="toast-salvando">Salvando...</div>
+
+    <div class="painel-topo">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="fw-bold text-dark m-0">GESTÃO DE LOGINS (Edição Direta)</h4>
+                <span class="text-muted small">Edite os campos diretamente na tabela. O sistema salva automaticamente ao sair da célula.</span>
+            </div>
+            <div>
+                <a href="/imoveis" class="btn btn-dark btn-sm fw-bold px-4 shadow-sm">← Voltar para Painel Mestre</a>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="row g-2">
+            <div class="col-md-5">
+                <div class="input-group input-group-sm shadow-sm">
+                    <span class="input-group-text bg-light text-muted">🔍</span>
+                    <input type="text" id="filtroGeral" class="form-control fw-bold" placeholder="Pesquisar Empreendimento, Administradora, Imóvel...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select id="filtroPortal" class="form-select form-select-sm shadow-sm fw-bold text-dark">
+                    <option value="">⚙️ Todos os Portais</option>
+                    <option value="WINKER">Winker</option>
+                    <option value="WEBWARE">Webware</option>
+                    <option value="DIVERSOS">Diversos</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="filtroStatus" class="form-select form-select-sm shadow-sm fw-bold text-dark">
+                    <option value="">📊 Todos Status</option>
+                    <option value="TEM">✅ TEM LOGIN</option>
+                    <option value="FALTA">🚫 FALTA LOGIN</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="bg-dark text-white text-center rounded shadow-sm py-1 fw-bold" id="contadorLinhas" style="font-size: 0.85rem;">
+                    Contando...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLANILHA FULL SCREEN EXPANSA -->
+    <div class="spreadsheet-wrapper">
+        <table class="table-spreadsheet" id="tabelaLogins">
+            <thead>
+                <tr>
+                    <th class="header-blue">Nº Imóvel</th>
+                    <th class="header-blue">Nome do Empreendimento</th>
+                    <th class="header-blue">Administradora</th>
+                    <th class="header-grey text-center">Portal</th>
+                    <th class="header-blue">Usuário</th>
+                    <th class="header-blue">Senha</th>
+                    <th class="header-yellow">Empreend. (Site)</th>
+                    <th class="header-yellow text-center">Bloco</th>
+                    <th class="header-yellow text-center">Unidade</th>
+                    <th class="header-grey">Link do Portal</th>
+                    <th class="header-green text-center">STATUS</th>
+                    <th class="header-green text-center">RESP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr class="{% if r['status_login'] == 'FALTA' %}falta-login{% endif %}">
+                    
+                    <td><a href="/imovel/{{ r['imovel'] }}" target="_blank" class="link-imovel">{{ r['imovel'] }}</a></td>
+                    
+                    <!-- Colunas Informativas Expandidas -->
+                    <td style="width: 15%;"><span class="d-inline-block text-truncate px-2" style="max-width: 300px;" title="{{ r['empreendimento'] }}">{{ r['empreendimento'] if r['empreendimento'] != '-' else '' }}</span></td>
+                    <td style="width: 12%;"><span class="d-inline-block text-truncate px-2" style="max-width: 250px;" title="{{ r['administradora'] }}">{{ r['administradora'] if r['administradora'] else '-' }}</span></td>
+                    <td class="text-center fw-bold text-secondary">{{ r['portal'] }}</td>
+
+                    <!-- INPUTS EDITÁVEIS (Com larguras para esticar a tabela) -->
+                    <td class="p-0"><input type="text" class="input-planilha input-medio" data-imovel="{{ r['imovel'] }}" data-campo="usuario" data-portal="{{ r['portal'] }}" value="{{ r['usuario'] }}"></td>
+                    <td class="p-0"><input type="text" class="input-planilha input-medio" data-imovel="{{ r['imovel'] }}" data-campo="senha" data-portal="{{ r['portal'] }}" value="{{ r['senha'] }}"></td>
+                    
+                    <td class="p-0"><input type="text" class="input-planilha input-largo" data-imovel="{{ r['imovel'] }}" data-campo="emp_site" data-portal="{{ r['portal'] }}" value="{{ r['emp_site'] }}"></td>
+                    <td class="p-0"><input type="text" class="input-planilha input-curto text-center" data-imovel="{{ r['imovel'] }}" data-campo="bloco_site" data-portal="{{ r['portal'] }}" value="{{ r['bloco_site'] }}"></td>
+                    <td class="p-0"><input type="text" class="input-planilha input-curto text-center" data-imovel="{{ r['imovel'] }}" data-campo="unidade_site" data-portal="{{ r['portal'] }}" value="{{ r['unidade_site'] }}"></td>
+                    
+                    <td class="p-0"><input type="text" class="input-planilha input-largo" data-imovel="{{ r['imovel'] }}" data-campo="link_portal" data-portal="{{ r['portal'] }}" value="{{ r['link_portal'] }}"></td>
+                    
+                    <td class="text-center fw-bold status-coluna">{{ r['status_login'] }}</td>
+                    <td class="text-center">{{ r['responsavel'] | upper }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div> <!-- FIM DA DIV MÁGICA -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // ==========================================
+    // 1. SISTEMA DE SALVAMENTO AUTOMÁTICO (AJAX)
+    // ==========================================
+    const toast = document.getElementById("toast-salvando");
+
+    function salvarDado(imovel, campo, valor, portal, elementoHtml) {
+        toast.style.display = "block";
+        toast.style.backgroundColor = "#f59e0b"; // Laranja
+        toast.innerText = "Salvando alteração...";
+
+        fetch('/api/imovel/salvar_linha_planilha', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({imovel: imovel, campo: campo, valor: valor, portal: portal})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if(data.sucesso) {
+                toast.style.backgroundColor = "#10b981"; // Verde
+                toast.innerText = "✓ Salvo com sucesso!";
+                
+                const originalBg = elementoHtml.style.backgroundColor;
+                elementoHtml.style.backgroundColor = "#a7f3d0";
+                setTimeout(() => { elementoHtml.style.backgroundColor = originalBg; }, 800);
+                
+                setTimeout(() => { toast.style.display = "none"; }, 2000);
+
+                if (campo === 'usuario' || campo === 'senha') {
+                    atualizarStatusVisualLinha(elementoHtml.closest('tr'));
+                }
+            } else {
+                toast.style.backgroundColor = "#ef4444"; // Vermelho
+                toast.innerText = "Erro: " + (data.msg || "Falha ao salvar");
+            }
+        }).catch(() => {
+            toast.style.backgroundColor = "#ef4444";
+            toast.innerText = "Erro de conexão!";
+        });
+    }
+
+    function atualizarStatusVisualLinha(tr) {
+        const inputs = tr.querySelectorAll('.input-planilha');
+        let temUsu = false, temSenha = false;
+        inputs.forEach(i => {
+            if(i.dataset.campo === 'usuario' && i.value.trim() !== '') temUsu = true;
+            if(i.dataset.campo === 'senha' && i.value.trim() !== '') temSenha = true;
+        });
+        
+        if(temUsu && temSenha && tr.classList.contains('falta-login')) {
+            tr.classList.remove('falta-login');
+            tr.querySelector('.status-coluna').textContent = 'TEM';
+            
+            // 🚀 ATUALIZA A MEMÓRIA DO FILTRO PARA ELE NÃO SE PERDER
+            const index = Array.from(linhasDOM).indexOf(tr);
+            if(index > -1 && cacheLinhas[index]) {
+                cacheLinhas[index].status = 'TEM';
+                cacheLinhas[index].textoGeral = tr.textContent.toLowerCase();
+            }
+        }
+    }
+
+    document.querySelectorAll('.input-planilha').forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.dataset.valorOriginal !== this.value) {
+                salvarDado(this.getAttribute('data-imovel'), this.getAttribute('data-campo'), this.value, this.getAttribute('data-portal'), this);
+                this.dataset.valorOriginal = this.value; 
+            }
+        });
+        input.addEventListener('focus', function() {
+            this.dataset.valorOriginal = this.value;
+        });
+    });
+
+
+    // ==========================================
+    // 2. SISTEMA DE FILTROS ULTRA RÁPIDO
+    // ==========================================
+    const inputGeral = document.getElementById("filtroGeral");
+    const selectPortal = document.getElementById("filtroPortal");
+    const selectStatus = document.getElementById("filtroStatus");
+    const tabela = document.getElementById("tabelaLogins");
+    const linhasDOM = tabela.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const contador = document.getElementById("contadorLinhas");
+
+    // 🚀 CACHE: Lê o peso do HTML inteiro apenas UMA vez e guarda num Array simples
+    const cacheLinhas = Array.from(linhasDOM).map(linha => {
+        return {
+            elemento: linha,
+            textoGeral: linha.textContent.toLowerCase(),
+            portal: linha.cells[3].textContent.trim().toUpperCase(),
+            status: linha.cells[10].textContent.trim(),
+            visivel: true // Guarda se já está aparecendo ou não para evitar gastar processamento
+        };
+    });
+
+    function filtrarTabela() {
+        const termoGeral = inputGeral.value.toLowerCase().trim();
+        const termoPortal = selectPortal.value.toUpperCase();
+        const termoStatus = selectStatus.value;
+        let qtdVisiveis = 0;
+
+        // Loop direto na memória (muito mais leve que ler HTML)
+        for (let i = 0; i < cacheLinhas.length; i++) {
+            const item = cacheLinhas[i];
+            
+            const matchGeral = termoGeral === "" || item.textoGeral.includes(termoGeral);
+            const matchPortal = termoPortal === "" || item.portal.includes(termoPortal);
+            const matchStatus = termoStatus === "" || item.status.includes(termoStatus);
+
+            const deveMostrar = matchGeral && matchPortal && matchStatus;
+
+            // 🚀 Só altera a tela se o estado realmente mudou (se já estava escondido, ignora)
+            if (deveMostrar !== item.visivel) {
+                item.elemento.style.display = deveMostrar ? "" : "none";
+                item.visivel = deveMostrar;
+            }
+
+            if (deveMostrar) {
+                qtdVisiveis++;
+            }
+        }
+        contador.textContent = "🏢 " + qtdVisiveis + " imóveis localizados";
+    }
+
+    // 🚀 DEBOUNCE: Espera você parar de digitar por 300ms antes de começar a filtrar
+    let timeoutFiltro;
+    inputGeral.addEventListener("keyup", function() {
+        clearTimeout(timeoutFiltro);
+        timeoutFiltro = setTimeout(filtrarTabela, 300);
+    });
+    
+    selectPortal.addEventListener("change", filtrarTabela);
+    selectStatus.addEventListener("change", filtrarTabela);
+    
+    // Atualiza o contador na entrada
+    filtrarTabela(); 
+});
+</script>
+{% endblock %}

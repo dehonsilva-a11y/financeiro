@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Scanner IA - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .status-card { background: white; border-radius: 12px; padding: 22px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+    .indicator-label { font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    .indicator-value { font-size: 2.2rem; font-weight: 700; color: #0f172a; margin-top: 10px; }
+    .console-container { background-color: #0f172a; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); overflow: hidden; }
+    .console-header { background-color: #1e293b; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+    .console-body { padding: 20px; height: 380px; overflow-y: auto; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem; color: #e2e8f0; }
+    .log-line { margin-bottom: 8px; line-height: 1.4; }
+    .log-time { color: #64748b; margin-right: 12px; }
+    .log-success { color: #10b981; font-weight: 600; }
+    .log-error { color: #ef4444; font-weight: 600; }
+    .log-warn { color: #f59e0b; }
+    .log-info { color: #38bdf8; }
+    .btn-start { background-color: #10b981; color: white; border: none; font-weight: 700; padding: 10px; border-radius: 8px; transition: all 0.2s; }
+    .btn-start:hover { background-color: #059669; }
+    .btn-stop { background-color: #ef4444; color: white; border: none; font-weight: 700; padding: 10px; border-radius: 8px; transition: all 0.2s; }
+    .btn-stop:hover { background-color: #dc2626; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Módulo de Auditoria Visual</h4>
+        <span class="text-muted small">Monitoramento inteligente de diretórios e processamento de PDFs físicos.</span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="status-card">
+                <div>
+                    <div class="indicator-label">Motor do Scanner</div>
+                    <div id="txtEstado" class="fw-bold fs-5 mt-2">Carregando...</div>
+                </div>
+                <button id="btnToggle" class="btn-start w-100 mt-3" onclick="toggleScanner()">Iniciar Leitura</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="status-card text-center">
+                <div class="indicator-label">Boletos Coletados</div>
+                <div class="indicator-value text-success" id="valSucessos">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="status-card text-center">
+                <div class="indicator-label">Arquivos Rejeitados</div>
+                <div class="indicator-value text-danger" id="valRejeitados">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="status-card">
+                <div class="indicator-label">Pasta Monitorada</div>
+                <div class="fw-semibold text-dark mt-2" style="font-size: 0.85rem; word-break: break-all;">
+                    📁 \\Lello2\ARQUIVOS-DIGITALIZACAO\...\1_ENTRADA
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="console-container">
+        <div class="console-header">
+            <span class="text-light fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;">⚙️ Terminal de Operação (Logs em Tempo Real)</span>
+            <span class="badge bg-success" style="font-size: 0.7rem;">Conexão Estável</span>
+        </div>
+        <div class="console-body" id="consoleLogs">
+            <div class="log-line"><span class="log-time">[Sistema]</span> Inicializando interface...</div>
+        </div>
+    </div>
+
+<script>
+    function atualizarStatus() {
+        fetch('/api/scanner/status')
+        .then(r => r.json())
+        .then(data => {
+            const btn = document.getElementById('btnToggle');
+            const txt = document.getElementById('txtEstado');
+            
+            if(data.rodando) {
+                txt.innerHTML = '<span class="text-success">● PROCESSANDO</span>';
+                btn.innerHTML = 'Pausar Operação';
+                btn.className = 'btn-stop w-100 mt-3';
+            } else {
+                txt.innerHTML = '<span class="text-muted">● STAND-BY</span>';
+                btn.innerHTML = 'Iniciar Leitura Automática';
+                btn.className = 'btn-start w-100 mt-3';
+            }
+
+            document.getElementById('valSucessos').innerText = data.sucessos;
+            document.getElementById('valRejeitados').innerText = data.rejeitados;
+
+            const consoleElement = document.getElementById('consoleLogs');
+            consoleElement.innerHTML = "";
+            data.logs.forEach(log => {
+                consoleElement.innerHTML += `<div class="log-line">
+                    <span class="log-time">[${log.hora}]</span>
+                    <span class="log-${log.tipo}">${log.msg}</span>
+                </div>`;
+            });
+        });
+    }
+
+    function toggleScanner() {
+        fetch('/api/scanner/toggle', {method: 'POST'})
+        .then(() => atualizarStatus());
+    }
+
+    setInterval(atualizarStatus, 1500);
+    atualizarStatus();
+</script>
+{% endblock %}

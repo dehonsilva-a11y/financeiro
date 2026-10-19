@@ -1,0 +1,1286 @@
+{% extends "base.html" %}
+
+{% block title %}Módulo Internet, Cheque, Slip e Baixa Manual - Lello{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- ========================================== -->
+    <!-- TELA 1: SELEÇÃO DE OPERAÇÃO               -->
+    <!-- ========================================== -->
+    <div id="telaEscolha" class="row justify-content-center mt-3 pt-2">
+        <div class="col-md-11 text-center">
+            <h2 class="fw-bold mb-3" style="color: #0f172a;">O que você irá fazer hoje?</h2>
+            <p class="text-muted mb-4" style="font-size: 1.05rem;">Selecione a operação desejada para prosseguir.</p>
+            
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <!-- Card 1: Boleto Normal -->
+                <button type="button" onclick="selecionarOperacao('internet')" class="btn btn-outline-primary shadow-sm d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s;">
+                    <i class="bi bi-cloud-arrow-up display-5 mb-2"></i>
+                    <h5 class="fw-bold mb-1">Internet</h5>
+                    <span class="text-muted" style="font-size: 0.8rem;">Upload de Boleto</span>
+                </button>
+
+                <!-- Card 2: Cheque -->
+                <button type="button" onclick="selecionarOperacao('cheque')" class="btn btn-outline-info shadow-sm d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s;">
+                    <i class="bi bi-bank display-5 mb-2"></i>
+                    <h5 class="fw-bold mb-1">Cheque (231)</h5>
+                    <span class="text-muted" style="font-size: 0.8rem;">Emissão de Cheque</span>
+                </button>
+
+                <!-- Card 3: Falhas de Pgto (NOVO) -->
+                <button type="button" onclick="selecionarOperacao('falhas')" class="btn btn-outline-danger shadow-sm d-flex flex-column align-items-center justify-content-center position-relative" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s; background-color: #fef2f2;">
+                    {% if erros_pagamento|length > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light fs-6">
+                        {{ erros_pagamento|length }}
+                    </span>
+                    {% endif %}
+                    <i class="bi bi-exclamation-triangle display-5 mb-2 text-danger"></i>
+                    <h5 class="fw-bold mb-1">Falhas Pgto</h5>
+                    <span class="text-muted" style="font-size: 0.8rem;">Boletos com Erro</span>
+                </button>
+
+                <!-- Card 4: Aprovação (RESTRITO GESTÃO) -->
+                {% if usuario_atual and usuario_atual.lower() in ['ryan', 'marcio', 'arthur'] %}
+                <button type="button" onclick="selecionarOperacao('verificacao')" class="btn btn-outline-dark shadow-sm d-flex flex-column align-items-center justify-content-center position-relative" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s; background-color: #0f172a; color: white;">
+                    {% if pendentes|length > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light fs-6">
+                        {{ pendentes|length }}
+                    </span>
+                    {% endif %}
+                    <i class="bi bi-shield-check display-5 mb-2 text-info"></i>
+                    <h5 class="fw-bold mb-1">Aprovação</h5>
+                    <span class="text-light opacity-75" style="font-size: 0.8rem;">Fila de Pagamento</span>
+                </button>
+                {% endif %}
+
+                <!-- Card 5: Slip -->
+                <button type="button" onclick="selecionarOperacao('slip')" class="btn btn-outline-success shadow-sm d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s;">
+                    <i class="bi bi-file-earmark-spreadsheet display-5 mb-2"></i>
+                    <h5 class="fw-bold mb-1">Slip</h5>
+                    <span class="text-muted" style="font-size: 0.8rem;">Lançar Juros/Multa</span>
+                </button>
+
+                <!-- Card 6: Baixa Manual -->
+                <button type="button" onclick="selecionarOperacao('baixa_manual')" class="btn btn-outline-warning shadow-sm d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 170px; border-radius: 20px; border-width: 2px; transition: all 0.3s;">
+                    <i class="bi bi-journal-arrow-down display-5 mb-2"></i>
+                    <h5 class="fw-bold mb-1">Baixa 275/276</h5>
+                    <span class="text-muted" style="font-size: 0.8rem;">Erro Portal (Plan)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TELA DE FALHAS BANCÁRIAS                   -->
+    <!-- ========================================== -->
+    <div id="telaFalhas" class="row justify-content-center" style="display: none;">
+        <div class="col-md-12">
+            <button type="button" onclick="voltarEscolha()" class="btn btn-link text-decoration-none text-muted mb-3 p-0 fw-bold">
+                ← Voltar para a escolha
+            </button>
+
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px; overflow: hidden; border: 2px solid #ef4444;">
+                <div class="card-header p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                    <div>
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Pendências de Pagamento no Banco</h5>
+                        <small class="opacity-75">Boletos que foram aprovados, mas o pagamento não foi concluído. Resolva e marque ciente.</small>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.86rem;">
+                            <thead style="background-color: #fef2f2;">
+                                <tr>
+                                    <th class="ps-3 text-danger">Data do Erro</th>
+                                    <th>Solicitante</th>
+                                    <th>Imóvel / Carteira</th>
+                                    <th>Empreendimento</th>
+                                    <th>Administradora</th>
+                                    <th>Endereço</th>
+                                    <th>Motivo do Banco</th>
+                                    <th class="text-center pe-3">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for erro in erros_pagamento %}
+                                <tr id="linha_erro_{{ erro.id }}">
+                                    <td class="ps-3 fw-bold text-danger">{{ erro.data_avaliacao[8:10] }}/{{ erro.data_avaliacao[5:7] }}</td>
+                                    <td class="fw-bold text-dark">{{ erro.usuario_solicitante }}</td>
+                                    <td><span class="badge bg-primary fs-6">{{ erro.imovel }}</span><br><span class="text-muted">Cart: {{ erro.carteira }}</span></td>
+                                    <td class="fw-medium text-dark">{{ erro.empreendimento }}</td>
+                                    <td class="text-secondary">{{ erro.administradora }}</td>
+                                    <td class="text-muted" style="max-width: 150px; font-size: 0.8rem;">{{ erro.endereco }}</td>
+                                    <td style="max-width: 200px;" title="{{ erro.motivo_recusa }}"><span class="text-danger fw-bold">🚨 {{ erro.motivo_recusa }}</span></td>
+                                    <!-- CÉLULA DE AÇÕES DA TELA DE FALHAS -->
+                                    <td class="text-center pe-3">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <button class="btn btn-sm btn-success fw-bold shadow-sm w-100" id="btn_resolver_{{ erro.id }}" onclick="resolverFalha({{ erro.id }})">✔️ Resolvido</button>
+                                            
+                                            <!-- BOTÃO EXCLUIR RESTRITO À GESTÃO -->
+                                            {% if usuario_atual and usuario_atual.lower() in ['ryan', 'marcio', 'arthur'] %}
+                                            <button class="btn btn-sm btn-secondary fw-bold shadow-sm" id="btn_excluir_erro_{{ erro.id }}" title="Excluir Registro" onclick="excluirPendencia({{ erro.id }}, 'erro')">🗑️</button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5 text-muted fw-bold">
+                                        🎉 Nenhuma falha de pagamento na fila no momento!
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TELA DE APROVAÇÃO DA GESTÃO + HISTÓRICO    -->
+    <!-- ========================================== -->
+    <div id="telaVerificacao" class="row justify-content-center" style="display: none;">
+        <div class="col-md-12">
+            <button type="button" onclick="voltarEscolha()" class="btn btn-link text-decoration-none text-muted mb-3 p-0 fw-bold">
+                ← Voltar para a escolha
+            </button>
+
+            <!-- 📊 CARDS DE DESEMPENHO (GESTÃO) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 bg-white" style="border-radius: 14px; border-left: 5px solid #0ea5e9 !important;">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">Aguardando Análise</small>
+                        <h3 class="fw-bold text-dark m-0">{{ pendentes|length }} <span class="fs-6 text-muted font-monospace">casos</span></h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 bg-white" style="border-radius: 14px; border-left: 5px solid #10b981 !important;">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">Aprovados ({{ periodo_nome }})</small>
+                        <h3 class="fw-bold text-success m-0">{{ aprovados_periodo }} <span class="fs-6 text-muted font-monospace">boletos</span></h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm p-3 bg-white" style="border-radius: 14px; border-left: 5px solid #ef4444 !important;">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">Recusas e Erros ({{ periodo_nome }})</small>
+                        <h3 class="fw-bold text-danger m-0">{{ recusados_periodo }} <span class="fs-6 text-muted font-monospace">boletos</span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA 1: FILA DE PENDENTES -->
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px; overflow: hidden;">
+                <div class="card-header text-white p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+                    <div>
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-hourglass-split text-warning me-2"></i> Fila Pendente para Análise</h5>
+                        <small class="opacity-75">Casos ordenados por prioridade de Data de Pagamento.</small>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.86rem;">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="ps-3">Data Pgto.</th>
+                                    <th>Tipo</th>
+                                    <th>Solicitante</th>
+                                    <th>Imóvel / Carteira</th>
+                                    <th>Conta / Ref</th>
+                                    <th>Valor</th>
+                                    <th>Motivo / Justificativa</th>
+                                    <th class="text-center">PDF</th>
+                                    <th class="text-center pe-3">Ações da Gestão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in pendentes %}
+                                <tr id="linha_pendencia_{{ item.id }}"
+                                    data-imovel="{{ item.imovel }}" data-carteira="{{ item.carteira }}" data-mes-ref="{{ item.mes_ref }}"
+                                    data-conta="{{ item.conta }}" data-valor="{{ item.valor or '' }}" data-tipo="{{ item.tipo_doc or 'BOLETO' }}"
+                                    data-data-pgto="{{ (item.data_pagamento or '')[0:10] }}" data-nome-arquivo="{{ item.nome_arquivo }}"
+                                    data-obs="{{ item.observacao_solicitante or '' }}">
+                                    <td class="ps-3 fw-bold">
+                                        {% if item.data_pagamento and item.data_pagamento|length >= 10 %}
+                                        {% if item.data_pagamento[0:10] < data_min_pagamento %}
+                                        <span class="badge bg-danger text-white fs-6 shadow-sm" title="Data no passado: edite antes de aprovar">⚠️ {{ item.data_pagamento[8:10] }}/{{ item.data_pagamento[5:7] }}/{{ item.data_pagamento[0:4] }}</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark fs-6 shadow-sm">📅 {{ item.data_pagamento[8:10] }}/{{ item.data_pagamento[5:7] }}/{{ item.data_pagamento[0:4] }}</span>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="badge bg-secondary fs-6 shadow-sm">📅 Sem data</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.tipo_doc == 'CHEQUE' %}<span class="badge bg-info text-dark fw-bold">🏦 CHEQUE</span>
+                                        {% else %}<span class="badge bg-primary fw-bold">📄 BOLETO</span>{% endif %}
+                                    </td>
+                                    <td class="fw-bold text-dark">{{ item.usuario_solicitante }}<br><small class="text-muted font-monospace" style="font-size: 0.72rem;">{{ item.data_solicitacao }}</small></td>
+                                    <td><span class="fw-bold text-primary">{{ item.imovel }}</span> <span class="text-muted">| Cart: {{ item.carteira }}</span></td>
+                                    <td><span class="fw-bold text-secondary">Conta {{ item.conta }}</span> <small class="text-muted">({{ item.mes_ref }})</small></td>
+                                    <td class="fw-bold text-success">{% if item.valor %}R$ {{ item.valor }}{% else %}-{% endif %}</td>
+                                    <td style="max-width: 200px;" title="{{ item.observacao_solicitante }}"><span class="text-dark fw-medium">💬 {{ item.observacao_solicitante or 'Sem justificativa.' }}</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary fw-bold" onclick="abrirPdfPendente({{ item.id }}, '{{ item.nome_arquivo }}')">👁️ Ver PDF</button>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            {% if pode_editar %}
+                                            <button class="btn btn-sm btn-warning fw-bold shadow-sm" title="Editar solicitação" onclick="abrirEdicao({{ item.id }})">✏️</button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-success fw-bold shadow-sm" title="Aprovar" onclick="aprovarInternet({{ item.id }})">✔️</button>
+                                            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="Recusar" onclick="recusarInternet({{ item.id }})">✖️</button>
+                                            <button class="btn btn-sm btn-secondary fw-bold shadow-sm" id="btn_excluir_pendencia_{{ item.id }}" title="Excluir Registro" onclick="excluirPendencia({{ item.id }}, 'pendencia')">🗑️</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center py-4 text-muted fw-bold">🎉 Nenhuma solicitação pendente no momento!</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA 2: 📜 HISTÓRICO DE AVALIAÇÕES COM FILTROS -->
+            <div class="card shadow-sm border-0 mt-4" style="border-radius: 16px; overflow: hidden;">
+                <div class="card-header bg-light p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-journal-text me-2 text-primary"></i> Histórico de Decisões <span class="badge bg-secondary ms-1">{{ periodo_nome }}</span></h6>
+                    
+                    <form method="GET" action="/modulo_internet" class="d-flex gap-2 align-items-center m-0 flex-wrap">
+    <!-- Grupo de Datas (De / Até) -->
+    <div class="input-group input-group-sm shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-white fw-bold text-muted">De</span>
+        <input type="date" name="data_inicio" class="form-control" value="{{ data_inicio }}" onchange="document.querySelector('[name=filtro_mes]').value=''">
+        <span class="input-group-text bg-white fw-bold text-muted border-start-0">Até</span>
+        <input type="date" name="data_fim" class="form-control" value="{{ data_fim }}" onchange="document.querySelector('[name=filtro_mes]').value=''">
+    </div>
+    
+    <span class="text-muted small fw-bold">OU</span>
+    
+    <!-- Mês -->
+    <div class="input-group input-group-sm shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-white fw-bold text-muted">Mês</span>
+        <input type="month" name="filtro_mes" class="form-control" value="{{ filtro_mes }}" onchange="document.querySelector('[name=data_inicio]').value=''; document.querySelector('[name=data_fim]').value='';">
+    </div>
+    
+    <button type="submit" class="btn btn-sm btn-dark fw-bold px-3 shadow-sm">Filtrar</button>
+    
+    <!-- Botão de Limpar (Aparece só se o filtro estiver ativo) -->
+    {% if filtro_mes or (data_inicio and data_inicio != data_hoje) or (data_fim and data_fim != data_hoje) %}
+    <a href="/modulo_internet?filtro_aberto=1" class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="Limpar Filtros">Limpar</a>
+    {% endif %}
+</form>
+                </div>
+                
+                <div class="bg-white p-2 border-bottom">
+                    <input type="text" id="buscaHistorico" class="form-control form-control-sm bg-light border-0 fw-medium" placeholder="🔍 Buscar por Imóvel, Solicitante ou Gestor neste relatório..." onkeyup="filtrarTabelaHistorico()">
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-striped table-hover align-middle mb-0" style="font-size: 0.84rem;" id="tabelaHistoricoDecisoes">
+                            <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th class="ps-3">Data / Hora</th>
+                                    <th>Status</th>
+                                    <th>Avaliador</th>
+                                    <th>Solicitante</th>
+                                    <th>Imóvel / Carteira</th>
+                                    <th>Conta</th>
+                                    <th class="pe-3">Detalhe / Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in historico_periodo %}
+                                <tr>
+                                    <td class="ps-3 fw-bold text-secondary">
+                                        {{ h.data_avaliacao[8:10] }}/{{ h.data_avaliacao[5:7] }} <span class="font-monospace text-muted ms-1">{{ h.data_avaliacao[11:16] }}</span>
+                                    </td>
+                                    <td>
+                                        {% if h.status == 'APROVADO' %}
+                                            <span class="badge bg-success">✔️ APROVADO</span>
+                                        {% elif h.status == 'ERRO PAGAMENTO' %}
+                                            <span class="badge bg-warning text-dark">🚨 ERRO BANCÁRIO</span>
+                                        {% elif h.status == 'RESOLVIDO' %}
+                                            <span class="badge bg-info text-dark">✔️ ERRO RESOLVIDO</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">✖️ RECUSADO</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold text-dark">{{ h.usuario_avaliador or 'Gestão' }}</td>
+                                    <td class="fw-medium">{{ h.usuario_solicitante }}</td>
+                                    <td><span class="fw-bold text-primary">{{ h.imovel }}</span> <small class="text-muted">({{ h.carteira }})</small></td>
+                                    <td class="fw-bold">Conta {{ h.conta }}</td>
+                                    <td class="pe-3 text-muted">
+                                        {% if h.status == 'APROVADO' %}
+    <!-- BOTAO PARA VER DETALHES -->
+    <button class="btn btn-sm btn-outline-info fw-bold ms-1 px-2 py-0 shadow-sm" 
+            data-imovel="{{ h.imovel }}"
+            data-carteira="{{ h.carteira }}"
+            data-conta="{{ h.conta }}"
+            data-mes="{{ h.mes_ref }}"
+            data-tipo="{{ h.tipo_doc }}" 
+            data-valor="{{ h.valor }}" 
+            data-datapgto="{{ h.data_pagamento }}"
+            data-solicitante="{{ h.usuario_solicitante }}" 
+            data-datasol="{{ h.data_solicitacao }}"
+            data-avaliador="{{ h.usuario_avaliador }}"
+            data-dataaval="{{ h.data_avaliacao }}"
+            data-arquivo="{{ h.nome_arquivo }}" 
+            data-obs="{{ h.observacao_solicitante }}" 
+            onclick="verDetalhesHistorico(this)" title="Ver todos os detalhes">
+        <i class="bi bi-eye"></i> Detalhes
+    </button>
+    <!-- BOTAO PARA REPORTAR ERRO NO BANCO -->
+    <button class="btn btn-sm btn-outline-danger fw-bold ms-1 px-2 py-0 shadow-sm" onclick="reportarErroPagamento({{ h.id }})">🚨 Reportar Falha</button>
+                                            <span class="text-danger fw-bold">Motivo: {{ h.motivo_recusa or 'Sem motivo informado.' }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted fw-bold">Nenhuma avaliação localizada neste período.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TELA 3: FORMULÁRIOS                       -->
+    <!-- ========================================== -->
+    <div id="telaFormulario" class="row justify-content-center" style="display: none;">
+        <div class="col-md-8">
+            <button type="button" onclick="voltarEscolha()" class="btn btn-link text-decoration-none text-muted mb-3 p-0 fw-bold">
+                ← Voltar para a escolha
+            </button>
+
+            <div class="card shadow-sm" style="border-radius: 16px; border: none;">
+                <div id="cabecalhoCard" class="card-header text-white p-4" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                    <h4 class="mb-0 fw-bold" id="tituloCard">Upload de Conta</h4>
+                    <p class="mb-0 mt-1" id="subtituloCard" style="font-size: 0.9rem; opacity: 0.9;"></p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form id="formGeral" enctype="multipart/form-data">
+                        <input type="hidden" id="tipo_operacao" name="tipo_operacao" value="">
+
+                        <!-- SEÇÃO 1: INTERNET (BOLETO NORMAL) -->
+                        <div class="row g-3" id="secaoInternet">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Nº do Imóvel</label>
+                                <input type="number" class="form-control fw-bold campo-internet" id="imovel" name="imovel" placeholder="Ex: 278977">
+                                <div id="imovelFeedback" class="form-text text-danger" style="display: none; font-weight: 500;">Imóvel não localizado.</div>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold">Carteira (Editável)</label>
+                                <input type="text" class="form-control campo-internet fw-bold text-primary" id="carteira" name="carteira" placeholder="Buscando na base mestre...">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Compl.</label>
+                                <input type="text" class="form-control fw-bold campo-internet" id="complemento" name="complemento" placeholder="Ex: 1">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mês de Referência</label>
+                                <input type="month" class="form-control campo-internet" id="mes_ref" name="mes_ref">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Tipo de Conta</label>
+                                <select class="form-select campo-internet" id="conta" name="conta">
+                                    <option value="" disabled selected>Selecione...</option>
+                                    <option value="33">33</option>
+                                    <option value="132">132</option>
+                                    <option value="209">209</option>
+                                    <option value="211">211</option>
+                                    <option value="212">212</option>
+                                    <option value="231">231</option>
+                                    <option value="275">275</option>
+                                    <option value="276">276</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-dark">Data de Pagamento <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control campo-internet fw-bold" id="data_pagamento" name="data_pagamento" min="{{ data_min_pagamento }}" oninput="verificarData(this, 'aviso_data_int')">
+                                <div id="aviso_data_int" class="form-text text-danger fw-bold" style="display: none;">⚠️ Não é possível agendar para datas que já passaram.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Motivo (opcional)</label>
+                                <select class="form-select" id="motivo_int" name="motivo_int">
+                                    <option value="" selected>Selecionar Motivo</option>
+                                    <option value="INCO">INCO</option>
+                                    <option value="N FIN">N FIN</option>
+                                    <option value="RELACIONAMENTO">RELACIONAMENTO</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-bold text-dark">Justificativa / Motivo do Envio <span class="text-danger">*</span></label>
+                                <textarea class="form-control campo-internet" id="observacao_solicitante_int" name="observacao_solicitante" rows="2" placeholder="Explique para a gestão o motivo do upload deste boleto..." style="resize: none;"></textarea>
+                            </div>
+                            
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-bold">Anexo do Boleto (Apenas PDF)</label>
+                                <input class="form-control form-control-lg campo-internet" type="file" id="boleto" name="boleto" accept="application/pdf">
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 2: CHEQUE -->
+                        <div class="row g-3" id="secaoCheque" style="display: none;">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Nº do Imóvel</label>
+                                <input type="number" class="form-control fw-bold campo-cheque" id="imovel_cheque" name="imovel" placeholder="Ex: 278977">
+                                <div id="imovelChequeFeedback" class="form-text text-danger" style="display: none; font-weight: 500;">Imóvel não localizado.</div>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold">Carteira</label>
+                                <input type="text" class="form-control campo-cheque fw-bold text-primary" id="carteira_cheque" name="carteira" placeholder="Buscando na base mestre...">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Compl.</label>
+                                <input type="text" class="form-control fw-bold campo-cheque" id="complemento_cheque" name="complemento" placeholder="Ex: 1">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Mês Ref.</label>
+                                <input type="month" class="form-control campo-cheque" id="mes_ref_cheque" name="mes_ref">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-success">Valor (R$)</label>
+                                <input type="text" class="form-control campo-cheque fw-bold text-success" id="valor_cheque" name="valor_cheque" placeholder="Ex: 1500,00">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted">Conta (Fixo)</label>
+                                <input type="text" class="form-control fw-bold bg-light" value="231 - Cheque" readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-dark">Data Pgto. <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control campo-cheque fw-bold" id="data_pagamento_cheque" name="data_pagamento" min="{{ data_min_pagamento }}" oninput="verificarData(this, 'aviso_data_cheque')">
+                                <div id="aviso_data_cheque" class="form-text text-danger fw-bold" style="display: none;">⚠️ Não é possível agendar no passado.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Motivo (opcional)</label>
+                                <select class="form-select" id="motivo_cheque" name="motivo_cheque">
+                                    <option value="" selected>Selecionar Motivo</option>
+                                    <option value="INCO">INCO</option>
+                                    <option value="N FIN">N FIN</option>
+                                    <option value="RELACIONAMENTO">RELACIONAMENTO</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-bold text-dark">Justificativa / Motivo da Emissão <span class="text-danger">*</span></label>
+                                <textarea class="form-control campo-cheque" id="observacao_cheque" name="observacao_solicitante" rows="2" placeholder="Explique para a gestão a necessidade de emissão deste cheque..." style="resize: none;"></textarea>
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-bold">Upload do Comprovante / PDF do Cheque</label>
+                                <input class="form-control form-control-lg campo-cheque" type="file" id="boleto_cheque" name="boleto" accept="application/pdf,image/*">
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 3: BAIXA MANUAL -->
+                        <div class="row g-3" id="secaoBaixaManual" style="display: none;">
+                            <div class="col-12 mb-3 p-4 rounded" style="background-color: #fffbeb; border: 2px dashed #f59e0b; text-align: center;">
+                                <h5 class="fw-bold text-warning mb-2"><i class="bi bi-file-earmark-pdf-fill"></i> Leitura Inteligente de Retorno (275 / 276)</h5>
+                                <p class="text-muted small mb-3">Envie o PDF de retorno para extração automática via IA.</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <input type="file" class="form-control form-control-lg shadow-sm" id="pdf_baixa_lote" accept="application/pdf" style="max-width: 400px; border-radius: 12px;">
+                                    <button class="btn btn-warning text-white btn-lg fw-bold shadow-sm" type="button" id="btnExtrairBaixaLote" onclick="extrairPDFBaixaLote()" style="border-radius: 12px;">Extrair Dados</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Nº do Imóvel</label>
+                                <input type="number" class="form-control fw-bold campo-baixa" id="imovel_baixa" name="imovel_baixa" placeholder="Ex: 278977">
+                                <div id="imovelBaixaFeedback" class="form-text text-danger" style="display: none; font-weight: 500;">Imóvel não localizado.</div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">Carteira</label>
+                                <input type="text" class="form-control campo-baixa" id="carteira_baixa" name="carteira_baixa" placeholder="Buscando..." readonly style="background-color: #f1f5f9;">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Valor (R$)</label>
+                                <input type="text" class="form-control fw-bold campo-baixa" id="valor_baixa" name="valor_baixa" placeholder="Ex: 460,99">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Conta (Débito)</label>
+                                <select class="form-select campo-baixa" id="conta_baixa" name="conta_baixa">
+                                    <option value="" disabled selected>Selecione...</option>
+                                    <option value="275">275 - Inq. (Cota/Multa)</option>
+                                    <option value="276">276 - Prop. (Fdo Reserva)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Descrição</label>
+                                <select class="form-select campo-baixa" id="desc_baixa" name="desc_baixa">
+                                    <option value="" disabled selected>Selecione...</option>
+                                    <option value="PAG COTA">PAG COTA</option>
+                                    <option value="PAG FDO DE RESERVA">PAG FDO DE RESERVA</option>
+                                    <option value="PAG MULTA">PAG MULTA</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Mês de Referência</label>
+                                <input type="month" class="form-control campo-baixa" id="mes_ref_baixa" name="mes_ref_baixa">
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 4: SLIP MANUAL -->
+                        <div class="row g-3" id="secaoSlip" style="display: none;">
+                            <div class="col-12 mb-4 p-4 rounded" style="background-color: #f8fafc; border: 2px dashed #cbd5e1; text-align: center;">
+                                <h5 class="fw-bold text-success mb-2"><i class="bi bi-file-earmark-pdf-fill"></i> Lançamento em Massa (Lote)</h5>
+                                <p class="text-muted small mb-3">Envie o PDF do Bradesco para extração via IA.</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <input type="file" class="form-control form-control-lg shadow-sm" id="pdf_lote" accept="application/pdf" style="max-width: 400px; border-radius: 12px;">
+                                    <button class="btn btn-success btn-lg fw-bold shadow-sm" type="button" id="btnExtrairLote" onclick="extrairPDFLote()" style="border-radius: 12px;">Extrair Dados</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Valor Total (R$)</label>
+                                <input type="number" step="0.01" class="form-control campo-slip fw-bold text-success" id="valor_multa" name="valor_multa" placeholder="Ex: 16.86">
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <label class="form-label">Histórico Automático</label>
+                                <div class="input-group">
+                                    <select class="form-select campo-slip fw-bold" id="prefixo_historico" style="max-width: 150px;">
+                                        <option value="PAG JUROS">PAG JUROS</option>
+                                        <option value="REG MULTA">REG MULTA</option>
+                                    </select>
+                                    <select class="form-select campo-slip fw-bold" id="mes_historico">
+                                        <option value="" disabled selected>Mês...</option>
+                                        <option value="JAN">JAN</option><option value="FEV">FEV</option>
+                                        <option value="MAR">MAR</option><option value="ABR">ABR</option>
+                                        <option value="MAI">MAI</option><option value="JUN">JUN</option>
+                                        <option value="JUL">JUL</option><option value="AGO">AGO</option>
+                                        <option value="SET">SET</option><option value="OUT">OUT</option>
+                                        <option value="NOV">NOV</option><option value="DEZ">DEZ</option>
+                                    </select>
+                                    <input type="hidden" id="historico_texto" name="historico_texto">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-lg w-100 shadow-sm text-white" id="btnSalvar" style="font-size: 1.1rem; padding: 12px; border: none; font-weight: bold; border-radius: 12px;">
+                                Salvar Lançamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VISUALIZADOR DE PDF -->
+<div class="modal fade" id="modalVisualizadorPdfPendente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
+            <div class="modal-header text-white" style="background-color: #0f172a; padding: 15px 20px;">
+                <h6 class="modal-title fw-bold" id="tituloModalPdfPendente">Visualizador de Documento Pendente</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="background-color: #525659; height: 100%;">
+                <iframe id="iframePdfPendente" src="" width="100%" height="100%" style="border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% if pode_editar %}
+<!-- MODAL EDITAR SOLICITAÇÃO (GESTÃO) -->
+<div class="modal fade" id="modalEditarPendencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: #fbbf24;">
+                <h6 class="modal-title fw-bold text-dark">✏️ Editar solicitação <span id="ed_titulo" class="font-monospace"></span></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="ed_id">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-danger">Data de Pagamento</label>
+                        <input type="date" class="form-control fw-bold border-danger" id="ed_data" oninput="avisoDataEdicao()">
+                        <div id="ed_aviso_data" class="form-text text-danger fw-bold" style="display:none;">⚠️ Data no passado. Corrija antes de aprovar.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Nº do Imóvel</label>
+                        <input type="number" class="form-control fw-bold" id="ed_imovel">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Carteira</label>
+                        <input type="text" class="form-control fw-bold text-primary" id="ed_carteira">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Mês de Referência</label>
+                        <input type="month" class="form-control" id="ed_mes">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Conta</label>
+                        <select class="form-select" id="ed_conta">
+                            <option value="33">33</option>
+                            <option value="132">132</option>
+                            <option value="209">209</option>
+                            <option value="211">211</option>
+                            <option value="212">212</option>
+                            <option value="231">231</option>
+                            <option value="275">275</option>
+                            <option value="276">276</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4" id="ed_linha_valor">
+                        <label class="form-label fw-bold text-success">Valor do Cheque (R$)</label>
+                        <input type="text" class="form-control fw-bold text-success" id="ed_valor">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Nome do arquivo (como será salvo no Drive)</label>
+                        <input type="text" class="form-control font-monospace" id="ed_nome">
+                        <div class="form-text">Se mudar imóvel, carteira, mês ou conta, ajuste o nome do arquivo também.</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Justificativa</label>
+                        <textarea class="form-control" id="ed_obs" rows="2" style="resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning fw-bold" id="btnSalvarEdicao" onclick="salvarEdicao()">💾 Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VER DETALHES DO HISTÓRICO (DESIGN APRIMORADO) -->
+<div class="modal fade" id="modalDetalhesHistorico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 20px;">
+                <h5 class="modal-title fw-bold text-white"><i class="bi bi-card-list text-info me-2"></i> Detalhes da Solicitação</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                
+                <!-- Cabeçalho do Modal: Imóvel e Status -->
+                <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm" style="border-radius: 12px; border-left: 5px solid #10b981;">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark" id="det_imovel_carteira">Imóvel - Cart</h4>
+                        <small class="text-muted fw-bold" id="det_conta_mes">Conta (Mês)</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success fs-6 shadow-sm mb-1">✔️ APROVADO</span><br>
+                        <span id="det_tipo" class="badge bg-primary">TIPO</span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Bloco Valores e Datas -->
+                    <div class="col-md-6">
+                        <div class="p-3 bg-white shadow-sm h-100" style="border-radius: 12px;">
+                            <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2"><i class="bi bi-cash-coin me-1"></i> Dados do Pagamento</h6>
+                            
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Valor a Pagar</p>
+                            <h5 class="fw-bold text-success mb-3" id="det_valor">R$ 0,00</h5>
+
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Data Agendada (Para Pagamento)</p>
+                            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-check text-warning"></i> <span id="det_datapgto">00/00/0000</span></h5>
+                        </div>
+                    </div>
+
+                    <!-- Bloco Operadores (Rastreio) -->
+                    <div class="col-md-6">
+                        <div class="p-3 bg-white shadow-sm h-100" style="border-radius: 12px;">
+                            <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2"><i class="bi bi-people me-1"></i> Rastreabilidade</h6>
+                            
+                            <div class="mb-3">
+                                <p class="mb-0 text-muted" style="font-size: 0.8rem;">Solicitado por:</p>
+                                <strong class="text-dark" id="det_solicitante">Nome</strong>
+                                <div class="text-muted font-monospace" style="font-size: 0.75rem;" id="det_datasol">Data Sol</div>
+                            </div>
+
+                            <div>
+                                <p class="mb-0 text-muted" style="font-size: 0.8rem;">Aprovado por:</p>
+                                <strong class="text-dark" id="det_avaliador">Nome</strong>
+                                <div class="text-muted font-monospace" style="font-size: 0.75rem;" id="det_dataaval">Data Aval</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloco Arquivo e Observação -->
+                    <div class="col-12">
+                        <div class="p-3 bg-white shadow-sm" style="border-radius: 12px;">
+                            <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2"><i class="bi bi-file-earmark-text me-1"></i> Arquivo e Justificativa</h6>
+                            
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Nome do Arquivo Salvo (Drive)</p>
+                            <p class="font-monospace text-primary mb-3" style="font-size: 0.85rem; word-break: break-all;" id="det_arquivo">arquivo.pdf</p>
+
+                            <p class="mb-1 text-muted" style="font-size: 0.85rem;">Justificativa do Solicitante</p>
+                            <div class="p-3 bg-light rounded text-dark fst-italic shadow-sm" style="border-left: 4px solid #cbd5e1; font-size: 0.9rem;" id="det_obs">
+                                Justificativa aqui...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 bg-light pt-0">
+                <button type="button" class="btn btn-secondary fw-bold px-4" style="border-radius: 8px;" data-bs-dismiss="modal">Fechar Visualização</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<style>
+    #overlayProcessando { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem; }
+    #overlayProcessando.ativo { display: flex; }
+    #overlayProcessando .overlay-card { background: #ffffff; border-radius: 16px; padding: 2rem 2.25rem; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); }
+</style>
+<div id="overlayProcessando" role="alertdialog" aria-modal="true" aria-live="assertive" aria-labelledby="overlayProcessandoTitulo">
+    <div class="overlay-card">
+        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h5 id="overlayProcessandoTitulo" class="fw-bold mb-1">Processando...</h5>
+        <p id="overlayProcessandoDetalhe" class="text-muted mb-3"></p>
+        <p class="small text-secondary mb-0">Não feche nem atualize esta página. Tempo decorrido: <b id="overlayProcessandoTempo">0s</b></p>
+    </div>
+</div>
+
+<script>
+    // Menor data de pagamento aceita (definida pelo servidor, fuso de Brasília)
+    const DATA_MIN_PGTO = "{{ data_min_pagamento }}";
+    let dataOriginalEdicao = '';
+
+    function validarDataPagamentoForm(form) {
+        const campo = form.querySelector('#data_pagamento:not(:disabled), #data_pagamento_cheque:not(:disabled)');
+        if (campo && campo.value && campo.value < DATA_MIN_PGTO) {
+            const [a, m, d] = DATA_MIN_PGTO.split('-');
+            alert(`🚨 A data de pagamento não pode ser anterior a ${d}/${m}/${a}. Boleto não é agendado no passado.`);
+            campo.focus();
+            return false;
+        }
+        return true;
+    }
+
+    // ==========================================
+    // EDIÇÃO DE SOLICITAÇÃO PENDENTE (GESTÃO)
+    // ==========================================
+    function avisoDataEdicao() {
+        const v = document.getElementById('ed_data').value;
+        document.getElementById('ed_aviso_data').style.display = (v && v < DATA_MIN_PGTO) ? 'block' : 'none';
+    }
+
+    function abrirEdicao(id) {
+        const linha = document.getElementById(`linha_pendencia_${id}`);
+        if (!linha) return;
+        const d = linha.dataset;
+        const ehCheque = d.tipo === 'CHEQUE';
+
+        document.getElementById('ed_id').value = id;
+        document.getElementById('ed_titulo').innerText = `#${id} · ${d.tipo}`;
+        document.getElementById('ed_data').value = d.dataPgto || '';
+        document.getElementById('ed_imovel').value = d.imovel || '';
+        document.getElementById('ed_carteira').value = d.carteira || '';
+        document.getElementById('ed_mes').value = d.mesRef || '';
+        document.getElementById('ed_conta').value = d.conta || '';
+        document.getElementById('ed_conta').disabled = ehCheque;      // cheque é sempre 231
+        document.getElementById('ed_valor').value = d.valor || '';
+        document.getElementById('ed_linha_valor').style.display = ehCheque ? '' : 'none';
+        document.getElementById('ed_nome').value = d.nomeArquivo || '';
+        document.getElementById('ed_obs').value = d.obs || '';
+        document.getElementById('ed_data').min = DATA_MIN_PGTO;
+        dataOriginalEdicao = d.dataPgto || '';
+        avisoDataEdicao();
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditarPendencia')).show();
+    }
+
+    function salvarEdicao() {
+        const dataNova = document.getElementById('ed_data').value;
+        if (dataNova && dataNova !== dataOriginalEdicao && dataNova < DATA_MIN_PGTO) {
+            const [a, m, d] = DATA_MIN_PGTO.split('-');
+            alert(`🚨 A data de pagamento não pode ser anterior a ${d}/${m}/${a}.`);
+            return;
+        }
+
+        const btn = document.getElementById('btnSalvarEdicao');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
+        btn.disabled = true;
+
+        fetch('/api/internet/editar_pendencia', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id: document.getElementById('ed_id').value,
+                data_pagamento: dataNova,
+                imovel: document.getElementById('ed_imovel').value,
+                carteira: document.getElementById('ed_carteira').value,
+                mes_ref: document.getElementById('ed_mes').value,
+                conta: document.getElementById('ed_conta').value,
+                valor: document.getElementById('ed_valor').value,
+                nome_arquivo: document.getElementById('ed_nome').value,
+                observacao_solicitante: document.getElementById('ed_obs').value
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.sucesso) {
+                alert('✅ ' + d.msg);
+                const u = new URL(window.location.href);
+                u.searchParams.set('filtro_aberto', '1');   // volta direto para a tela de Aprovação
+                window.location.href = u.toString();
+            } else {
+                alert('❌ ' + d.msg);
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('❌ Erro de comunicação com o servidor.');
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
+    }
+
+    // Se o gestor fez um filtro, o sistema abre automaticamente a tela de Verificação
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('filtro_dia') || urlParams.has('filtro_mes') || urlParams.has('filtro_aberto')) {
+            selecionarOperacao('verificacao');
+        }
+    });
+
+    function selecionarOperacao(tipo) {
+        document.getElementById('telaEscolha').style.display = 'none';
+        
+        if (tipo === 'verificacao') {
+            document.getElementById('telaVerificacao').style.display = 'flex';
+            document.getElementById('telaFormulario').style.display = 'none';
+            document.getElementById('telaFalhas').style.display = 'none';
+            return;
+        }
+
+        if (tipo === 'falhas') {
+            document.getElementById('telaFalhas').style.display = 'flex';
+            document.getElementById('telaFormulario').style.display = 'none';
+            document.getElementById('telaVerificacao').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('telaVerificacao').style.display = 'none';
+        document.getElementById('telaFalhas').style.display = 'none';
+        document.getElementById('telaFormulario').style.display = 'flex';
+        document.getElementById('tipo_operacao').value = tipo;
+        
+        const cabecalho = document.getElementById('cabecalhoCard');
+        const titulo = document.getElementById('tituloCard');
+        const subtitulo = document.getElementById('subtituloCard');
+        const btnSalvar = document.getElementById('btnSalvar');
+        
+        const camposInternet = document.querySelectorAll('.campo-internet');
+        const camposCheque = document.querySelectorAll('.campo-cheque');
+        const camposSlip = document.querySelectorAll('.campo-slip');
+        const camposBaixa = document.querySelectorAll('.campo-baixa');
+
+        document.getElementById('secaoInternet').style.display = 'none';
+        document.getElementById('secaoCheque').style.display = 'none';
+        document.getElementById('secaoSlip').style.display = 'none';
+        document.getElementById('secaoBaixaManual').style.display = 'none';
+
+        // 🎯 Desabilita todos os campos para não darem conflito no envio!
+        camposInternet.forEach(c => { c.removeAttribute('required'); c.disabled = true; });
+        camposCheque.forEach(c => { c.removeAttribute('required'); c.disabled = true; });
+        camposSlip.forEach(c => { c.removeAttribute('required'); c.disabled = true; });
+        camposBaixa.forEach(c => { c.removeAttribute('required'); c.disabled = true; });
+
+        if(tipo === 'cheque') {
+            cabecalho.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+            titulo.innerHTML = '<i class="bi bi-bank"></i> Emissão de Cheque (Conta 231)';
+            subtitulo.innerText = 'Preencha os dados do cheque para envio à Fila de Aprovação da Gestão.';
+            btnSalvar.style.backgroundColor = '#0284c7';
+            
+            document.getElementById('secaoCheque').style.display = 'flex';
+            camposCheque.forEach(c => { 
+                c.setAttribute('required', 'required'); 
+                c.disabled = false; // Reativa só os campos do Cheque
+            });
+
+        } else if(tipo === 'slip') {
+            cabecalho.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            titulo.innerHTML = '<i class="bi bi-file-earmark-spreadsheet"></i> Lançamento de Slip';
+            subtitulo.innerText = 'Preencha os dados de Juros/Multa ou faça o upload do PDF em massa.';
+            btnSalvar.style.backgroundColor = '#10b981';
+            
+            document.getElementById('secaoSlip').style.display = 'flex';
+            camposSlip.forEach(c => { 
+                c.disabled = false; // Reativa só os campos do Slip
+                if(c.id !== 'ref_debito' && c.id !== 'conta_debito' && c.id !== 'prefixo_historico' && c.id !== 'observacao_slip') {
+                    c.setAttribute('required', 'required');
+                }
+            });
+
+        } else if (tipo === 'baixa_manual') {
+            cabecalho.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            titulo.innerHTML = '<i class="bi bi-journal-arrow-down"></i> Baixa Manual (Erro Portal Lello)';
+            subtitulo.innerText = 'Lança a baixa do boleto direto na planilha de Slip (Contas 275/276).';
+            btnSalvar.style.backgroundColor = '#f59e0b';
+            
+            document.getElementById('secaoBaixaManual').style.display = 'flex';
+            camposBaixa.forEach(c => { 
+                c.disabled = false; // Reativa só os campos da Baixa
+                if(c.id !== 'pdf_baixa_lote') c.setAttribute('required', 'required');
+            });
+
+        } else {
+            cabecalho.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+            titulo.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Envio de Boleto de Internet';
+            subtitulo.innerText = 'O boleto passará pela Fila de Aprovação da Gestão em ordem de pagamento.';
+            btnSalvar.style.backgroundColor = '#0ea5e9';
+            
+            document.getElementById('secaoInternet').style.display = 'flex';
+            camposInternet.forEach(c => { 
+                c.setAttribute('required', 'required'); 
+                c.disabled = false; // Reativa só os campos da Internet
+            });
+        }
+    }
+
+    function voltarEscolha() {
+        document.getElementById('telaFormulario').style.display = 'none';
+        document.getElementById('telaVerificacao').style.display = 'none';
+        document.getElementById('telaFalhas').style.display = 'none';
+        document.getElementById('telaEscolha').style.display = 'flex';
+        document.getElementById('formGeral').reset();
+    }
+
+    // ==========================================
+    // FUNÇÕES DE APROVAÇÃO, RECUSA E EXCLUSÃO
+    // ==========================================
+    function abrirPdfPendente(id, nomeArquivo) {
+        document.getElementById('tituloModalPdfPendente').innerText = "Visualizando: " + nomeArquivo;
+        document.getElementById('iframePdfPendente').src = `/api/internet/visualizar_pdf_pendente/${id}`;
+        new bootstrap.Modal(document.getElementById('modalVisualizadorPdfPendente')).show();
+    }
+
+    // ==========================================
+    // TELA DE PROCESSAMENTO (bloqueia cliques duplos)
+    // ==========================================
+    let processandoAgora = false;
+    let timerOverlayProcessando = null;
+
+    function avisarAntesDeSair(e) { e.preventDefault(); e.returnValue = ''; }
+
+    function mostrarOverlayProcessando(titulo, detalhe) {
+        processandoAgora = true;
+        document.getElementById('overlayProcessandoTitulo').innerText = titulo;
+        document.getElementById('overlayProcessandoDetalhe').innerText = detalhe || '';
+        const tempo = document.getElementById('overlayProcessandoTempo');
+        tempo.innerText = '0s';
+        const inicio = Date.now();
+        clearInterval(timerOverlayProcessando);
+        timerOverlayProcessando = setInterval(() => { tempo.innerText = Math.floor((Date.now() - inicio) / 1000) + 's'; }, 1000);
+        document.getElementById('overlayProcessando').classList.add('ativo');
+        window.addEventListener('beforeunload', avisarAntesDeSair);
+    }
+
+    function esconderOverlayProcessando() {
+        processandoAgora = false;
+        clearInterval(timerOverlayProcessando);
+        document.getElementById('overlayProcessando').classList.remove('ativo');
+        window.removeEventListener('beforeunload', avisarAntesDeSair);
+    }
+
+    function aprovarInternet(id) {
+        if (processandoAgora) return;   // já existe uma aprovação em andamento
+        if (!confirm("Confirma a APROVAÇÃO deste documento? Ele será enviado para o Google Drive na pasta da Data de Pagamento.")) return;
+
+        const linha = document.getElementById(`linha_pendencia_${id}`);
+        const tipoDoc = linha && linha.dataset.tipo === 'CHEQUE' ? 'cheque' : 'boleto';
+        const detalhe = linha ? `Enviando o ${tipoDoc} do imóvel ${linha.dataset.imovel} (conta ${linha.dataset.conta}) ao Drive.` : 'Enviando o documento ao Drive.';
+
+        // Trava visual: tela de carregamento por cima de tudo + botão desabilitado
+        const btn = document.querySelector(`#linha_pendencia_${id} .btn-success`);
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; btn.disabled = true; }
+        mostrarOverlayProcessando('Enviando para o Drive...', detalhe);
+
+        const restaurarBotao = () => { if (btn) { btn.innerHTML = originalHtml; btn.disabled = false; } };
+
+        fetch('/api/internet/aprovar_pendencia', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: id })
+        })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(d => {
+            esconderOverlayProcessando();
+            if (d.sucesso) {
+                alert('✔️ ' + d.msg);
+                if (linha) linha.remove();
+            } else {
+                alert('❌ Erro: ' + d.msg);
+                restaurarBotao();
+            }
+        })
+        .catch(err => {
+            esconderOverlayProcessando();
+            alert('❌ Erro de comunicação com o servidor.\n\nO envio pode ter sido concluído mesmo assim. Atualize a página e confira se a solicitação saiu da fila antes de tentar de novo.');
+            restaurarBotao();
+        });
+    }
+
+    function recusarInternet(id) {
+        const motivo = prompt("Digite a justificativa da RECUSA (Será enviado e-mail para o solicitante e anotado no prontuário):");
+        if (motivo === null || motivo.trim() === "") {
+            alert("Operação cancelada. É necessário informar um motivo para recusar.");
+            return;
+        }
+
+        const btn = document.querySelector(`#linha_pendencia_${id} .btn-outline-danger`);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/api/internet/recusar_pendencia', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: id, motivo: motivo })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if(d.sucesso) {
+                alert('✔️ Solicitação recusada e e-mail enviado ao solicitante.');
+                const linha = document.getElementById(`linha_pendencia_${id}`);
+                if(linha) linha.remove();
+            } else {
+                alert('❌ Erro ao recusar.');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function excluirPendencia(id, tipoTabela = 'pendencia') {
+        if (!confirm("Tem certeza que deseja EXCLUIR definitivamente este registro do sistema?")) return;
+        
+        const btn = document.getElementById(`btn_excluir_${tipoTabela}_${id}`);
+        if(btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.disabled = true;
+        }
+
+        fetch('/api/internet/excluir_pendencia', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: id })
+        })
+        .then(r => r.json()).then(d => {
+            if(d.sucesso) { 
+                const linha = document.getElementById(`linha_${tipoTabela}_${id}`);
+                if(linha) linha.remove();
+            } else {
+                alert('❌ Erro ao excluir: ' + d.msg);
+                if(btn) { btn.innerHTML = '🗑️'; btn.disabled = false; }
+            }
+        });
+    }
+
+    // ==========================================
+    // FUNÇÕES DE FALHAS BANCÁRIAS E HISTÓRICO
+    // ==========================================
+    function reportarErroPagamento(id) {
+        const motivo = prompt("🚨 INFORME A FALHA BANCÁRIA:\nEsse erro será enviado por e-mail imediatamente para quem solicitou o boleto.\nMotivo:");
+        if (motivo === null || motivo.trim() === "") return;
+
+        fetch('/api/internet/erro_pagamento', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: id, motivo: motivo })
+        })
+        .then(r => r.json()).then(d => {
+            if(d.sucesso) { 
+                alert('✔️ Erro reportado com sucesso! E-mail enviado.');
+                location.reload(); 
+            }
+        });
+    }
+
+    function resolverFalha(id) {
+        if (!confirm("Tem certeza que esse erro bancário foi resolvido e pode ser removido da lista de pendências?")) return;
+        
+        const btn = document.getElementById(`btn_resolver_${id}`);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/api/internet/resolver_erro', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: id })
+        })
+        .then(r => r.json()).then(d => {
+            if(d.sucesso) { 
+                const linha = document.getElementById(`linha_erro_${id}`);
+                if(linha) linha.remove();
+            } else {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function filtrarTabelaHistorico() {
+        const termo = document.getElementById('buscaHistorico').value.toLowerCase();
+        const linhas = document.querySelectorAll('#tabelaHistoricoDecisoes tbody tr');
+        linhas.forEach(linha => {
+            linha.style.display = linha.innerText.toLowerCase().includes(termo) ? '' : 'none';
+        });
+    }
+
+    // ==========================================
+    // BUSCAS AUTOMÁTICAS E FORMULÁRIOS
+    // ==========================================
+    function buscarCarteira(inputId, carteiraId, feedbackId) {
+        const inputElem = document.getElementById(inputId);
+        if(!inputElem) return;
+        inputElem.addEventListener('blur', function() {
+            const imovelNum = this.value.trim();
+            if(imovelNum) {
+                document.getElementById(carteiraId).value = "Buscando na base mestre...";
+                fetch('/api/internet/buscar_dados_imovel', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({imovel: imovelNum})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.sucesso) {
+                        document.getElementById(carteiraId).value = data.carteira;
+                        document.getElementById(feedbackId).style.display = 'none';
+                    } else {
+                        document.getElementById(carteiraId).value = "";
+                        document.getElementById(feedbackId).innerText = data.msg;
+                        document.getElementById(feedbackId).style.display = 'block';
+                    }
+                })
+                .catch(err => { document.getElementById(carteiraId).value = ""; });
+            }
+        });
+    }
+
+    buscarCarteira('imovel', 'carteira', 'imovelFeedback');
+    buscarCarteira('imovel_cheque', 'carteira_cheque', 'imovelChequeFeedback');
+    buscarCarteira('imovel_baixa', 'carteira_baixa', 'imovelBaixaFeedback');
+
+    document.getElementById('formGeral').addEventListener('submit', function(e) {
+        if (!validarDataPagamentoForm(this)) { e.preventDefault(); return; }
+        e.preventDefault(); 
+        const btnSalvar = document.getElementById('btnSalvar');
+        const btnText = btnSalvar.innerHTML; 
+        btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+        btnSalvar.disabled = true;
+
+        fetch('/api/internet/salvar', { method: 'POST', body: new FormData(this) })
+        .then(res => res.json())
+        .then(data => {
+            if(data.sucesso) { 
+                alert('✅ ' + data.msg); 
+                voltarEscolha(); 
+            } else { 
+                alert('🚨 Erro: ' + data.msg); 
+            }
+        })
+        .finally(() => {
+            btnSalvar.innerHTML = btnText;
+            btnSalvar.disabled = false;
+        });
+    });
+
+// Função para validar visualmente a data selecionada
+    function verificarData(input, avisoId) {
+        const avisoDiv = document.getElementById(avisoId);
+        
+        // Se a data escolhida for menor que a data mínima permitida (hoje)
+        if (input.value && input.value < DATA_MIN_PGTO) {
+            input.classList.add('border-danger', 'text-danger');
+            if (avisoDiv) avisoDiv.style.display = 'block';
+        } else {
+            // Se estiver tudo certo, remove o vermelho
+            input.classList.remove('border-danger', 'text-danger');
+            if (avisoDiv) avisoDiv.style.display = 'none';
+        }
+    }
+
+   // ==========================================
+// FUNÇÃO PARA VER DETALHES NO HISTÓRICO (DASHBOARD)
+// ==========================================
+function verDetalhesHistorico(btn) {
+    const d = btn.dataset; // Pega automaticamente todos os atributos "data-..."
+
+    // 1. Formatar a Data de Pagamento (Vem do banco como YYYY-MM-DD)
+    let dataPgtoFmt = 'Não informada';
+    if (d.datapgto && d.datapgto.length >= 10) {
+        const parts = d.datapgto.substring(0, 10).split('-');
+        if (parts.length === 3) {
+            dataPgtoFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
+
+    // 2. Título (Imóvel, Carteira, Conta, Mês)
+    document.getElementById('det_imovel_carteira').innerHTML = `${d.imovel} <span class="text-muted fs-5">| Cart: ${d.carteira}</span>`;
+    document.getElementById('det_conta_mes').innerText = `Conta ${d.conta} (${d.mes})`;
+    
+    // 3. Status/Tipo (Badge Colorida)
+    const tipoDoc = d.tipo || 'BOLETO';
+    const badgeTipo = document.getElementById('det_tipo');
+    if (tipoDoc === 'CHEQUE') {
+        badgeTipo.className = 'badge bg-info text-dark shadow-sm';
+        badgeTipo.innerHTML = '🏦 CHEQUE';
+    } else {
+        badgeTipo.className = 'badge bg-primary shadow-sm';
+        badgeTipo.innerHTML = '📄 BOLETO';
+    }
+
+    // 4. Valores Financeiros e Datas Agendadas
+    document.getElementById('det_valor').innerText = d.valor ? `R$ ${d.valor}` : 'R$ -';
+    document.getElementById('det_datapgto').innerText = dataPgtoFmt;
+    
+    // 5. Rastreabilidade (Quem fez o quê)
+    document.getElementById('det_solicitante').innerText = d.solicitante || 'Não informado';
+    document.getElementById('det_datasol').innerText = d.datasol || '';
+    document.getElementById('det_avaliador').innerText = d.avaliador || 'Gestão';
+    document.getElementById('det_dataaval').innerText = d.dataaval || '';
+
+    // 6. Dados Auxiliares
+    document.getElementById('det_arquivo').innerText = d.arquivo || 'Nenhum arquivo';
+    document.getElementById('det_obs').innerText = d.obs || 'Nenhuma justificativa foi preenchida na solicitação.';
+
+    // 7. Abre o modal com os dados carregados!
+    new bootstrap.Modal(document.getElementById('modalDetalhesHistorico')).show();
+}
+</script>
+{% endblock %}

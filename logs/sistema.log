@@ -1,0 +1,94 @@
+2026-06-12 18:40:26,991 - INFO - ====== WebDriver manager ======
+2026-06-12 18:40:30,692 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:40:32,245 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:40:33,275 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache
+2026-06-12 18:47:17,663 - INFO - ====== WebDriver manager ======
+2026-06-12 18:47:20,701 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:47:21,529 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:47:22,281 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache
+2026-06-12 18:48:26,423 - INFO - ====== WebDriver manager ======
+2026-06-12 18:48:30,319 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:48:31,160 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 18:48:31,939 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache
+2026-06-12 18:48:54,876 - ERROR - Erro Crítico no Main: Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=149.0.7827.103)
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x105a823+10083]
+	chromedriver!GetHandleVerifier [0x105a864+100c4]
+	chromedriver!(No symbol) [0xe3a6f0]
+	chromedriver!(No symbol) [0xe19613]
+	chromedriver!(No symbol) [0xeac41b]
+	chromedriver!(No symbol) [0xec2b69]
+	chromedriver!(No symbol) [0xea5e26]
+	chromedriver!(No symbol) [0xe79139]
+	chromedriver!(No symbol) [0xe79f04]
+	chromedriver!GetHandleVerifier [0x12d8fca+28e82a]
+	chromedriver!GetHandleVerifier [0x12d44fd+289d5d]
+	chromedriver!GetHandleVerifier [0x12f505b+2aa8bb]
+	chromedriver!GetHandleVerifier [0x1074416+29c76]
+	chromedriver!GetHandleVerifier [0x107b3ad+30c0d]
+	chromedriver!GetHandleVerifier [0x1063108+18968]
+	chromedriver!GetHandleVerifier [0x10632b5+18b15]
+	chromedriver!GetHandleVerifier [0x104c3ef+1c4f]
+	KERNEL32!BaseThreadInitThunk [0x74ce5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x7722d83b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x7722d7c1+231]
+
+2026-06-12 19:06:54,957 - INFO - ====== WebDriver manager ======
+2026-06-12 19:06:58,419 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 19:06:59,249 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-12 19:06:59,925 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache
+2026-06-13 00:12:08,594 - INFO - ====== WebDriver manager ======
+2026-06-13 00:12:13,034 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-13 00:12:15,744 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-13 00:12:17,392 - INFO - WebDriver version 149.0.7827.115 selected
+2026-06-13 00:12:17,402 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/149.0.7827.115/win64/chromedriver-win64.zip
+2026-06-13 00:12:17,403 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/149.0.7827.115/win64/chromedriver-win64.zip
+2026-06-13 00:12:18,395 - INFO - Driver downloading response is 200
+2026-06-13 00:12:20,317 - INFO - Driver has been saved in cache [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115]
+2026-06-16 13:13:04,698 - INFO - ====== WebDriver manager ======
+2026-06-16 13:13:06,096 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 13:39:32,501 - INFO - ====== WebDriver manager ======
+2026-06-16 13:39:35,567 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 13:48:20,080 - INFO - ====== WebDriver manager ======
+2026-06-16 13:48:21,924 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 13:55:15,894 - INFO - ====== WebDriver manager ======
+2026-06-16 13:55:17,629 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 14:10:56,434 - INFO - ====== WebDriver manager ======
+2026-06-16 14:10:57,840 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 14:11:37,958 - INFO - ====== WebDriver manager ======
+2026-06-16 14:11:39,120 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 14:14:11,440 - INFO - ====== WebDriver manager ======
+2026-06-16 14:14:13,471 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 14:28:51,181 - INFO - ====== WebDriver manager ======
+2026-06-16 14:28:52,733 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 16:50:44,125 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='localhost', port=55875): Failed to establish a new connection: [WinError 10061] Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente")': /session/0f995416b6c161e1998ed2974b8ca414
+2026-06-16 16:50:48,193 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='localhost', port=55875): Failed to establish a new connection: [WinError 10061] Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente")': /session/0f995416b6c161e1998ed2974b8ca414
+2026-06-16 16:50:52,280 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='localhost', port=55875): Failed to establish a new connection: [WinError 10061] Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente")': /session/0f995416b6c161e1998ed2974b8ca414
+2026-06-16 16:51:34,667 - INFO - ====== WebDriver manager ======
+2026-06-16 16:51:36,367 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 17:19:38,946 - INFO - ====== WebDriver manager ======
+2026-06-16 17:19:40,351 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 17:39:36,418 - INFO - ====== WebDriver manager ======
+2026-06-16 17:39:38,016 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-16 19:05:30,306 - INFO - ====== WebDriver manager ======
+2026-06-16 19:05:32,279 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.115\chromedriver-win32/chromedriver.exe] found in cache by browser version
+2026-06-17 12:06:57,052 - INFO - ====== WebDriver manager ======
+2026-06-17 12:07:00,654 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-17 12:07:02,154 - INFO - There is no [win64] chromedriver "149.0.7827.155" for browser google-chrome "149.0.7827" in cache
+2026-06-17 12:07:03,815 - INFO - There is no [win64] chromedriver "149.0.7827.155" for browser google-chrome "149.0.7827" in cache
+2026-06-17 12:07:03,815 - INFO - Get LATEST chromedriver version for google-chrome
+2026-06-17 12:07:06,547 - INFO - WebDriver version 149.0.7827.155 selected
+2026-06-17 12:07:06,561 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/149.0.7827.155/win64/chromedriver-win64.zip
+2026-06-17 12:07:06,561 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/149.0.7827.155/win64/chromedriver-win64.zip
+2026-06-17 12:07:07,781 - INFO - Driver downloading response is 200
+2026-06-17 12:07:13,251 - INFO - Driver has been saved in cache [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.155]
+2026-06-17 12:10:33,061 - INFO - ====== WebDriver manager ======
+2026-06-17 12:10:34,754 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.155\chromedriver-win64/chromedriver.exe] found in cache by browser version
+2026-06-17 12:15:56,802 - INFO - ====== WebDriver manager ======
+2026-06-17 12:15:58,146 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.155\chromedriver-win64/chromedriver.exe] found in cache by browser version
+2026-06-17 12:25:13,075 - INFO - ====== WebDriver manager ======
+2026-06-17 12:25:16,247 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.155\chromedriver-win64/chromedriver.exe] found in cache by browser version
+2026-06-17 12:49:48,278 - INFO - ====== WebDriver manager ======
+2026-06-17 12:49:50,257 - INFO - Driver [C:\Users\ryan.lima\.wdm\drivers\chromedriver\win64\149.0.7827.155\chromedriver-win64/chromedriver.exe] found in cache by browser version

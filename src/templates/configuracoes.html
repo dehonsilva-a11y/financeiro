@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurações de Administradoras - Lello{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .table-container { border: 1px solid #e2e8f0; border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.03); overflow: hidden; }
+    .table-wrapper { max-height: 50vh; overflow-y: auto; }
+    .table thead th { background-color: #0f172a; color: #f8fafc; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 15px 12px; position: sticky; top: 0; z-index: 10; }
+    .table tbody td { font-size: 0.88rem; color: #334155; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .table tbody tr:hover { background-color: #f8fafc; }
+    .badge-resp { font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: 1px solid transparent; }
+    .badge-atribuido { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .badge-pendente { background-color: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    .form-select-custom { font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; max-width: 150px; color: #334155; background-color: #f8fafc; }
+    .form-input-custom { font-size: 0.82rem; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; color: #334155; }
+    .form-input-custom:focus, .form-select-custom:focus { border-color: #00a7e1; box-shadow: 0 0 0 2px rgba(0, 167, 225, 0.1); outline: none; }
+    .btn-lello-save { background-color: #00a7e1; color: #ffffff; font-weight: 600; font-size: 0.8rem; border: none; padding: 8px 16px; border-radius: 6px; transition: all 0.2s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Configurações de Administradoras</h4>
+        <span class="text-muted small">Mapeamento de e-mails de contatos operacionais e vínculos de responsabilidade.</span>
+    </div>
+
+    {% if eh_master %}
+    <div class="card border-0 mb-4" style="border-radius: 12px; background: linear-gradient(to bottom, #ffffff, #f8fafc); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center mb-2">
+                <span class="fs-4 me-2">🛡️</span>
+                <h5 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Gestão de Colaboradores e Permissões</h5>
+            </div>
+            <p class="text-muted small mb-4" style="max-width: 600px;">Adicione colaboradores para que possam assumir o controle de administradoras no sistema. Eleve os mais experientes ao cargo de Admin Master para liberar as ferramentas avançadas.</p>
+            
+            <div class="row align-items-end g-3 mb-4 bg-white p-3 rounded-3 shadow-sm border" style="max-width: 650px;">
+                <div class="col-md-8">
+                    <label class="form-label small fw-bold text-secondary mb-1">Cadastrar Novo Colaborador (ID Curto):</label>
+                    <input type="text" id="inputNovoUsuarioPainel" class="form-control bg-light border-light shadow-none fw-medium" placeholder="Ex: ryan (como no e-mail)" style="font-size: 0.9rem;">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-dark w-100 fw-bold shadow-sm" style="background-color: #0f172a; border-radius: 6px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="adicionarUsuarioPainel()">
+                        ＋ Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive bg-white rounded-3 border shadow-sm" style="max-height: 350px; overflow-y: auto;">
+                <table class="table table-hover align-middle m-0" style="font-size: 0.9rem;">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="ps-4 py-3 text-secondary" style="font-size: 0.75rem; letter-spacing: 0.5px;">IDENTIFICAÇÃO</th>
+                            <th class="text-center py-3 text-secondary" style="font-size: 0.75rem; letter-spacing: 0.5px;">NÍVEL DE ACESSO</th>
+                            <th class="text-end pe-4 py-3 text-secondary" style="font-size: 0.75rem; letter-spacing: 0.5px;">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usu in usuarios_salvos %}
+                        <tr style="transition: background-color 0.2s;">
+                            <td class="ps-4 fw-bold text-dark py-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                        {{ usu.nome[0] | upper }}
+                                    </div>
+                                    {{ usu.nome | title }}
+                                </div>
+                            </td>
+                            <td class="text-center py-3">
+                                {% if usu.is_master == 1 or usu.nome in ['ryan', 'marcio', 'paulo', 'alessandra'] %}
+                                    <span class="badge" style="background-color: #1e293b; color: #f8fafc; font-size: 0.7rem; padding: 6px 12px; border: 1px solid #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">👑 Admin Master</span>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border px-3 py-2 fw-semibold" style="font-size: 0.7rem;">Operador Comum</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4 py-3">
+                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                    {% if usu.nome in ['ryan', 'marcio', 'paulo', 'alessandra'] %}
+                                        <span class="text-muted small fw-bold py-1 opacity-50"><i class="fas fa-lock"></i> Fundador Protegido</span>
+                                    {% else %}
+                                        {% if usu.is_master == 1 %}
+                                            <button class="btn btn-sm btn-light text-warning fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 0)" title="Rebaixar para Operador Comum">⬇️ Remover</button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-light text-success fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 1)" title="Promover a Admin Master">⬆️ Promover</button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-light text-danger fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="removerUsuarioPainel({{ usu.id }}, '{{ usu.nome }}')" title="Excluir do Sistema">🗑️</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not usuarios_salvos %}
+                        <tr><td colspan="3" class="text-center py-5 text-muted fw-semibold">Nenhum operador carregado no sistema.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #10b981 !important;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-dark mb-1"><span class="text-success"><i class="fas fa-file-invoice-dollar me-1"></i></span> Importar Baixas (Liquidações)</h6>
+            <p class="text-muted small mb-3">Faça o upload do relatório financeiro <b>(CSV ou Excel)</b>. O sistema lerá a <b>Coluna K</b> e mudará o status para <b>PAGO</b> nos imóveis da <b>Coluna A</b> marcados com a letra "L".</p>
+            
+            <form id="formBaixaLote" class="d-flex align-items-center gap-3">
+                <input type="file" id="arquivoBaixa" class="form-control form-control-sm w-50 border-success" accept=".csv, .xlsx" required>
+                <button type="button" class="btn btn-success btn-sm px-4 fw-bold shadow-sm" onclick="processarBaixasEmLote()">
+                    <i class="fas fa-check-double me-1"></i> Processar Baixas
+                </button>
+            </form>
+            <div id="resultadoBaixa" class="mt-2 small fw-bold"></div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-dark mb-1"><span style="color: #00a7e1;">|</span> Importar Base Padrão de Imóveis (Excel)</h6>
+            <p class="text-muted small mb-3">Selecione o relatório oficial da Lello extraído do sistema (ex: <code>relatorioBoletoCondominioNaoRecebido.xlsx</code>) para alimentar ou atualizar o painel.</p>
+            
+            {% if ultimo_upload %}
+            <div class="mb-3 p-2 rounded" style="background-color: #f8fafc; border: 1px solid #cbd5e1; font-size: 0.8rem; color: #475569;">
+                <b>ℹ️ Última importação realizada:</b> O arquivo <span class="badge bg-white text-dark border border-secondary font-monospace px-2 py-1">{{ ultimo_upload['acao'].split('|')[1] }}</span> 
+                foi processado por <b>{{ ultimo_upload['usuario'] }}</b> em <b>{{ ultimo_upload['data_hora'] }}</b>.
+            </div>
+            {% endif %}
+            
+            <form action="/api/sistema/upload_base" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-3">
+                <input type="file" name="arquivo_base" class="form-control form-control-sm w-50" accept=".xlsx, .xls, .csv" required>
+                <button type="submit" class="btn btn-dark btn-sm px-4 fw-bold shadow-sm" style="background-color: #1e293b;">Carregar Nova Base 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    {% if usuario_atual in ['ryan', 'marcio', 'paulo', 'alessandra'] %}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-dark mb-1"><span style="color: #00a7e1;">|</span> Movimentação Rápida de Administradora/Imóveis (Transferir / Inverter)</h6>
+            <p class="text-muted small mb-3">Troque os Imóveis entre dois operadores ou passe todas as administradoras de um para o outro instantaneamente.</p>
+            
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small fw-bold text-secondary mb-0">Colaborador A:</label>
+                    <select id="swapOpA" class="form-select form-select-sm fw-bold border-secondary text-secondary" style="width: 150px; font-size: 0.8rem;">
+                        <option value="" disabled selected>Selecionar...</option>
+                        <option value="Ryan">Ryan</option>
+                        <option value="Jéssica">Jéssica</option>
+                        <option value="Victor">Victor</option>
+                        <option value="Arthur">Arthur</option>
+                        <option value="Ellen">Ellen</option>
+                    </select>
+                </div>
+
+                <div class="fs-5 text-muted fw-bold">🔄</div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small fw-bold text-secondary mb-0">Colaborador B:</label>
+                    <select id="swapOpB" class="form-select form-select-sm fw-bold border-secondary text-secondary" style="width: 150px; font-size: 0.8rem;">
+                        <option value="" disabled selected>Selecionar...</option>
+                        <option value="Ryan">Ryan</option>
+                        <option value="Jéssica">Jéssica</option>
+                        <option value="Victor">Victor</option>
+                        <option value="Arthur">Arthur</option>
+                        <option value="Ellen">Ellen</option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-2 ms-md-2">
+                    <button type="button" class="btn btn-outline-dark btn-sm fw-bold px-3" onclick="processarMovimentacao('transferir')">➡️ Transferir A para B</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3" style="background-color: #00a7e1; border-color: #00a7e1;" onclick="processarMovimentacao('inverter')">🔀 Inverter (Trocar)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+  
+
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <div class="d-flex align-items-center gap-2" id="containerAcoesLoteConfig" style="display: none;">
+            <span class="small fw-bold text-muted">Ação em Lote:</span>
+            <select id="operadorLote" class="form-select form-select-sm fw-bold border-secondary text-secondary shadow-sm" style="width: 200px;">
+                <option value="" disabled selected>Atribuir para Colaborador(a)...</option>
+                <option value="Ryan">Ryan</option>
+                <option value="Jéssica">Jéssica</option>
+                <option value="Victor">Victor</option>
+                <option value="Arthur">Arthur</option>
+                <option value="Ellen">Ellen</option>
+            </select>
+            <button class="btn btn-sm btn-dark fw-bold px-3 shadow-sm" onclick="aplicarOperadorLote()">Aplicar a Selecionados</button>
+        </div>
+        <div class="small fw-bold text-primary ms-auto" id="contadorSelecionadosConfig" style="display: none;">0 selecionados</div>
+    </div>
+
+    <div class="card card-table-container border-0 table-container">
+        <div class="table-wrapper">
+            <table class="table m-0">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;" class="text-center">
+                            <input type="checkbox" id="checkTodosConfig" class="form-check-input" onclick="selecionarTodosConfig(this)">
+                        </th>
+                        <th style="width: 30%;">Administradora</th>
+                        <th style="width: 15%;">Responsável Atual</th>
+                        <th style="width: 50%;">Ações de Update (Colaborador / E-mail Corporativo)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vinculo in vinculos %}
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input check-adm" value="{{ vinculo['administradora'] }}">
+                        </td>
+                        <td class="fw-bold text-dark">{{ vinculo['administradora'] }}</td>
+                        <td>
+                            {% if vinculo['colaborador'] and vinculo['colaborador'] != 'Não Atribuído' %}
+                                <span class="badge badge-resp badge-atribuido">{{ vinculo['colaborador'] }}</span>
+                            {% else %}
+                                <span class="badge badge-resp badge-pendente">Não Atribuído</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="/atualizar_configuracoes_adm" method="POST" class="d-flex gap-2 m-0 align-items-center">
+                                <input type="hidden" name="administradora" value="{{ vinculo['administradora'] }}">
+                                
+                                <select name="colaborador" class="form-select form-select-custom">
+                                    <option value="" disabled selected>Alterar...</option>
+                                    <option value="Ryan">Ryan</option>
+                                    <option value="Jéssica">Jéssica</option>
+                                    <option value="Victor">Victor</option>
+                                    <option value="Arthur">Arthur</option>
+                                    <option value="Ellen">Ellen</option>
+                                </select>
+                                
+                                <input type="text" name="email" class="form-control form-input-custom"
+                                       placeholder="" 
+                                       value="{{ vinculo['email'] if vinculo['email'] else '' }}">
+                                
+                                <button type="submit" class="btn btn-lello-save text-nowrap">Gravar Dados</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {% if not vinculos %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <h6 class="fw-bold mb-1">Nenhuma administradora localizada na base atual.</h6>
+                            <small>Utilize o campo de upload acima para carregar o arquivo Excel e iniciar o mês!</small>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+// ==========================================
+// FUNÇÃO DE BAIXA EM LOTE (LIQUIDAÇÕES)
+// ==========================================
+function processarBaixasEmLote() {
+    const input = document.getElementById('arquivoBaixa');
+    const resultado = document.getElementById('resultadoBaixa');
+    
+    if (!input.files || input.files.length === 0) {
+        alert('⚠️ Selecione um arquivo CSV ou Excel primeiro!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('arquivo', input.files[0]);
+
+    resultado.innerHTML = '<span class="text-primary"><i class="fas fa-spinner fa-spin"></i> Lendo arquivo e cruzando baixas no banco... Aguarde.</span>';
+
+    fetch('/api/importar_baixas', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            resultado.innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> Sucesso! ${data.qtd} imóveis foram confirmados como PAGO.</span>`;
+            input.value = ""; 
+        } else {
+            resultado.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Erro: ${data.msg}</span>`;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        resultado.innerHTML = `<span class="text-danger"><i class="fas fa-wifi"></i> Erro de conexão com o servidor.</span>`;
+    });
+}
+
+// ==========================================
+// FUNÇÕES DE AÇÃO EM LOTE PARA CONFIGURAÇÕES
+// ==========================================
+
+function selecionarTodosConfig(master) {
+    document.querySelectorAll('.check-adm').forEach(cb => cb.checked = master.checked);
+    atualizarContadorConfig();
+}
+
+document.addEventListener('change', function(e) {
+    if(e.target.classList.contains('check-adm') || e.target.id === 'checkTodosConfig') {
+        atualizarContadorConfig();
+    }
+});
+
+function atualizarContadorConfig() {
+    const qtd = document.querySelectorAll('.check-adm:checked').length;
+    const contador = document.getElementById('contadorSelecionadosConfig');
+    const painelLote = document.getElementById('containerAcoesLoteConfig');
+    
+    if (qtd > 0) {
+        contador.innerText = qtd + " administradora(s) selecionada(s)";
+        contador.style.display = "block";
+        painelLote.style.display = "flex";
+    } else {
+        contador.style.display = "none";
+        painelLote.style.display = "none";
+    }
+}
+
+function aplicarOperadorLote() {
+    const checkboxes = document.querySelectorAll('.check-adm:checked');
+    const novoOperador = document.getElementById('operadorLote').value;
+    
+    if (checkboxes.length === 0) return;
+    if (!novoOperador) { alert("⚠️ Selecione para qual operador(a) deseja atribuir a carteira."); return; }
+
+    if(!confirm(`Confirma a atribuição de ${checkboxes.length} administradoras para o(a) operador(a) "${novoOperador}"?`)) return;
+
+    const adms = Array.from(checkboxes).map(cb => cb.value);
+
+    fetch('/api/sistema/atualizar_responsaveis_lote', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ adms: adms, colaborador: novoOperador })
+    }).then(r => r.json()).then(data => {
+        if(data.sucesso) {
+            window.location.reload(); 
+        } else {
+            alert(" Falha ao atualizar em lote: " + data.msg);
+        }
+    });
+}
+
+// ==========================================
+// PROMOÇÃO E REBAIXAMENTO DINÂMICO DE CARGO
+// ==========================================
+function alterarNivelMaster(idUsuario, nomeUsuario, tornarMaster) {
+    const acaoTexto = tornarMaster === 1 ? "promover a Admin Master" : "remover o status de Admin Master de";
+    if(!confirm(` Deseja realmente ${acaoTexto} o operador "${nomeUsuario}"?`)) return;
+    
+    fetch('/api/sistema/alterar_permissao_usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idUsuario, nome: nomeUsuario, is_master: tornarMaster })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(" Erro ao processar: " + data.msg);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert(" Falha de comunicação com o servidor.");
+    });
+}
+
+// ==========================================
+// MOVIMENTAÇÃO RÁPIDA (TRANSFERIR / INVERTER)
+// ==========================================
+
+function processarMovimentacao(acao) {
+    const opA = document.getElementById('swapOpA').value;
+    const opB = document.getElementById('swapOpB').value;
+
+    if (!opA || !opB) {
+        alert("⚠️ Por favor, selecione os dois operadores para executar a ação.");
+        return;
+    }
+    if (opA === opB) {
+        alert("⚠️ Os operadores selecionados precisam ser diferentes.");
+        return;
+    }
+
+    const msgConfirm = acao === 'transferir'
+        ? `🚨 ATENÇÃO: Confirma transferir TODAS as administradoras de [${opA}] para [${opB}]?`
+        : `🔀 CONFIRMA INVERTER AS CARTEIRAS? Tudo que é da carteira de [${opA}] vai para [${opB}] e tudo de [${opB}] vai para [${opA}] simultaneamente!`;
+
+    if (!confirm(msgConfirm)) return;
+
+    fetch('/api/sistema/transferir_inverter_carteira', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operador_a: opA, operador_b: opB, acao: acao })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(" Falha na operação: " + data.msg);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert(" Erro de comunicação com o servidor.");
+    });
+}
+
+// ==========================================
+// GERENCIAMENTO DE USUÁRIOS DO PAINEL
+// ==========================================
+function adicionarUsuarioPainel() {
+    const nomeInput = document.getElementById('inputNovoUsuarioPainel').value.trim();
+    if(!nomeInput) { alert("⚠️ Digite o nome do operador."); return; }
+    
+    fetch('/api/sistema/adicionar_usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nomeInput })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(" Erro: " + data.msg);
+        }
+    });
+}
+
+function removerUsuarioPainel(idUsuario, nomeUsuario) {
+    if(!confirm(`⚠️ Tem certeza absoluta que deseja remover o acesso do operador "${nomeUsuario}"?`)) return;
+    
+    fetch('/api/sistema/remover_usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idUsuario, nome: nomeUsuario })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(" Erro: " + data.msg);
+        }
+    });
+}
+
+</script>
+{% endblock %}
