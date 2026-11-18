@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Acessos e senhas - Lello{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/acessos.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-1 pb-5">
+
+    <div class="mb-4">
+        <h3 class="fw-bold m-0" style="color: var(--vinho); letter-spacing: -.5px;">Acessos e senhas</h3>
+        <p class="m-0 mt-1" style="color: var(--cinza); font-size: .9rem;">
+            Quem pode entrar no sistema. O nome continua sendo o mesmo usado na produtividade e nas carteiras.
+        </p>
+    </div>
+
+    <div class="cartao-acessos mb-4">
+        <div class="cabeca">
+            <h5>Pessoas</h5>
+            <p>O e-mail é para onde vai o link de “esqueci minha senha”. Desativar tira o acesso na hora e guarda o histórico.</p>
+        </div>
+        <div class="table-responsive">
+            <table class="acessos">
+                <thead>
+                    <tr>
+                        <th class="text-start">Nome</th>
+                        <th class="text-start">Usuário</th>
+                        <th class="text-start">E-mail</th>
+                        <th class="text-start">Situação</th>
+                        <th class="text-start">Última entrada</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pessoas %}
+                    <tr id="linha-{{ p.id }}" class="{{ '' if p.ativo else 'inativo' }}">
+                        <td class="fw-bold">
+                            {{ p.nome_exibicao or p.nome }}
+                            {% if p.is_master %}<span class="etiqueta gestor ms-1">gestor</span>{% endif %}
+                        </td>
+                        <td><code style="color: var(--cinza);">{{ p.usuario_login }}</code></td>
+                        <td>
+                            <input type="email" class="email-campo" value="{{ p.email or '' }}"
+                                   placeholder="nome@lello.com.br" data-id="{{ p.id }}"
+                                   onchange="salvarEmail(this)" aria-label="E-mail de {{ p.nome_exibicao or p.nome }}">
+                        </td>
+                        <td>
+                            {% if not p.ativo %}<span class="etiqueta sem">desativado</span>
+                            {% elif not p.tem_senha %}<span class="etiqueta sem">sem senha</span>
+                            {% elif p.precisa_trocar_senha %}<span class="etiqueta pendente">senha temporária</span>
+                            {% else %}<span class="etiqueta sem">em uso</span>{% endif %}
+                        </td>
+                        <td style="color: var(--cinza);">{{ p.ultimo_acesso or '—' }}</td>
+                        <td class="text-end">
+                            <button class="botao-acao" onclick="gerarSenha({{ p.id }}, '{{ (p.nome_exibicao or p.nome)|e }}')">Gerar senha</button>
+                            <button class="botao-acao ms-1" onclick="mudarAtivo({{ p.id }}, {{ 0 if p.ativo else 1 }})">
+                                {{ 'Desativar' if p.ativo else 'Reativar' }}
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="cartao-acessos">
+        <div class="cabeca">
+            <h5>Últimas entradas</h5>
+            <p>Serve para conferir quem entrou e enxergar tentativa de acesso que falhou.</p>
+        </div>
+        <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+            <table class="acessos registro">
+                <tbody>
+                    {% for a in acessos %}
+                    <tr>
+                        <td style="white-space: nowrap;">{{ a.data_hora }}</td>
+                        <td class="fw-bold">{{ a.usuario or a.usuario_digitado or '—' }}</td>
+                        <td class="{{ '' if a.sucesso else 'falhou' }}">{{ a.motivo }}</td>
+                        <td style="color: var(--cinza);">{{ a.ip or '' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td class="text-center py-4" style="color: var(--cinza);">Nenhum acesso registrado ainda.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSenha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius: 14px; border: 0;">
+            <div class="modal-body p-4 text-center">
+                <h5 class="fw-bold mb-1" style="color: var(--vinho);">Senha de <span id="senhaDe"></span></h5>
+                <p class="small mb-3" style="color: var(--cinza);" id="senhaRecado"></p>
+                <div class="senha-gerada mb-3" id="senhaValor"></div>
+                <p class="small mb-3" style="color: var(--cinza);">
+                    Esta senha aparece uma vez só. No primeiro acesso o sistema pede para trocar.
+                </p>
+                <button class="botao-acao w-100" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function pedir(rota, corpo) {
+    return fetch(rota, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(corpo)
+    }).then(function (r) { return r.json(); });
+}
+
+function salvarEmail(campo) {
+    pedir('{{ url_for("api_acessos_salvar_email") }}', { id: campo.dataset.id, email: campo.value.trim() })
+        .then(function (d) {
+            campo.style.borderColor = d.sucesso ? '#1e5b39' : 'var(--vermelho)';
+            if (!d.sucesso) { alert(d.msg || 'Não consegui salvar o e-mail.'); }
+            setTimeout(function () { campo.style.borderColor = ''; }, 1500);
+        })
+        .catch(function () { alert('O sistema não respondeu.'); });
+}
+
+function gerarSenha(id, nome) {
+    if (!confirm('Gerar uma senha nova para ' + nome + '?\nA senha atual deixa de funcionar na hora.')) { return; }
+    pedir('{{ url_for("api_acessos_gerar_senha") }}', { id: id }).then(function (d) {
+        if (!d.sucesso) { return alert(d.msg || 'Não consegui gerar a senha.'); }
+        document.getElementById('senhaDe').textContent = nome;
+        document.getElementById('senhaValor').textContent = d.senha;
+        document.getElementById('senhaRecado').textContent = d.email_enviado
+            ? 'Também enviamos para ' + d.email
+            : 'Entregue pessoalmente: não há e-mail cadastrado.';
+        new bootstrap.Modal(document.getElementById('modalSenha')).show();
+        var linha = document.getElementById('linha-' + id);
+        if (linha) { linha.querySelector('.etiqueta').outerHTML = '<span class="etiqueta pendente">senha temporária</span>'; }
+    }).catch(function () { alert('O sistema não respondeu.'); });
+}
+
+function mudarAtivo(id, ativo) {
+    pedir('{{ url_for("api_acessos_ativar") }}', { id: id, ativo: ativo }).then(function (d) {
+        if (!d.sucesso) { return alert(d.msg || 'Não consegui alterar.'); }
+        window.location.reload();
+    }).catch(function () { alert('O sistema não respondeu.'); });
+}
+</script>
+{% endblock %}

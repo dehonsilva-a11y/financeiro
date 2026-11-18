@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if primeira_vez %}Crie sua senha{% else %}Nova senha{% endif %} · Portal de Cobranças</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/lello.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/definir_senha.css') }}">
+</head>
+<body>
+    <div class="boleto" id="faixa" aria-hidden="true"></div>
+
+    <main>
+        <div class="coluna">
+            <img src="{{ url_for('static', filename='img/lello.png') }}" alt="Lello Imóveis" class="marca">
+
+            {% if link_invalido %}
+                <h1>Link vencido</h1>
+                <p class="linha-fina">Este link de senha já foi usado ou passou de uma hora.
+                   Peça um novo na tela de entrada, em “Esqueci minha senha”.</p>
+                <a class="volta" href="{{ url_for('login') }}">Voltar para a entrada</a>
+            {% else %}
+                {% if primeira_vez %}
+                    <h1>Crie sua senha</h1>
+                    <p class="linha-fina">Olá, {{ nome }}. Esta é sua primeira entrada: escolha uma senha sua
+                       e confirme seu e-mail de trabalho — é por ele que você recupera o acesso depois.</p>
+                {% else %}
+                    <h1>Nova senha</h1>
+                    <p class="linha-fina">Olá, {{ nome }}. Escolha a senha que você vai usar a partir de agora.</p>
+                {% endif %}
+
+                <div class="recado ruim" id="caixaErro" role="alert" {% if not erro %}hidden{% endif %}>{{ erro or '' }}</div>
+
+                <form id="formSenha" method="POST" action="{{ url_for('definir_senha') }}" novalidate>
+                    <input type="hidden" name="t" value="{{ token or '' }}">
+
+                    <div class="campo com-botao">
+                        <label for="senha">Nova senha</label>
+                        <input type="password" id="senha" name="senha" autocomplete="new-password" required>
+                        <button type="button" class="olho" id="botaoOlho" aria-label="Mostrar senha" title="Mostrar senha">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="campo">
+                        <label for="confirma">Repita a senha</label>
+                        <input type="password" id="confirma" name="confirma" autocomplete="new-password" required>
+                    </div>
+
+                    <ul class="regras" aria-live="polite">
+                        <li id="regraTamanho">Pelo menos {{ minimo }} caracteres</li>
+                        <li id="regraIguais">As duas senhas são iguais</li>
+                    </ul>
+
+                    <div class="campo">
+                        <label for="email">E-mail de trabalho{% if not primeira_vez %} (opcional){% endif %}</label>
+                        <input type="email" id="email" name="email" value="{{ email_atual or '' }}"
+                               placeholder="nome.sobrenome@lello.com.br" autocapitalize="none" spellcheck="false"
+                               {% if primeira_vez %}required{% endif %}>
+                    </div>
+
+                    <button type="submit" class="principal" id="botaoSalvar"><span id="textoSalvar">Salvar e entrar</span></button>
+                </form>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>Uso interno · Lello Imóveis</footer>
+
+<script>
+(function () {
+    'use strict';
+    var faixa = document.getElementById('faixa');
+    // barras e espaços de larguras variadas, como o código de barras de um boleto
+    var larguras = [2, 1, 1, 3, 1, 2, 1, 1, 4, 1, 1, 2, 3, 1, 1, 1, 2, 1, 3, 2, 1, 1, 2, 4, 1, 1, 3, 1, 2, 1, 1, 2];
+    for (var i = 0; i < 210; i++) {
+        var barra = document.createElement('i');
+        barra.style.flexGrow = larguras[i % larguras.length];
+        if (i % 2) { barra.className = 'vazio'; }
+        faixa.appendChild(barra);
+    }
+
+    var form = document.getElementById('formSenha');
+    if (!form) { return; }
+
+    var senha = document.getElementById('senha');
+    var confirma = document.getElementById('confirma');
+    var regraTamanho = document.getElementById('regraTamanho');
+    var regraIguais = document.getElementById('regraIguais');
+    var caixaErro = document.getElementById('caixaErro');
+    var minimo = {{ minimo or 8 }};
+
+    function conferir() {
+        regraTamanho.classList.toggle('ok', senha.value.length >= minimo);
+        regraIguais.classList.toggle('ok', senha.value.length > 0 && senha.value === confirma.value);
+    }
+    senha.addEventListener('input', conferir);
+    confirma.addEventListener('input', conferir);
+    senha.focus();
+
+    var botaoOlho = document.getElementById('botaoOlho');
+    botaoOlho.addEventListener('click', function () {
+        var vendo = senha.type === 'text';
+        senha.type = confirma.type = vendo ? 'password' : 'text';
+        botaoOlho.setAttribute('aria-label', vendo ? 'Mostrar senha' : 'Ocultar senha');
+        botaoOlho.style.color = vendo ? '' : 'var(--vermelho)';
+        senha.focus();
+    });
+
+    var botaoSalvar = document.getElementById('botaoSalvar');
+    var textoSalvar = document.getElementById('textoSalvar');
+    form.addEventListener('submit', function (evento) {
+        evento.preventDefault();
+        caixaErro.hidden = true;
+        if (senha.value !== confirma.value) {
+            caixaErro.textContent = 'As duas senhas não são iguais.';
+            caixaErro.hidden = false; confirma.focus(); return;
+        }
+        botaoSalvar.disabled = true;
+        textoSalvar.innerHTML = '<span class="girando"></span>Salvando…';
+        fetch('{{ url_for("definir_senha") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                t: form.querySelector('[name=t]').value,
+                senha: senha.value, confirma: confirma.value,
+                email: (document.getElementById('email') || {}).value || ''
+            })
+        }).then(function (resposta) {
+            return resposta.json().then(function (dados) { return { ok: resposta.ok, dados: dados }; });
+        }).then(function (r) {
+            if (r.ok && r.dados.sucesso) { window.location.href = r.dados.destino || '/'; return; }
+            botaoSalvar.disabled = false; textoSalvar.textContent = 'Salvar e entrar';
+            caixaErro.textContent = r.dados.msg || 'Não foi possível salvar a senha.';
+            caixaErro.hidden = false;
+        }).catch(function () {
+            botaoSalvar.disabled = false; textoSalvar.textContent = 'Salvar e entrar';
+            caixaErro.textContent = 'O sistema não respondeu. Tente de novo.';
+            caixaErro.hidden = false;
+        });
+    });
+}());
+</script>
+</body>
+</html>

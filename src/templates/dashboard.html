@@ -1,371 +1,498 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Executivo - Lello{% endblock %}
+{% block title %}Dashboard gerencial - Lello{% endblock %}
 
 {% block extra_styles %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-    /* DESIGN ULTRA PREMIUM - ESTILO SAAS CONTEMPORÂNEO */
-    body { background-color: #f8fafc; }
-    
-    .premium-banner {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #00a7e1 100%);
-        border-radius: 16px;
-        padding: 28px;
-        color: white;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
-    .premium-banner::before {
-        content: ''; position: absolute; top: -50%; right: -20%; width: 350px; height: 400px;
-        background: rgba(0, 167, 225, 0.12); filter: blur(70px); border-radius: 50%;
-    }
-
-    /* KPI CARDS REMODELADOS */
-    .kpi-card { 
-        background: #ffffff; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 14px; 
-        padding: 22px; 
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
-        position: relative; 
-        overflow: hidden;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
-    }
-    .kpi-card:hover { 
-        transform: translateY(-4px); 
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-    }
-    .kpi-card.clickable { cursor: pointer; }
-    .kpi-card.clickable::after { 
-        content: '🔍 DETALHAR'; 
-        position: absolute; 
-        bottom: 8px; 
-        right: 12px; 
-        font-size: 0.6rem; 
-        color: #94a3b8; 
-        font-weight: 700; 
-        letter-spacing: 0.5px;
-    }
-    .kpi-label { color: #64748b; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .kpi-value { font-size: 2.3rem; font-weight: 800; line-height: 1.1; margin: 0; color: #0f172a; letter-spacing: -1px; }
-    
-    .border-accent-blue { border-top: 4px solid #00a7e1; }
-    .border-accent-indigo { border-top: 4px solid #6366f1; }
-    .border-accent-green { border-top: 4px solid #10b981; }
-    .border-accent-amber { border-top: 4px solid #f59e0b; }
-    .border-accent-red { border-top: 4px solid #ef4444; }
-
-    /* CONTÊINERES DE GRÁFICOS */
-    .chart-container { 
-        background: #ffffff; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 14px; 
-        padding: 24px; 
-        height: 100%; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); 
-    }
-    
-    .panel-container {
-        background: #ffffff; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 14px; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); 
-        overflow: hidden;
-    }
-
-    .table-modern { font-size: 0.85rem; width: 100%; margin: 0; }
-    .table-modern thead th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; letter-spacing: 0.5px; }
-    .table-modern tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; font-weight: 500; }
-    
-    .clickable-row { cursor: pointer; transition: background-color 0.15s ease-in-out; }
-    .clickable-row:hover { background-color: #f8fafc !important; }
-
-    /* CUSTOM SCROLLBAR */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-1">
+{% macro n(v) %}{{ "{:,}".format((v or 0)|int).replace(',', '.') }}{% endmacro %}
+{% macro p1(v) %}{{ '%.1f'|format((v or 0)|float)|replace('.', ',') }}{% endmacro %}
 
-   <div class="premium-banner mb-4 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+{% macro tabela_matriz(titulo, alt, linhas, ops, rodape, total_mes) %}
+<table class="dg-matrix">
+    <thead>
+        <tr>
+            <th class="blank"></th>
+            <th colspan="{{ ops|length }}" class="dg-matrix-title{% if alt %} is-alt{% endif %}">{{ titulo }}</th>
+            <th class="blank"></th>
+        </tr>
+        <tr>
+            <th>Dia</th>
+            {% for op in ops %}<th>{{ op }}</th>{% endfor %}
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for linha in linhas %}
+        <tr class="{% if linha.is_hoje %}is-hoje{% endif %}">
+            <th scope="row">{{ linha.dia }}</th>
+            {% for colab in linha.colaboradores %}
+                {% if colab.is_futuro %}
+                <td class="st-{{ colab.status|lower }}"></td>
+                {% else %}
+                <td class="st-{{ colab.status|lower }}{% if colab.qtd == 0 %} is-zero{% endif %}">{{ colab.qtd }}</td>
+                {% endif %}
+            {% endfor %}
+            <td class="tot">{% if not linha.is_futuro %}{{ linha.total_dia }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td class="lbl">Total</td>
+            {% for t in rodape %}<td>{{ t }}</td>{% endfor %}
+            <td class="grand">{{ total_mes }}</td>
+        </tr>
+    </tfoot>
+</table>
+{% endmacro %}
+
+{% set base_ref = total if mes_ref else base_atualizada %}
+{% set baixados_seg = (total - base_atualizada) if (not mes_ref and base_congelada and total > base_atualizada) else 0 %}
+{% set denom = coletados + pendentes_total + baixados_seg %}
+
+<div class="dg">
+
+    <!-- ===================== CABEÇALHO ===================== -->
+    <header class="dg-head">
         <div>
-            <h3 class="fw-bold m-0" style="letter-spacing: -0.5px; color: #ffffff !important;">Inteligência Operacional Gerencial</h3>
-            <p class="m-0 text-white-50 small">Análise executiva estratégica de volumetria, metas e burn-down de liquidações.</p>
+            <h1 class="dg-title">Dashboard gerencial</h1>
+            <p class="dg-sub">
+                {% if mes_ref %}
+                    Fechamento de {{ mes_ref }}.
+                {% elif base_congelada and meta_mes_ref %}
+                    Dados em tempo real. Meta congelada de {{ meta_mes_ref }}.
+                {% else %}
+                    Dados em tempo real. A meta do mês ainda não foi congelada.
+                {% endif %}
+            </p>
         </div>
-        
-        <div class="d-flex gap-2 align-items-center flex-wrap">
-            <a href="/ia_assistant" class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
-               style="font-size: 0.78rem; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;"
-               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 15px rgba(124, 58, 237, 0.5)';"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                🤖 IA DADOS
-            </a>
 
-            <button class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
-        onclick="abrirRelatorioLotes()" 
-        style="font-size: 0.78rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;"
-        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 15px rgba(16, 185, 129, 0.5)';"
-        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-    📦 Rastreio de Lotes
-</button>
-            <button class="btn btn-sm fw-bold shadow-sm px-3 py-2 me-2" 
-                onclick="abrirVisaoFimDeMes()" 
-                style="font-size: 0.78rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: 1px solid rgba(255,255,255,0.3); color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;">
-                📊 Visão Lote fim de Mês
+        <div class="dg-actions">
+            <select class="dg-select" aria-label="Mês de referência" onchange="window.location.href = '/dashboard_gerencial?mes_ref=' + encodeURIComponent(this.value);">
+                <option value="">Mês atual{% if nome_mes_real %} ({{ nome_mes_real }}){% endif %}</option>
+                {% for m in meses_arquivados %}
+                    <option value="{{ m }}" {% if mes_ref == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+
+            <button class="dg-btn" onclick="abrirRelatorioLotes()">
+                <svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
+                Rastreio de lotes
             </button>
+            <button class="dg-btn" onclick="abrirVisaoFimDeMes()">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
+                Fim de mês
+            </button>
+            <a class="dg-btn" href="/dashboard_gerencial/auto_manual" title="Quais lançamentos sobem automático e quais sobem manual, e por quê">
+                <svg viewBox="0 0 24 24"><path d="M4 7h10M4 17h10"/><circle cx="17" cy="7" r="3"/><circle cx="17" cy="17" r="3"/><path d="m16 17 .8.8 1.6-1.6"/></svg>
+                Auto × Manual
+            </a>
+            <a class="dg-btn" href="/dashboard_gerencial/conciliacao_bw" title="Confronta, dia a dia, a base do mês com o relatório de lançamentos (relBolMovFinanCondominios) e o BW do caixa">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M10 7.5h4M7 11l3 3M17 11l-3 3"/></svg>
+                Base × Relatório × BW
+            </a>
+            {% if not mes_ref %}
 
+                {% if base_congelada %}
+                <button class="dg-btn is-danger" onclick="descongelarBaseAtual()" title="Descongela a meta e permite ler uma nova planilha">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>
+                    Descongelar base
+                </button>
+                {% else %}
+                <button class="dg-btn is-primary" onclick="congelarBaseAtual()" title="Grava a base de hoje como a meta oficial do mês">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                    Congelar base
+                </button>
+                {% endif %}
+            {% endif %}
+        </div>
+    </header>
 
-            <div style="width: 280px;">
-                <select class="form-select form-select-sm fw-bold border-light shadow-sm bg-white text-dark" onchange="window.location.href = '/dashboard_gerencial?mes_ref=' + this.value;">
-                    <option value="">
-                        📊 Mês Atual {% if nome_mes_real %}({{ nome_mes_real }}){% else %}(Tempo Real){% endif %}
-                    </option>
-
-                    {% for m in meses_arquivados %}
-                        <option value="{{ m }}" {% if mes_ref == m %}selected{% endif %}>📅 {{ m }}</option>
-                    {% endfor %}
-                </select>
+    <!-- ===================== RESUMO DA BASE ===================== -->
+    <section class="dg-panel dg-hero dg-row" aria-label="Resumo da base">
+        <div class="dg-stats">
+            <div class="dg-stat">
+                <div class="dg-stat-label">{% if mes_ref %}Total no fechamento{% else %}Meta congelada{% endif %}</div>
+                <div class="dg-stat-value">{{ n(total) }}</div>
+                <div class="dg-stat-note">
+                    {% if mes_ref %}Boletos arquivados no mês
+                    {% elif base_congelada %}Base no dia do congelamento
+                    {% else %}Ainda não congelada{% endif %}
+                </div>
             </div>
 
             {% if not mes_ref %}
-                {% if base_congelada %}
-                    <button class="btn btn-sm fw-bold shadow-sm px-3 py-2" onclick="descongelarBaseAtual()" style="font-size: 0.78rem; background-color: #ef4444; border: none; color: #ffffff !important; border-radius: 8px; transition: all 0.3s ease;" title="Clique para resetar a meta e ler a nova planilha">
-                        🔓 Descongelar Base{% if meta_mes_ref %} · Meta de {{ meta_mes_ref }}{% endif %}
-                    </button>
-                {% else %}
-                    <button class="btn btn-sm btn-primary fw-bold shadow-sm px-3 py-2" onclick="congelarBaseAtual()" style="font-size: 0.78rem; background-color: #00a7e1; border: none; color: #ffffff !important; border-radius: 8px;">
-                        🔒 Congelar Base
-                    </button>
-                {% endif %}
+            <div class="dg-stat is-main">
+                <div class="dg-stat-label">Base atual</div>
+                <div class="dg-stat-value">{{ n(base_atualizada) }}</div>
+                <div class="dg-stat-note">
+                    {% if base_congelada and diferenca_total > 0 %}
+                        <b>{{ n(diferenca_total) }}</b> a menos que a meta ({{ p1(percentual_baixado_total) }}%)
+                    {% elif base_congelada and diferenca_total < 0 %}
+                        <b>{{ n(-diferenca_total) }}</b> a mais que a meta
+                    {% else %}
+                        Boletos ativos hoje
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
-            
-            <span class="badge px-3 py-2 fw-semibold" style="font-size: 0.78rem; background-color: rgba(255, 255, 255, 0.25) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;">
-                {% if mes_ref %}Relatório Consolidado{% else %} Em Tempo Real{% endif %}
-            </span>
-        </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md">
-            <div class="kpi-card border-accent-blue text-center" style="cursor: help;" 
-                 title="Distribuição de Portais:&#10;🤖 Winker: {{ breakdown_total.get('WINKER', 0) }}&#10;🤖 Webware: {{ breakdown_total.get('WEBWARE', 0) }}&#10;🌐 Diversos: {{ breakdown_total.get('DIVERSOS', 0) }}">
-                <div class="kpi-label">Volume Total ({% if mes_ref %}Histórico{% else %}Meta Fixo{% endif %})</div>
-                <div class="kpi-value text-dark">{{ "{:,}".format(total).replace(',', '.') }}</div>
-            </div>
-        </div>
-        
-        <div class="col-md">
-            <div class="kpi-card border-accent-amber text-center" style="cursor: help;"
-                 title="Pendências por Portal:&#10;🤖 Winker: {{ breakdown_faltam.get('WINKER', 0) }}&#10;🤖 Webware: {{ breakdown_faltam.get('WEBWARE', 0) }}&#10;🌐 Diversos: {{ breakdown_faltam.get('DIVERSOS', 0) }}">
-                <div class="kpi-label text-warning">Base Atualizada (Faltam)</div>
-                <div class="kpi-value" style="color: #d97706;">{{ "{:,}".format(base_atualizada).replace(',', '.') }}</div>
-            </div>
-        </div>
-
-        <div class="col-md">
-            <div class="kpi-card border-accent-green clickable" data-bs-toggle="modal" data-bs-target="#modalColetados">
-                <div class="kpi-label text-success">Total Coletado</div>
-                <div class="kpi-value text-success">{{ "{:,}".format(coletados).replace(',', '.') }}</div>
-            </div>
-        </div>
-
-        {% if not mes_ref and emissao_hoje_geral %}
-        <div class="col-md">
-            <div class="kpi-card border-accent-blue text-center" style="border-top-color: #00a7e1;">
-                <div class="kpi-label text-indigo" style="color: #00a7e1;">Emissões Hoje</div>
-                <div class="kpi-value" style="color: #00a7e1;">{{ emissao_hoje_geral | sum(attribute='qtd') }}</div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if not mes_ref %}
-        <div class="col-md">
-            <div class="kpi-card border-accent-red clickable" data-bs-toggle="modal" data-bs-target="#modalVencemHoje">
-                <div class="kpi-label text-danger">Crítico (Vencem Hoje)</div>
-                <div class="kpi-value text-danger">{{ vencendo_hoje }}</div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    {% if not mes_ref and emissao_hoje_geral %}
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="chart-container shadow-sm p-4">
-                <div class="mb-3">
-                    <h6 class="fw-bold text-dark mb-0">📌 Volume de Emissão Agendada para Hoje</h6>
+            <button type="button" class="dg-stat is-link" data-bs-toggle="modal" data-bs-target="#modalColetados">
+                <div class="dg-stat-label">Coletados</div>
+                <div class="dg-stat-value">{{ n(coletados) }}</div>
+                <div class="dg-stat-note">
+                    {% if base_ref > 0 %}<b>{{ p1(pct_coletado) }}%</b> {% if mes_ref %}do fechamento{% else %}da base atual{% endif %}{% endif %}
+                    {% if not mes_ref and coletas_hoje %}<br>{{ n(coletas_hoje) }} hoje{% endif %}
                 </div>
-                <div class="table-responsive">
-                    <table class="table-modern mb-0">
+            </button>
+
+            <div class="dg-stat">
+                <div class="dg-stat-label">{% if mes_ref %}Pendentes no fechamento{% else %}A coletar{% endif %}</div>
+                <div class="dg-stat-value">{{ n(pendentes_total) }}</div>
+                <div class="dg-stat-note">{% if base_ref > 0 %}<b>{{ p1(100 - pct_coletado) }}%</b> {% if mes_ref %}do fechamento{% else %}da base atual{% endif %}{% endif %}</div>
+            </div>
+
+            {% if not mes_ref %}
+            <button type="button" class="dg-stat is-link {% if vencendo_hoje %}is-crit{% endif %}" data-bs-toggle="modal" data-bs-target="#modalVencemHoje">
+                <div class="dg-stat-label">Vencem hoje</div>
+                <div class="dg-stat-value">{{ n(vencendo_hoje) }}</div>
+                <div class="dg-stat-note">{% if vencendo_hoje %}Pendentes com vencimento hoje{% else %}Nenhum pendente para hoje{% endif %}</div>
+            </button>
+            {% endif %}
+        </div>
+
+        {% if denom > 0 %}
+        <div class="dg-seg" role="img" aria-label="Distribuição da base: {{ coletados }} coletados, {{ pendentes_total }} a coletar{% if baixados_seg %}, {{ baixados_seg }} fora da base{% endif %}">
+            <span class="seg-col" style="width: {{ (coletados / denom * 100)|round(2) }}%"></span>
+            <span class="seg-pen" style="width: {{ (pendentes_total / denom * 100)|round(2) }}%"></span>
+            {% if baixados_seg %}<span class="seg-bai" style="width: {{ (baixados_seg / denom * 100)|round(2) }}%"></span>{% endif %}
+        </div>
+        <div class="dg-legend">
+            <span><i class="seg-col"></i>Coletados<b>{{ n(coletados) }}</b></span>
+            <span><i class="seg-pen"></i>{% if mes_ref %}Pendentes{% else %}A coletar{% endif %}<b>{{ n(pendentes_total) }}</b></span>
+            {% if baixados_seg %}<span><i class="seg-bai"></i>Saíram da base desde o congelamento<b>{{ n(baixados_seg) }}</b><em>{{ p1(baixados_seg / denom * 100) }}%</em></span>{% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ===================== CARTEIRA + PENDÊNCIAS ===================== -->
+    <div class="row g-3 dg-row">
+        <div class="col-lg-7">
+            <section class="dg-panel">
+                <div class="dg-panel-head">
+                    <div>
+                        <h2>Carteira por responsável</h2>
+                        <p>Quanto cada pessoa tem na base e quanto já foi coletado.</p>
+                    </div>
+                </div>
+                <div class="dg-scroll" style="max-height: 340px;">
+                    <table class="dg-table">
                         <thead>
                             <tr>
-                                <th>Colaborador Responsável</th>
-                                <th class="text-end">Quantidade de Casos</th>
+                                <th>Responsável</th>
+                                <th>Base</th>
+                                <th>Coletados</th>
+                                <th>{% if mes_ref %}Pendentes{% else %}A coletar{% endif %}</th>
+                                <th>Avanço</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in emissao_hoje_geral %}
-                            <tr>
-                                <td class="fw-bold text-secondary">👤 {{ item.responsavel }}</td>
-                                <td class="text-end fw-bold text-dark fs-6">{{ item.qtd }}</td>
+                            {% for c in carteira_responsaveis %}
+                            <tr class="{% if c.nome == 'Não atribuído' %}is-warn{% endif %}">
+                                <td class="name">{{ c.nome }}</td>
+                                <td>{{ n(c.base) }}</td>
+                                <td>{{ n(c.coletados) }}</td>
+                                <td>{{ n(c.pendentes) }}</td>
+                                <td><span class="dg-meter"><span style="width: {{ c.pct }}%"></span></span><span class="dg-pct">{{ p1(c.pct) }}%</span></td>
                             </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="panel-container h-100 border-0 shadow-sm d-flex flex-column">
-                <div class="p-4 border-bottom bg-white">
-                    <h6 class="fw-bold text-dark m-0">🥇 Performance Individual: Operação Manual</h6>
-                </div>
-                <div class="table-responsive flex-grow-1 custom-scroll" style="max-height: 250px; overflow-y: auto;">
-                    <table class="table-modern">
-                        <thead>
-                            <tr>
-                                <th style="padding-left: 24px;">Colaborador</th>
-                                <th class="text-end" style="padding-right: 24px;">Baixas Efetuadas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for op in ranking_manual %}
-                            <tr>
-                                <td style="padding-left: 24px;" class="fw-bold text-secondary">👤 {{ op.nome }}</td>
-                                <td class="text-end fw-bold text-primary" style="padding-right: 24px; font-size: 0.95rem;">{{ op.qtd }} coletas</td>
-                            </tr>
-                            {% endfor %}
-                            {% if not ranking_manual %}
-                            <tr><td colspan="2" class="text-center py-5 text-muted">Nenhum registro manual encontrado nesta competência.</td></tr>
+                            {% if not carteira_responsaveis %}
+                            <tr><td colspan="5" class="dg-empty">Nenhuma carteira encontrada nesta competência.</td></tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div class="col-lg-6">
-            <div class="chart-container shadow-sm">
-                <h6 class="fw-bold text-dark mb-3">🤖 Distribuição de Captura por Automação (RPA)</h6>
-                <div id="dadosGrafico2" data-webware="{{ stats_robos.WEBWARE }}" data-winker="{{ stats_robos.WINKER }}" data-finmail="{{ stats_robos.FINMAIL }}" data-scanner="{{ stats_robos.SCANNER }}" style="display: none;"></div>
-                <div style="position: relative; height: 200px; width: 100%;">
-                    <canvas id="chartRobos"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row justify-content-center mb-4">
-        <div class="col-lg-4 col-md-6">
-            <div class="chart-container text-center shadow-sm py-4" style="border-radius: 14px; background: #ffffff;">
-                <h6 class="fw-bold text-secondary mb-3" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Evolução de Conclusão da Base</h6>
-                <div id="dadosGrafico1" data-coletados="{{ coletados }}" data-base-atualizada="{{ base_atualizada }}" style="display: none;"></div>
-                <div style="position: relative; height: 140px; width: 100%; display: flex; justify-content: center;">
-                    <canvas id="chartProgresso"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row justify-content-center mb-5">
-        <div class="col-lg-12">
-            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0">
-                
-                <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center bg-light gap-3">
-                    <h6 class="fw-bold text-dark m-0" style="font-size: 0.9rem;">📊 Acompanhamento de Resolução por Dia de Vencimento</h6>
-                    
-                    <div class="d-flex gap-2">
-                        <select id="filtroPeriodoDias" class="form-select form-select-sm shadow-sm fw-bold border-secondary text-secondary" style="font-size: 0.75rem; min-width: 140px;" onchange="filtrarTabelaDias('periodo')">
-                            <option value="ALL" selected>📅 Todos os Períodos</option>
-                            <option value="1-4">Dias 01 a 04</option>
-                            <option value="5-9">Dias 05 a 09</option>
-                            <option value="10-14">Dias 10 a 14</option>
-                            <option value="15-31">Dias 15 a 31</option>
-                        </select>
-
-                        <select id="filtroDiaUnico" class="form-select form-select-sm shadow-sm fw-bold border-secondary text-secondary" style="font-size: 0.75rem; min-width: 130px;" onchange="filtrarTabelaDias('dia')">
-                            <option value="ALL" selected> Todos os Dias</option>
-                            {% for r in resumo_diario %}
-                            <option value="{{ r.dia | replace('Dia ', '') }}">Apenas Dia {{ r.dia | replace('Dia ', '') }}</option>
-                            {% endfor %}
-                        </select>
+        <div class="col-lg-5">
+            <section class="dg-panel">
+                <div class="dg-panel-head">
+                    <div>
+                        <h2>O que falta coletar</h2>
+                        <p>Pendências agrupadas pela situação atual do boleto.</p>
                     </div>
                 </div>
-                
-                <div class="table-responsive custom-scroll" style="max-height: 380px; overflow-y: auto;">
-                    <table class="table-modern text-center m-0"id="tabelaAcompanhamentoDias">
-                        <thead style="position: sticky; top: 0; z-index: 1;">
-                            <tr>
-                                <th class="text-start ps-4">Dia Vencimento</th>
-                                <th>Total Existente</th>
-                                <th>Faltantes (Base Atualizada)</th>
-                                <th>Concluídos (Diferença)</th>
-                                <th class="text-end pe-4">% Baixado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for r in resumo_diario %}
-                            <tr class="clickable-row" data-dia="{{ r.dia | replace('Dia ', '') }}" data-bs-toggle="modal" data-bs-target="#modalDetalheDia">
-                                <td class="text-start fw-bold text-dark ps-4" style="font-size: 0.78rem;"> {{ r.dia }}</td>
-                                <td class="text-secondary fw-semibold">{{ r.total }}</td>
-                                <td class="fw-bold" style="color: #d97706 !important;">{{ r.atual }}</td>
-                                <td class="text-success fw-bold">{{ r.diferenca }}</td>
-                                <td class="text-end pe-4">
-                                    {% set pct_num = r.pct.replace(',', '.') | float %}
-                                    <span class="badge 
-                                        {% if pct_num >= 95 %} bg-success 
-                                        {% elif pct_num >= 80 %} bg-success bg-opacity-75
-                                        {% elif pct_num >= 60 %} bg-warning text-dark 
-                                        {% else %} bg-danger {% endif %} 
-                                        px-2.5 py-1.5 fw-bold" style="font-size: 0.75rem; min-width: 65px;">
-                                        {{ r.pct }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot class="bg-light border-top fw-bold" style="position: sticky; bottom: 0; z-index: 1;">
-                            <tr>
-                                <td class="text-start text-dark ps-4" style="font-size: 0.85rem;">TOTAL GERAL</td>
-                                <td class="text-dark" style="font-size: 0.95rem;">{{ total }}</td>
-                                <td class="text-dark" style="font-size: 0.95rem;">{{ base_atualizada }}</td>
-                                <td class="text-dark" style="font-size: 0.95rem;">{{ diferenca_total }}</td>
-                                <td class="text-end pe-4 text-dark" style="font-size: 1rem;">
-                                    {{ (percentual_baixado_total|default(0))|float|round(2)|string|replace('.', ',') }}%
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <div class="dg-panel-body">
+                    {% if status_pendentes %}
+                    {% set maior = status_pendentes[0].qtd %}
+                    <ul class="dg-bars">
+                        {% for s in status_pendentes %}
+                        <li>
+                            <span>{{ s.nome }}</span>
+                            <span class="track"><span style="width: {{ ((s.qtd / maior * 100) if maior else 0)|round(1) }}%"></span></span>
+                            <span class="val">{{ n(s.qtd) }}<em>{{ p1((s.qtd / pendentes_total * 100) if pendentes_total else 0) }}%</em></span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="dg-portais">
+                        {% for rotulo, chave in [('Winker', 'WINKER'), ('Webware', 'WEBWARE'), ('Diversos', 'DIVERSOS')] %}
+                        <div>
+                            <div class="k">{{ rotulo }}</div>
+                            <div class="v">{{ n(breakdown_faltam.get(chave, 0)) }}</div>
+                            <div class="s">de {{ n(breakdown_total.get(chave, 0)) }} na base</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="dg-empty">Nenhuma pendência. Toda a base foi coletada.</div>
+                    {% endif %}
                 </div>
-            </div>
+            </section>
         </div>
     </div>
+
+    <!-- ===================== RITMO + ORIGEM ===================== -->
+    <div class="row g-3 dg-row">
+        {% if ritmo_coletas %}
+        <div class="col-lg-7">
+            <section class="dg-panel">
+                <div class="dg-panel-head">
+                    <div>
+                        <h2>Coletas por dia</h2>
+                        <p>Últimos dias úteis{% if ritmo_media %}. Média de {{ n(ritmo_media) }} por dia, sem contar hoje{% endif %}.</p>
+                    </div>
+                </div>
+                <div class="dg-panel-body">
+                    <div class="dg-chart-legend">
+                        <span><i style="background: var(--dg-series-robo)"></i>Automações</span>
+                        <span><i style="background: var(--dg-series-manual)"></i>Equipe</span>
+                    </div>
+                    {% set maximo = (ritmo_coletas | map(attribute='total') | max) or 1 %}
+                    {% set base_passo = 50 if maximo > 300 else (10 if maximo > 20 else 1) %}
+                    {% set passo = ((maximo / 2 / base_passo) | round(0, 'ceil') | int) * base_passo %}
+                    {% set teto = passo * 2 %}
+                    <div class="dg-plotbox">
+                        <div class="dg-plot" role="img" aria-label="Coletas por dia, separadas entre automações e equipe. Veja a tabela abaixo para os valores.">
+                            <div class="dg-gridline" style="bottom: 100%;"><span>{{ n(teto) }}</span></div>
+                            <div class="dg-gridline" style="bottom: 50%;"><span>{{ n(passo) }}</span></div>
+                            <div class="dg-gridline base" style="bottom: 0;"><span>0</span></div>
+                            {% for d in ritmo_coletas %}
+                            <div class="dg-col{% if d.hoje %} is-hoje{% endif %}{% if loop.index <= 3 %} tip-left{% elif loop.index > ritmo_coletas|length - 3 %} tip-right{% endif %}" tabindex="0" style="--h: {{ (d.total / teto * 100)|round(2) }}%">
+                                <div class="dg-stack" style="height: {{ (d.total / teto * 100)|round(2) }}%">
+                                    {% if d.manual %}<span class="seg manual" style="flex: {{ d.manual }}"></span>{% endif %}
+                                    {% if d.robo %}<span class="seg robo" style="flex: {{ d.robo }}"></span>{% endif %}
+                                </div>
+                                <div class="dg-tip">
+                                    <b>{{ d.rotulo }}{% if d.hoje %} (hoje, parcial){% endif %}</b><br>
+                                    <i style="background: var(--dg-series-robo)"></i>Automações: {{ n(d.robo) }}<br>
+                                    <i style="background: var(--dg-series-manual)"></i>Equipe: {{ n(d.manual) }}
+                                    <div class="t"><span>Total</span><b>{{ n(d.total) }}</b></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="dg-xaxis">
+                            {% for d in ritmo_coletas %}<span{% if d.hoje %} class="is-hoje"{% endif %}>{{ d.rotulo }}</span>{% endfor %}
+                        </div>
+                    </div>
+                    <table class="sr-only-dg">
+                        <caption>Coletas por dia</caption>
+                        <thead><tr><th>Dia</th><th>Automações</th><th>Equipe</th></tr></thead>
+                        <tbody>{% for d in ritmo_coletas %}<tr><td>{{ d.rotulo }}</td><td>{{ d.robo }}</td><td>{{ d.manual }}</td></tr>{% endfor %}</tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        {% endif %}
+
+        <div class="{% if ritmo_coletas %}col-lg-5{% else %}col-12{% endif %}">
+            <section class="dg-panel">
+                <div class="dg-panel-head">
+                    <div>
+                        <h2>Coletas por automação</h2>
+                        <p>Volume capturado por cada robô na base.</p>
+                    </div>
+                </div>
+                <div class="dg-panel-body">
+                    {% set robos = [('Webware', stats_robos.WEBWARE), ('Winker', stats_robos.WINKER), ('FinMail', stats_robos.FINMAIL), ('Scanner', stats_robos.SCANNER)] %}
+                    {% set total_robos = stats_robos.WEBWARE + stats_robos.WINKER + stats_robos.FINMAIL + stats_robos.SCANNER %}
+                    {% set maior_robo = (robos | map(attribute=1) | max) or 1 %}
+                    <ul class="dg-bars is-robo">
+                        {% for nome_robo, qtd_robo in robos %}
+                        <li>
+                            <span>{{ nome_robo }}</span>
+                            <span class="track"><span style="width: {{ (qtd_robo / maior_robo * 100)|round(1) }}%"></span></span>
+                            <span class="val">{{ n(qtd_robo) }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="dg-resumo-robo">
+                        As automações somam <b>{{ n(total_robos) }}</b> coletas{% if coletados > 0 %}, <b>{{ p1(total_robos / coletados * 100) }}%</b> de tudo que foi coletado{% endif %}.
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ===================== ACOMPANHAMENTO POR VENCIMENTO ===================== -->
+    <section class="dg-panel dg-row">
+        <div class="dg-panel-head">
+            <div>
+                <h2>Acompanhamento por dia de vencimento</h2>
+                <p>
+                    {% if mes_ref %}Como ficou cada dia de vencimento no fechamento. Clique em uma linha para ver por responsável.
+                    {% else %}Meta congelada contra a base atual. Clique em uma linha para ver por responsável.{% endif %}
+                </p>
+            </div>
+            <div class="dg-filter">
+                <select id="filtroPeriodoDias" class="dg-select" aria-label="Filtrar por período" onchange="filtrarTabelaDias('periodo')">
+                    <option value="ALL" selected>Todos os períodos</option>
+                    <option value="1-4">Dias 01 a 04</option>
+                    <option value="5-9">Dias 05 a 09</option>
+                    <option value="10-14">Dias 10 a 14</option>
+                    <option value="15-31">Dias 15 a 31</option>
+                </select>
+                <select id="filtroDiaUnico" class="dg-select" aria-label="Filtrar por dia" onchange="filtrarTabelaDias('dia')">
+                    <option value="ALL" selected>Todos os dias</option>
+                    {% for r in resumo_diario %}
+                    <option value="{{ r.dia | replace('Dia ', '') }}">Apenas dia {{ r.dia | replace('Dia ', '') }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="dg-scroll" style="max-height: 420px;">
+            <table class="dg-table" id="tabelaAcompanhamentoDias">
+                <thead style="position: sticky; top: 0; z-index: 1;">
+                    <tr>
+                        <th>Dia de vencimento</th>
+                        <th>{% if mes_ref %}Total no fechamento{% else %}Meta congelada{% endif %}</th>
+                        <th>{% if mes_ref %}Pendentes{% else %}Base atual{% endif %}</th>
+                        <th>{% if mes_ref %}Concluídos{% else %}Saíram da base{% endif %}</th>
+                        <th>{% if mes_ref %}% concluído{% else %}% saiu da base{% endif %}</th>
+                        {% if not mes_ref %}<th>A coletar</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resumo_diario %}
+                    {% set pct_num = r.pct.replace(',', '.') | float %}
+                    <tr class="is-click clickable-row" data-dia="{{ r.dia | replace('Dia ', '') }}" data-meta="{{ r.total }}" data-base="{{ r.atual }}" data-baix="{{ r.diferenca }}" data-pend="{{ r.pendentes }}" data-bs-toggle="modal" data-bs-target="#modalDetalheDia">
+                        <td class="name">{{ r.dia }}</td>
+                        <td>{{ n(r.total) }}</td>
+                        <td>{{ n(r.atual) }}</td>
+                        <td>
+                            {% if r.diferenca < 0 %}<span class="dg-new" title="Boletos que entraram na base depois do congelamento">+{{ n(-r.diferenca) }}</span>{% else %}{{ n(r.diferenca) }}{% endif %}
+                        </td>
+                        <td><span class="dg-meter is-slate"><span style="width: {{ pct_num if pct_num <= 100 else 100 }}%"></span></span><span class="dg-pct">{{ p1(pct_num) }}%</span></td>
+                        {% if not mes_ref %}<td>{{ n(r.pendentes) }}</td>{% endif %}
+                    </tr>
+                    {% endfor %}
+                    {% if not resumo_diario %}
+                    <tr><td colspan="6" class="dg-empty">Sem dados de vencimento para esta competência.</td></tr>
+                    {% endif %}
+                </tbody>
+                <tfoot style="position: sticky; bottom: 0; z-index: 1;">
+                    <tr>
+                        <td>Total geral</td>
+                        <td id="ftMeta">{{ n(total) }}</td>
+                        <td id="ftBase">{{ n(base_atualizada) }}</td>
+                        <td id="ftBaix">{% if diferenca_total < 0 %}<span class="dg-new" title="Boletos que entraram na base depois do congelamento">+{{ n(-diferenca_total) }}</span>{% else %}{{ n(diferenca_total) }}{% endif %}</td>
+                        <td id="ftPct">{{ p1(percentual_baixado_total) }}%</td>
+                        {% if not mes_ref %}<td id="ftPend">{{ n(pendentes_total) }}</td>{% endif %}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===================== MATRIZ DE PRODUTIVIDADE ===================== -->
+    <section class="dg-panel dg-row" aria-label="Matriz de coletas">
+        <div class="dg-panel-head">
+            <div>
+                <h2>Matriz de coletas</h2>
+                <div class="dg-legend-jornada mt-2">
+                    <span><i style="background:#FFD9B3"></i>Home office</span>
+                    <span><i style="background:var(--sec-bege)"></i>Férias, folga ou atestado</span>
+                    <span><i style="background:var(--sec-azul-claro)"></i>Feriado ou ponte</span>
+                    <span><i style="background:var(--sunk)"></i>Fim de semana</span>
+                </div>
+            </div>
+            <div class="dg-actions">
+                {% if not matriz_calendario_2 %}
+                <select class="dg-select" style="min-width: 190px; height: 30px; font-size: 0.78rem;" aria-label="Comparar com outro mês" onchange="adicionarComparativo(this.value)">
+                    <option value="">Comparar com outro mês</option>
+                    <option value="atual">Mês atual</option>
+                    {% for m in meses_arquivados %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <button class="dg-btn is-small" onclick="abrirHomeOffice()">
+                    <svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M10 20v-6h4v6"/></svg>
+                    Home office
+                </button>
+                <button class="dg-btn is-small" onclick="abrirGestaoJornada('{{ base_data_1 }}')">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+                    Férias e feriados
+                </button>
+            </div>
+        </div>
+
+        {% if home_hoje or ausentes_hoje %}
+        <div class="dg-hoje">
+            {% if home_hoje %}<span>Em home office hoje: <b>{{ home_hoje | join(', ') }}</b></span>{% endif %}
+            {% if ausentes_hoje %}<span>Ausentes hoje: <b>{{ ausentes_hoje | join(', ') }}</b></span>{% endif %}
+        </div>
+        {% endif %}
+
+        <div class="row g-0">
+            <div class="{% if matriz_calendario_2 %}col-lg-6{% else %}col-12{% endif %}">
+                <div class="dg-matrix-wrap">
+                    {{ tabela_matriz(titulo_matriz_1, false, matriz_calendario, time_operacional, totais_rodape, total_geral_mes) }}
+                </div>
+            </div>
+            {% if matriz_calendario_2 %}
+            <div class="col-lg-6">
+                <div class="dg-matrix-wrap">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <select class="dg-select" style="min-width: 190px; height: 30px; font-size: 0.78rem;" aria-label="Mês do comparativo" onchange="adicionarComparativo(this.value)">
+                            <option value="atual" {% if mes_ref_2 == 'atual' %}selected{% endif %}>Mês atual</option>
+                            {% for m in meses_arquivados %}
+                            <option value="{{ m }}" {% if mes_ref_2 == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="dg-btn is-small is-danger" onclick="removerComparativo()">Fechar comparativo</button>
+                    </div>
+                    {{ tabela_matriz(titulo_matriz_2, true, matriz_calendario_2, time_operacional_2, totais_rodape_2, total_geral_mes_2) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
 
 </div>
 
-<div class="modal fade" id="modalColetados" tabindex="-1">
+<!-- ===================== MODAL: COLETADOS ===================== -->
+<div class="modal fade" id="modalColetados" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header bg-dark text-white">
-                <h6 class="modal-title fw-bold">Baixas Efetuadas (Operadores / Automaçãos)</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content shadow-lg" style="overflow: hidden;">
+            <div class="modal-header dg-modal-head">
+                <h5 class="modal-title">{% if mes_ref %}Quem coletou no mês{% else %}Coletados por carteira{% endif %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body p-0">
-                <table class="table-modern m-0">
-                    <thead><tr><th class="ps-4">Origem da Coleta</th><th class="text-end pe-4">Quantidade</th></tr></thead>
+                <table class="table-modern">
+                    <thead><tr><th class="ps-4">{% if mes_ref %}Origem da coleta{% else %}Responsável{% endif %}</th><th class="text-end pe-4">Quantidade</th></tr></thead>
                     <tbody>
                         {% for item in lista_coletados %}
-                        <tr><td class="ps-4 fw-bold text-secondary">🤖 {{ item.nome }}</td><td class="text-end pe-4 fw-bold text-success">{{ "{:,}".format(item.qtd).replace(',', '.') }}</td></tr>
+                        <tr><td class="ps-4 fw-semibold" style="color: var(--dg-ink);">{{ item.nome }}</td><td class="text-end pe-4 fw-semibold" style="color: var(--dg-ink);">{{ n(item.qtd) }}</td></tr>
                         {% endfor %}
+                        {% if not lista_coletados %}
+                        <tr><td colspan="2" class="dg-empty">Nenhuma coleta registrada.</td></tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -373,42 +500,65 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: DETALHE DO DIA ===================== -->
 <div class="modal fade" id="modalDetalheDia" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> 
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header bg-dark text-white">
-                <h6 class="modal-title fw-bold" id="modalDetalheDiaLabel">Detalhes do Dia: <span id="detalheDiaTitulo"></span></h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg" style="overflow: hidden;">
+            <div class="modal-header dg-modal-head">
+                <h5 class="modal-title" id="modalDetalheDiaLabel">Vencimento: <span id="detalheDiaTitulo"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body p-0">
-                <table class="table-modern m-0 text-center">
+                <table class="table-modern text-center">
                     <thead>
                         <tr>
                             <th class="text-start ps-4">Responsável</th>
-                            <th>Total Inicial</th>
-                            <th>Base Atualizada</th>
-                            <th class="text-end pe-4">Diferença (Baixados)</th>
+                            <th>Base {% if mes_ref %}no fechamento{% else %}atual{% endif %}</th>
+                            <th>Coletados</th>
+                            <th class="text-end pe-4">{% if mes_ref %}Pendentes{% else %}A coletar{% endif %}</th>
                         </tr>
                     </thead>
-                    <tbody id="detalheDiaCorpo">
-                    </tbody>
+                    <tbody id="detalheDiaCorpo"></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ========================================================= -->
+<!-- ===================== MODAL: HOME OFFICE ===================== -->
+<div class="modal fade" id="modalHomeOffice" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg" style="overflow: hidden;">
+            <div class="modal-header dg-modal-head">
+                <div>
+                    <h5 class="modal-title mb-1">Home office da equipe</h5>
+                    <small>Marque os dias da semana em que cada pessoa trabalha em casa. Salva na hora e vale para a matriz.</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-0" style="min-height: 120px;">
+                <div id="listaHomeOffice"><div class="dg-empty">Carregando...</div></div>
+            </div>
+            <div class="modal-footer justify-content-between" style="border-top: 1px solid var(--dg-line); background: var(--bg);">
+                <form class="d-flex gap-2" onsubmit="return adicionarColaboradorHome(event)">
+                    <input id="novoColaboradorHome" type="text" maxlength="40" class="form-control form-control-sm" style="width: 190px; border-radius: 8px;" placeholder="Nome do colaborador" aria-label="Nome do novo colaborador">
+                    <button type="submit" class="dg-btn is-small">Adicionar</button>
+                </form>
+                <span id="homeStatus" role="status"></span>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- MODAL VISÃO FIM DE MÊS -->
 <div class="modal fade" id="modalVisaoFimDeMes" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-bottom: 4px solid #b45309;">
+            <div class="modal-header dg-modal-head">
                 <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
                     <div>
-                        <h5 class="modal-title fw-bold mb-0">📊 Fechamento: Visão Lote Fim de Mês</h5>
-                        <small class="text-white-50">Volume consolidado de coletas da base ativa no mês selecionado.</small>
+                        <h5 class="modal-title mb-1">Fechamento: Visão Lote Fim de Mês</h5>
+                        <small class="text-muted">Volume consolidado de coletas da base ativa no mês selecionado.</small>
                     </div>
                     
                     <div class="d-flex align-items-center gap-3">
@@ -417,7 +567,7 @@
                         </select>
 
                         <select id="filtroVisaoFimMes" class="form-select fw-bold shadow-sm text-dark" onchange="renderizarTabelaFimDeMes()">
-                            <option value="ALL">📦 Mostrar Todos</option>
+                            <option value="ALL">Mostrar Todos</option>
                             <option value="01-05">Apenas 01-05</option>
                             <option value="06-10">Apenas 06-10</option>
                             <option value="11-15">Apenas 11-15</option>
@@ -427,7 +577,7 @@
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 bg-light">
                 <table class="table-modern text-center m-0">
@@ -437,7 +587,7 @@
                             <th>Total da Base</th>
                             <th>Total Coletado</th>
                             <th>% Concluído</th>
-                            <th id="thProjecaoVisao" class="text-end pe-4" style="color: #0ea5e9;">🎯 Projeção Fim de Mês</th>
+                            <th id="thProjecaoVisao" class="text-end pe-4" style="color: var(--accent);">Projeção Fim de Mês</th>
                         </tr>
                     </thead>
                     <tbody id="corpoVisaoFimDeMes">
@@ -454,37 +604,37 @@
 <div class="modal fade" id="modalSimulacaoLote" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
-            <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border-bottom: 4px solid #312e81;">
+            <div class="modal-header dg-modal-head">
                 <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
                     <div>
-                        <h5 class="modal-title fw-bold mb-0">⚙️ Simulador Estratégico: Lote <span id="tituloLoteSimulacao"></span></h5>
-                        <small class="text-white-50">Ajuste a Data Definitiva de recebimento para visualizar a captura de boletos.</small>
+                        <h5 class="modal-title mb-1">Simulador Estratégico: Lote <span id="tituloLoteSimulacao"></span></h5>
+                        <small class="text-muted">Ajuste a Data Definitiva de recebimento para visualizar a captura de boletos.</small>
                     </div>
                     <div class="d-flex align-items-center gap-3 bg-white p-2 rounded shadow-sm">
                         <label class="fw-bold text-dark mb-0 small">Data Definitiva (Dia):</label>
                         <input type="number" id="inputDataDefinitiva" class="form-control form-control-sm fw-bold text-primary text-center" value="21" min="1" max="31" style="width: 70px;" onchange="renderizarMatrizSimulacao()">
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 bg-light d-flex flex-column">
                 <div class="d-flex justify-content-around p-3 bg-white border-bottom shadow-sm">
                     <div class="text-center">
-                        <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">📦 Total do Lote</h6>
+                        <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">Total do Lote</h6>
                         <h4 class="text-dark fw-bold mb-0" id="simTotal">0</h4>
                     </div>
                     <div class="text-center border-start ps-4">
-                        <h6 class="text-success fw-bold mb-1" style="font-size: 0.8rem;">✅ Capturados no Prazo</h6>
+                        <h6 class="text-success fw-bold mb-1" style="font-size: 0.8rem;">Capturados no Prazo</h6>
                         <h4 class="text-success fw-bold mb-0" id="simCapturados">0</h4>
                     </div>
                     <div class="text-center border-start ps-4">
-                        <h6 class="text-danger fw-bold mb-1" style="font-size: 0.8rem;">⏳ Fora do Prazo (Atrasados)</h6>
+                        <h6 class="text-danger fw-bold mb-1" style="font-size: 0.8rem;">Fora do Prazo (Atrasados)</h6>
                         <h4 class="text-danger fw-bold mb-0" id="simPerdidos">0</h4>
                     </div>
                 </div>
                 <div class="table-responsive flex-grow-1 custom-scroll p-3">
                     <table class="table table-sm table-bordered text-center m-0" style="font-size: 0.75rem; background: white;">
-                        <thead id="headMatrizSimulacao" style="position: sticky; top: 0; z-index: 2; background: #0f172a; color: white;">
+                        <thead id="headMatrizSimulacao" style="position: sticky; top: 0; z-index: 2; background: var(--deep); color: white;">
                             <!-- Preenchido via JS -->
                         </thead>
                         <tbody id="corpoMatrizSimulacao">
@@ -502,22 +652,22 @@
 <div class="modal fade" id="modalRelatorioLotes" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
-           <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid #10b981;">
+           <div class="modal-header dg-modal-head">
                 
                 <div class="d-flex justify-content-between align-items-center w-100 me-4 flex-wrap gap-3">
                     <div>
-                        <h5 class="modal-title fw-bold mb-0">📦 Rastreio de Entregas por Lote</h5>
-                        <small class="text-white-50">Desdobramento de volumetria: Lote ➔ Emissão ➔ Vencimento.</small>
+                        <h5 class="modal-title mb-1">Rastreio de Entregas por Lote</h5>
+                        <small class="text-muted">Desdobramento de volumetria: Lote › Emissão › Vencimento.</small>
                     </div>
                     
                     <div style="min-width: 250px;">
                         <select id="filtroLoteModal" class="form-select fw-bold shadow-sm text-dark" onchange="renderizarTabelaLotes()">
-                            <option value="ALL">📦 Todos os Lotes</option>
+                            <option value="ALL">Todos os Lotes</option>
                         </select>
                     </div>
                 </div>
 
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 bg-light">
                 <div class="table-responsive h-100 custom-scroll">
@@ -547,14 +697,14 @@
 <div class="modal fade" id="modalVencemHoje" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header bg-danger text-white">
-                <h6 class="modal-title fw-bold">🚨 Casos Críticos - Vencimento Hoje</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header dg-modal-head">
+                <h5 class="modal-title">Casos Críticos - Vencimento Hoje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
                 
                 <div class="bg-light border-bottom p-3">
-                    <h6 class="fw-bold text-dark mb-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">📊 Resumo Rápido de Status</h6>
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Resumo Rápido de Status</h6>
                     <div class="d-flex flex-wrap gap-2">
                         {% set grupos_status = lista_vencem_hoje | groupby('status_interno') %}
                         {% for grupo in grupos_status %}
@@ -581,19 +731,19 @@
                     <tbody>
                         {% for item in lista_vencem_hoje %}
                         <tr>
-                            <td class="fw-bold text-primary ps-4">🏢 {{ item.imovel }}</td>
+                            <td class="fw-bold text-primary ps-4">{{ item.imovel }}</td>
                             <td class="fw-semibold text-secondary">{{ item.administradora }}</td>
                             <td>
                                 <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1" style="font-size: 0.7rem;">
                                     {{ item.status_interno }}
                                 </span>
                             </td>
-                            <td class="pe-4">{% if not item.responsavel or item.responsavel == 'Não Atribuída' %}<span class="text-danger fw-bold">⚠️ Não Atribuída</span>{% else %}<span class="badge bg-light text-dark border px-2 py-1">{{ item.responsavel }}</span>{% endif %}</td>                        
+                            <td class="pe-4">{% if not item.responsavel or item.responsavel == 'Não Atribuída' %}<span class="text-danger fw-bold">Não Atribuída</span>{% else %}<span class="badge bg-light text-dark border px-2 py-1">{{ item.responsavel }}</span>{% endif %}</td>                        
                         </tr>
                         {% endfor %}
                         
                         {% if not lista_vencem_hoje %}
-                        <tr><td colspan="4" class="text-center py-5 text-muted fw-semibold">🎉 Nenhum boleto pendente para a data de hoje.</td></tr>
+                        <tr><td colspan="4" class="text-center py-5 text-muted fw-semibold">Nenhum boleto pendente para a data de hoje.</td></tr>
                         {% endif %}
                     </tbody>
                 </table>
@@ -602,7 +752,10 @@
         </div>
     </div>
 </div>
+
+
 {% endif %}
+
 <!-- ========================================================================= -->
     <!-- SCRIPT DE NAVEGAÇÃO DA MATRIZ (TEM QUE FICAR AQUI PARA FUNCIONAR)         -->
     <!-- ========================================================================= -->
@@ -664,189 +817,13 @@
     }
     </script>
 
-    <!-- ========================================================================= -->
-    <!-- LEGENDA E BOTÃO DE GERENCIAMENTO DE JORNADA                               -->
-    <!-- ========================================================================= -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 px-2 gap-3">
-        <div class="d-flex gap-3 bg-white p-2 rounded shadow-sm border">
-            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #FFFF00; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Férias / Folga / Atestado</small></div>
-            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #FFA500; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Home Office</small></div>
-            <div class="d-flex align-items-center gap-1"><span style="width: 14px; height: 14px; background-color: #00FFFF; border: 1px solid #000; display: inline-block;"></span> <small class="fw-bold text-dark">Feriado Nacional / Ponte</small></div>
-        </div>
-        <button class="btn btn-dark fw-bold btn-sm shadow-sm" style="background-color: #1e293b;" onclick="abrirGestaoJornada('{{ base_data_1 }}')">
-            ⚙️ Gerenciar Férias e Feriados
-        </button>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- MATRIZ DE PRODUTIVIDADE DIÁRIA (FUNDO BRANCO E JORNADA DESTACADA)         -->
-    <!-- ========================================================================= -->
-    <div class="row mb-5 gx-3 px-2">
-        <!-- TABELA 1 -->
-        <div class="{% if matriz_calendario_2 %}col-lg-6{% else %}col-lg-12{% endif %} mb-4">
-            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0" style="background-color: #e2e8f0;">
-                <div class="p-2 d-flex justify-content-between align-items-center" style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                    <h6 class="fw-bold m-0 text-dark ps-2" style="font-size: 0.85rem;">📊 Matriz de Coletas</h6>
-                    {% if not matriz_calendario_2 %}
-                    <div style="width: 200px;"> 
-                        <select class="form-select form-select-sm fw-bold shadow-sm text-white" style="background-color: #6366f1; border-color: #4f46e5; font-size: 0.75rem;" onchange="adicionarComparativo(this.value)">
-                            <option value="" style="background: white; color: black;">➕ Comparar com outro mês...</option>
-                            <option value="atual" style="background: white; color: black;">📊 Mês Atual</option>
-                            {% for m in meses_arquivados %}
-                                <option value="{{ m }}" style="background: white; color: black;">📅 {{ m }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% endif %}
-                </div>
-                
-                <div class="table-responsive custom-scroll" style="padding: 10px; display: flex; justify-content: center; background-color: #ffffff;">
-                    <table class="table-sm text-center m-0 mx-auto" style="background-color: #fff; width: 100%; min-width: 400px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.75rem; border-collapse: collapse;">
-                        <thead style="position: sticky; top: 0; z-index: 2;">
-                            <tr>
-                                <th style="background-color: #fff; border: none;"></th>
-                                <th colspan="{{ time_operacional|length }}" style="background-color: #1a0b2e; color: #ffffff; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; border: 1px solid #000; padding: 4px;">{{ titulo_matriz_1 }}</th>
-                                <th style="background-color: #fff; border: none;"></th>
-                            </tr>
-                            <tr style="background-color: #f8fafc;">
-                                <th class="text-dark fw-bold" style="width: 25px; border: 1px solid #000; padding: 2px;">Dia</th>
-                                {% for op in time_operacional %}
-                                <th class="text-dark fw-bold" style="min-width: 45px; border: 1px solid #000; padding: 2px;">{{ op }}</th>
-                                {% endfor %}
-                                <th class="text-muted fw-bold" style="width: 35px; border: none; background-color: #e2e8f0; padding: 2px 0 2px 4px; text-align: left;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for linha in matriz_calendario %}
-                            <tr class="clickable-row" style="height: 16px;">
-                                <td class="fw-bold text-dark" style="border: 1px solid #000; background-color: #f1f5f9; padding: 0;">{{ linha.dia }}</td>
-                                
-                                {% for colab in linha.colaboradores %}
-                                    {% set bg_c = '#ffffff' %} 
-                                    {% set txt_c = '#0f172a' %} 
-                                    
-                                    {% if colab.status == 'FERIADO' %} {% set bg_c = '#00FFFF' %} 
-                                    {% elif colab.status in ['FERIAS', 'FOLGA'] %} {% set bg_c = '#FFFF00' %} 
-                                    {% elif colab.status == 'HOME' %} {% set bg_c = '#FFA500' %} 
-                                    {% else %}
-                                        {% if colab.qtd == 0 %} {% set txt_c = '#cbd5e1' %} {% endif %}
-                                    {% endif %}
-                                    
-                                {% if colab.is_futuro %}
-                                    <td style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }};"></td>
-                                {% else %}
-                                    <td class="fw-bold" style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }}; color: {{ txt_c }};">{{ colab.qtd }}</td>
-                                {% endif %}
-                                {% endfor %}
-                                
-                                {% if linha.is_futuro %}
-                                    <td style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;"></td>
-                                {% else %}
-                                    <td class="text-muted fw-bold" style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;">{{ linha.total_dia }}</td>
-                                {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot style="position: sticky; bottom: 0; z-index: 2;">
-                            <tr style="height: 20px;">
-                                <td class="fw-bold bg-secondary text-white" style="border: 1px solid #000; padding: 0;">TOT</td>
-                                {% for total in totais_rodape %}
-                                <td class="fw-bold bg-light text-dark" style="border: 1px solid #000; padding: 0;">{{ total }}</td>
-                                {% endfor %}
-                                <td class="fw-bold bg-dark text-white" style="border: 1px solid #000; text-align: center; padding: 0;">{{ total_geral_mes }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- TABELA 2 (COMPARATIVO) -->
-        {% if matriz_calendario_2 %}
-        <div class="col-lg-6 mb-4">
-            <div class="panel-container p-0 overflow-hidden d-flex flex-column shadow-sm border-0" style="background-color: #e2e8f0;">
-                <div class="p-2 d-flex justify-content-between align-items-center" style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0;">
-                    <div style="width: 200px;"> 
-                        <select class="form-select form-select-sm fw-bold shadow-sm text-white" style="background-color: #6366f1; border-color: #4f46e5; font-size: 0.75rem;" onchange="adicionarComparativo(this.value)">
-                            <option value="atual" style="background: white; color: black;" {% if mes_ref_2 == 'atual' %}selected{% endif %}>Mês Atual</option>
-                            {% for m in meses_arquivados %}
-                                <option value="{{ m }}" style="background: white; color: black;" {% if mes_ref_2 == m %}selected{% endif %}>📅 {{ m }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger fw-bold py-0 px-2 shadow-sm" style="font-size: 0.7rem;" onclick="removerComparativo()">✖ Fechar Comparativo</button>
-                </div>
-                
-                <div class="table-responsive custom-scroll" style="padding: 10px; display: flex; justify-content: center; background-color: #ffffff;">
-                    <table class="table-sm text-center m-0 mx-auto" style="background-color: #fff; width: 100%; min-width: 400px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.75rem; border-collapse: collapse;">
-                        <thead style="position: sticky; top: 0; z-index: 2;">
-                            <tr>
-                                <th style="background-color: #fff; border: none;"></th>
-                                <th colspan="{{ time_operacional_2|length }}" style="background-color: #166534; color: #ffffff; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; border: 1px solid #000; padding: 4px;">{{ titulo_matriz_2 }}</th>
-                                <th style="background-color: #fff; border: none;"></th>
-                            </tr>
-                            <tr style="background-color: #f8fafc;">
-                                <th class="text-dark fw-bold" style="width: 25px; border: 1px solid #000; padding: 2px;">Dia</th>
-                                {% for op in time_operacional_2 %}
-                                <th class="text-dark fw-bold" style="min-width: 45px; border: 1px solid #000; padding: 2px;">{{ op }}</th>
-                                {% endfor %}
-                                <th class="text-muted fw-bold" style="width: 35px; border: none; background-color: #e2e8f0; padding: 2px 0 2px 4px; text-align: left;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for linha in matriz_calendario_2 %}
-                            <tr class="clickable-row" style="height: 16px;">
-                                <td class="fw-bold text-dark" style="border: 1px solid #000; background-color: #f1f5f9; padding: 0;">{{ linha.dia }}</td>
-                                
-                                {% for colab in linha.colaboradores %}
-                                    {% set bg_c = '#ffffff' %} 
-                                    {% set txt_c = '#0f172a' %} 
-                                    
-                                    {% if colab.status == 'FERIADO' %} {% set bg_c = '#00FFFF' %} 
-                                    {% elif colab.status in ['FERIAS', 'FOLGA'] %} {% set bg_c = '#FFFF00' %} 
-                                    {% elif colab.status == 'HOME' %} {% set bg_c = '#FFA500' %} 
-                                    {% else %}
-                                        {% if colab.qtd == 0 %} {% set txt_c = '#cbd5e1' %} {% endif %}
-                                    {% endif %}
-                                    
-                                {% if colab.is_futuro %}
-                                    <td style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }};"></td>
-                                {% else %}
-                                    <td class="fw-bold" style="border: 1px solid #000; padding: 0; background-color: {{ bg_c }}; color: {{ txt_c }};">{{ colab.qtd }}</td>
-                                {% endif %}
-                                {% endfor %}
-                                
-                                {% if linha.is_futuro %}
-                                    <td style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;"></td>
-                                {% else %}
-                                    <td class="text-muted fw-bold" style="border: none; background-color: #e2e8f0; text-align: left; padding: 0 0 0 4px;">{{ linha.total_dia }}</td>
-                                {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot style="position: sticky; bottom: 0; z-index: 2;">
-                            <tr style="height: 20px;">
-                                <td class="fw-bold bg-secondary text-white" style="border: 1px solid #000; padding: 0;">TOT</td>
-                                {% for total in totais_rodape_2 %}
-                                <td class="fw-bold bg-light text-dark" style="border: 1px solid #000; padding: 0;">{{ total }}</td>
-                                {% endfor %}
-                                <td class="fw-bold bg-dark text-white" style="border: 1px solid #000; text-align: center; padding: 0;">{{ total_geral_mes_2 }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
     <!-- MODAL DE EXCEÇÕES E JORNADA -->
     <div class="modal fade" id="modalExcecoes" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-dark text-white">
-                    <h6 class="modal-title fw-bold">Gestão de Férias e Feriados</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-header dg-modal-head">
+                    <h5 class="modal-title">Gestão de Férias e Feriados</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-2 mb-4">
@@ -948,6 +925,7 @@
     </script>
 
 <script>
+/* ===================== AÇÕES DO TOPO ===================== */
 function congelarBaseAtual() {
     if(confirm("Deseja congelar a quantidade de boletos de HOJE como sendo a meta oficial deste mês?")) {
         fetch('/api/sistema/congelar_metas', { method: 'POST' })
@@ -959,135 +937,16 @@ function congelarBaseAtual() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    // 🎯 1. ROSCA GLOBAL (COM PORCENTAGEM FIXA DESENHADA NO CENTRO)
-    const elProgresso = document.getElementById('dadosGrafico1');
-    const valColetados = parseInt(elProgresso.getAttribute('data-coletados')) || 0;
-    const valBaseAtualizada = parseInt(elProgresso.getAttribute('data-base-atualizada')) || 0;
-
-    new Chart(document.getElementById('chartProgresso'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Coletado', 'Base Faltante'],
-            datasets: [{
-                data: [valColetados, valBaseAtualizada],
-                backgroundColor: ['#10b981', '#e2e8f0'],
-                borderWidth: 0,
-                cutout: '72%'
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { legend: { display: false } } 
-        },
-        plugins: [{
-            id: 'centerTextPercentage',
-            afterDraw(chart) {
-                const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
-                ctx.save();
-                ctx.font = 'bold 20px Segoe UI, Arial';
-                ctx.fillStyle = '#10b981';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                const total = chart.data.datasets[0].data[0];
-                const base = chart.data.datasets[0].data[1];
-                const pct = (total + base > 0) ? Math.round((total / (total + base)) * 100) : 0;
-                
-                ctx.fillText(pct + '%', left + width / 2, top + height / 2);
-                ctx.restore();
-            }
-        }]
-    });
-
-    // 🎯 2. BARRAS HORIZONTAIS AUTOMAÇÃOS (COM VALORES EXIBIDOS LADO A LADO DA BARRA)
-    const elRobos = document.getElementById('dadosGrafico2');
-    const valWebware = parseInt(elRobos.getAttribute('data-webware')) || 0;
-    const valWinker = parseInt(elRobos.getAttribute('data-winker')) || 0;
-    const valFinmail = parseInt(elRobos.getAttribute('data-finmail')) || 0;
-    const valScanner = parseInt(elRobos.getAttribute('data-scanner')) || 0;
-
-    new Chart(document.getElementById('chartRobos'), {
-        type: 'bar',
-        data: {
-            labels: ['Webware', 'Winker', 'FinMail', 'Scanner'],
-            datasets: [{
-                label: 'Volume',
-                data: [valWebware, valWinker, valFinmail, valScanner],
-                backgroundColor: '#1e293b',
-                borderRadius: 5,
-                barThickness: 18
-            }]
-        },
-        options: {
-            responsive: true, 
-            maintainAspectRatio: false, 
-            indexAxis: 'y',
-            plugins: { legend: { display: false } },
-            layout: { padding: { right: 35 } }, // Dá espaço para o texto não cortar na borda direita
-            scales: { 
-                x: { display: false, grid: { display: false } }, 
-                y: { grid: { display: false }, ticks: { font: { family: 'Segoe UI', weight: 'bold' }, color: '#475569' } } 
-            }
-        },
-        plugins: [{
-            id: 'alwaysVisibleLabels',
-            afterDatasetsDraw(chart) {
-                const { ctx, data } = chart;
-                ctx.save();
-                ctx.font = 'bold 11px Segoe UI, Arial';
-                ctx.fillStyle = '#0f172a';
-                
-                chart.getDatasetMeta(0).data.forEach((bar, index) => {
-                    const value = data.datasets[0].data[index];
-                    if(value > 0) {
-                        // Desenha o número fixo deslocado 8 pixels para a direita do fim da barra
-                        ctx.fillText(value + " un", bar.x + 8, bar.y + 4);
-                    } else {
-                        ctx.fillText("0", bar.x + 8, bar.y + 4);
-                    }
-                });
-                ctx.restore();
-            }
-        }]
-    });
-
-    // DETALHAMENTO DO DIÁRIO VIA AJAX (SUPORTE HISTÓRICO)
-    const modalDetalheDia = document.getElementById('modalDetalheDia');
-    modalDetalheDia.addEventListener('show.bs.modal', function (event) {
-        const row = event.relatedTarget; 
-        const dia = row.getAttribute('data-dia');
-        const titulo = document.getElementById('detalheDiaTitulo');
-        const corpo = document.getElementById('detalheDiaCorpo');
-
-        titulo.textContent = `Dia ${dia}`;
-        corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando no banco Lello...</td></tr>';
-
-        fetch(`/api/dashboard/resumo_por_dia?dia=${dia}&mes_ref={{ mes_ref }}`)
-            .then(res => res.json())
-            .then(res => {
-                corpo.innerHTML = '';
-                if (res.sucesso && res.dados.length > 0) {
-                    res.dados.forEach(item => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="text-start fw-bold ps-4">👤 ${item.responsavel}</td>
-                            <td class="text-secondary fw-semibold">${item.total_inicial}</td>
-                            <td class="fw-bold" style="color: #d97706;">${item.base_atualizada}</td>
-                            <td class="text-end pe-4 text-success fw-bold">${item.diferenca}</td>
-                        `;
-                        corpo.appendChild(tr);
-                    });
-                } else {
-                    corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Sem pendências registradas para este dia.</td></tr>';
-                }
-            })
-            .catch(err => {
-                corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-danger">Falha de conexão com o servidor local.</td></tr>';
-            });
-    });
-});
+function descongelarBaseAtual() {
+    if(confirm("Deseja descongelar a meta atual? Uma cópia dela fica guardada e você poderá congelar de novo a partir da base de hoje. (Na virada de mês isso já é feito automaticamente ao importar a nova planilha.)")) {
+        fetch('/api/sistema/descongelar_metas', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.sucesso) window.location.reload();
+            else alert("Erro ao descongelar meta no banco de dados.");
+        });
+    }
+}
 
 let dadosLotesGlobais = []; 
 let modalLotesInstancia = null; // Guardião do Modal
@@ -1110,7 +969,7 @@ function abrirRelatorioLotes() {
             // Popula o filtro com os Lotes na ordem certa
             const lotesUnicos = [...new Set(res.dados.map(item => item.lote))];
             const select = document.getElementById('filtroLoteModal');
-            select.innerHTML = '<option value="ALL">📦 Mostrar Todos os Lotes</option>';
+            select.innerHTML = '<option value="ALL">Mostrar Todos os Lotes</option>';
             lotesUnicos.forEach(l => {
                 select.innerHTML += `<option value="${l}">Apenas Lote ${l}</option>`;
             });
@@ -1147,7 +1006,7 @@ function recarregarLotesAntecipados() {
             // Salva a seleção do menu para não resetar se o usuário só clicou na chavinha
             const selecaoAtual = select.value;
             
-            select.innerHTML = '<option value="ALL">📦 Mostrar Todos os Lotes</option>';
+            select.innerHTML = '<option value="ALL">Mostrar Todos os Lotes</option>';
             lotesUnicos.forEach(l => {
                 select.innerHTML += `<option value="${l}">Apenas Lote ${l}</option>`;
             });
@@ -1214,7 +1073,7 @@ function renderizarTabelaLotes() {
         let classId = 'sublote_' + contadorLote;
         
         let pctLote = dados.total > 0 ? ((dados.coletados / dados.total) * 100).toFixed(2) : 0;
-        let badgeLote = pctLote >= 100 ? 'bg-success' : (pctLote >= 70 ? 'bg-primary' : (pctLote >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
+        let badgeLote = pctLote >= 100 ? 'bg-success' : (pctLote >= 70 ? 'bg-info' : (pctLote >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
         
         let mediaEmi = dados.total > 0 ? Math.round(dados.somaEmissao / dados.total) : 0;
         let mediaVen = dados.total > 0 ? Math.round(dados.somaVencimento / dados.total) : 0;
@@ -1223,24 +1082,24 @@ function renderizarTabelaLotes() {
         let txtVen = mediaVen > 0 ? `Dia ${String(mediaVen).padStart(2, '0')}` : '-';
         
         let isTranquilo = lote.includes('Aluguel Tranquilo');
-        let corFundo = isTranquilo ? '#dcfce7' : '#ffffff';
-        let corHover = isTranquilo ? '#bbf7d0' : '#f8fafc';
+        let corFundo = isTranquilo ? 'var(--ok-bg)' : '#ffffff';
+        let corHover = isTranquilo ? '#C3E3CC' : 'var(--bg)';
 
         // LINHA MESTRA CONSOLIDADA (Clicável)
         corpo.innerHTML += `
-            <tr class="clickable-row" style="background-color: ${corFundo}; border-bottom: 2px solid #e2e8f0; cursor: pointer;" 
+            <tr class="clickable-row" style="background-color: ${corFundo}; border-bottom: 2px solid var(--line); cursor: pointer;" 
                 onclick="toggleExpansaoLote('${classId}')" 
                 onmouseover="this.style.backgroundColor='${corHover}'" 
                 onmouseout="this.style.backgroundColor='${corFundo}'">
                 
                 <td class="text-start ps-4 fw-bold text-primary" style="font-size: 0.95rem;">
-                    <span id="icone_${classId}" class="me-2 text-muted" style="font-size: 0.8rem;">➕</span> 📦 Lote ${lote}
+                    <span id="icone_${classId}" class="me-2 text-muted" style="font-size: 0.8rem;">▸</span> Lote ${lote}
                 </td>
                 <td class="fw-bold text-secondary">Média: ${txtEmi}</td>
                 <td class="fw-bold text-dark">Média: ${txtVen}</td>
                 <td class="fw-bold text-dark" style="font-size: 1.05rem;">${dados.total}</td>
                 <td class="fw-bold text-success" style="font-size: 1.05rem;">${dados.coletados}</td>
-                <td class="fw-bold" style="color: #d97706 !important; font-size: 1.05rem;">${dados.pendentes}</td>
+                <td class="fw-bold" style="color: var(--warn-text) !important; font-size: 1.05rem;">${dados.pendentes}</td>
                 <td class="text-end pe-4">
                     <span class="badge ${badgeLote} px-2 py-1 fw-bold" style="font-size: 0.85rem; min-width: 65px; border: 1px solid rgba(0,0,0,0.1);">
                         ${String(pctLote).replace('.', ',')}%
@@ -1252,10 +1111,10 @@ function renderizarTabelaLotes() {
         // LINHAS DE ABERTURA (Invisíveis por padrão)
         dados.detalhamento.forEach(item => {
             let pctSub = parseFloat(item.pct.replace(',', '.'));
-            let badgeSub = pctSub >= 100 ? 'bg-success' : (pctSub >= 70 ? 'bg-primary' : (pctSub >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
+            let badgeSub = pctSub >= 100 ? 'bg-success' : (pctSub >= 70 ? 'bg-info' : (pctSub >= 40 ? 'bg-warning text-dark' : 'bg-danger'));
             
             corpo.innerHTML += `
-                <tr class="${classId}" style="background-color: #f1f5f9; display: none; border-bottom: 1px solid #e2e8f0;">
+                <tr class="${classId}" style="background-color: var(--sunk); display: none; border-bottom: 1px solid var(--line);">
                     <td class="text-start ps-5 text-muted" style="font-size: 0.8rem;">↳ Fração do Lote</td>
                     <td class="fw-semibold text-secondary">Dia ${item.emissao}</td>
                     <td class="fw-semibold text-dark">Dia ${item.vencimento}</td>
@@ -1285,176 +1144,9 @@ window.toggleExpansaoLote = function(classId) {
     });
     
     if (icone) {
-        icone.innerText = estaEscondido ? '➖' : '➕';
+        icone.innerText = estaEscondido ? '▾' : '▸';
     }
 };
-
-// =========================================================
-// FILTRO DA TABELA DE ACOMPANHAMENTO DIÁRIO (NO DASHBOARD)
-// =========================================================
-function filtrarTabelaDias(origem) {
-    const selectPeriodo = document.getElementById('filtroPeriodoDias');
-    const selectDia = document.getElementById('filtroDiaUnico');
-    
-    // UX Inteligente
-    if (origem === 'periodo' && selectPeriodo.value !== 'ALL') selectDia.value = 'ALL';
-    else if (origem === 'dia' && selectDia.value !== 'ALL') selectPeriodo.value = 'ALL';
-    
-    const periodo = selectPeriodo.value;
-    const diaUnico = selectDia.value;
-    
-    const tabela = document.getElementById('tabelaAcompanhamentoDias');
-    if (!tabela) return;
-
-    const tbody = tabela.querySelector('tbody');
-    
-    // Limpa a linha agrupada se ela já existir na tela
-    const existingGroupedRow = document.getElementById('linhaAgrupadaPeriodo');
-    if (existingGroupedRow) existingGroupedRow.remove();
-
-    const rows = tbody.querySelectorAll('tr.clickable-row:not(.dynamic-period-row)');
-    
-    let sumTotal = 0;
-    let sumFaltantes = 0;
-    let sumConcluidos = 0;
-    let matchCount = 0;
-
-    rows.forEach(row => {
-        const diaStr = row.getAttribute('data-dia');
-        const diaNum = parseInt(diaStr, 10);
-        
-        let exibirPeriodo = true;
-        if (periodo === '1-4') exibirPeriodo = (diaNum >= 1 && diaNum <= 4);
-        else if (periodo === '5-9') exibirPeriodo = (diaNum >= 5 && diaNum <= 9);
-        else if (periodo === '10-14') exibirPeriodo = (diaNum >= 10 && diaNum <= 14);
-        else if (periodo === '15-31') exibirPeriodo = (diaNum >= 15 && diaNum <= 31);
-        
-        let exibirDia = true;
-        if (diaUnico !== 'ALL') exibirDia = (diaStr === diaUnico);
-        
-        if (exibirPeriodo && exibirDia) {
-            // 🎯 Se escolheu período, ESCONDE a linha individual (mas soma os valores dela)
-            if (periodo !== 'ALL') row.style.display = 'none';
-            else row.style.display = '';
-            
-            const valTotal = parseInt(row.children[1].innerText.replace(/\./g, '')) || 0;
-            const valFaltantes = parseInt(row.children[2].innerText.replace(/\./g, '')) || 0;
-            const valConcluidos = parseInt(row.children[3].innerText.replace(/\./g, '')) || 0;
-            
-            sumTotal += valTotal;
-            sumFaltantes += valFaltantes;
-            sumConcluidos += valConcluidos;
-            matchCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // 🎯 MÁGICA: CRIA A LINHA AGRUPADA MESTRE SE TIVER UM PERÍODO SELECIONADO
-    if (periodo !== 'ALL' && matchCount > 0) {
-        let pct = 0;
-        if (sumTotal > 0) pct = ((sumConcluidos / sumTotal) * 100).toFixed(2);
-        
-        let badgeClass = 'bg-danger';
-        if (pct >= 95) badgeClass = 'bg-success';
-        else if (pct >= 80) badgeClass = 'bg-success bg-opacity-75';
-        else if (pct >= 60) badgeClass = 'bg-warning text-dark';
-
-        const trGroup = document.createElement('tr');
-        trGroup.id = 'linhaAgrupadaPeriodo';
-        trGroup.className = 'clickable-row dynamic-period-row';
-        trGroup.style.backgroundColor = '#e0f2fe'; // Azul clarinho para destacar que é um grupo
-        trGroup.setAttribute('data-dia', periodo); // Manda "1-4" pro modal chamar a API!
-        trGroup.setAttribute('data-bs-toggle', 'modal');
-        trGroup.setAttribute('data-bs-target', '#modalDetalheDia');
-        
-        let labelPeriodo = `Período ${periodo}`;
-        if (periodo === '1-4') labelPeriodo = "Dias 01 a 04";
-        if (periodo === '5-9') labelPeriodo = "Dias 05 a 09";
-        if (periodo === '10-14') labelPeriodo = "Dias 10 a 14";
-        if (periodo === '15-31') labelPeriodo = "Dias 15 a 31";
-
-        trGroup.innerHTML = `
-            <td class="text-start fw-bold text-primary ps-4" style="font-size: 0.85rem;">📅 ${labelPeriodo}</td>
-            <td class="text-secondary fw-bold">${sumTotal.toLocaleString('pt-BR')}</td>
-            <td class="fw-bold" style="color: #d97706 !important;">${sumFaltantes.toLocaleString('pt-BR')}</td>
-            <td class="text-success fw-bold">${sumConcluidos.toLocaleString('pt-BR')}</td>
-            <td class="text-end pe-4">
-                <span class="badge ${badgeClass} px-2.5 py-1.5 fw-bold" style="font-size: 0.75rem; min-width: 65px;">
-                    ${String(pct).replace('.', ',')}%
-                </span>
-            </td>
-        `;
-        tbody.prepend(trGroup); // Joga ela lá no topo da tabela
-    }
-    
-    // Atualiza o Rodapé Geral
-    const tfoot = tabela.querySelector('tfoot');
-    if (tfoot) {
-        tfoot.children[0].children[1].innerText = sumTotal.toLocaleString('pt-BR');
-        tfoot.children[0].children[2].innerText = sumFaltantes.toLocaleString('pt-BR');
-        tfoot.children[0].children[3].innerText = sumConcluidos.toLocaleString('pt-BR');
-        let pct = 0;
-        if (sumTotal > 0) pct = ((sumConcluidos / sumTotal) * 100).toFixed(2);
-        tfoot.children[0].children[4].innerText = String(pct).replace('.', ',') + '%';
-    }
-}
-
-// 🎯 AJUSTE DO EVENTO DO MODAL (Para exibir "Período" ou "Dia" no título)
-document.addEventListener("DOMContentLoaded", function() {
-    const modalDetalheDia = document.getElementById('modalDetalheDia');
-    if(modalDetalheDia) {
-        modalDetalheDia.addEventListener('show.bs.modal', function (event) {
-            const row = event.relatedTarget; 
-            const dia = row.getAttribute('data-dia');
-            const titulo = document.getElementById('detalheDiaTitulo');
-            const corpo = document.getElementById('detalheDiaCorpo');
-
-            // 🎯 Se tiver traço, ele escreve "Período". Se não, escreve "Dia".
-            if (dia.includes('-')) {
-                titulo.textContent = `Período ${dia}`;
-            } else {
-                titulo.textContent = `Dia ${dia}`;
-            }
-
-            corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando no banco Lello...</td></tr>';
-
-            fetch(`/api/dashboard/resumo_por_dia?dia=${dia}&mes_ref={{ mes_ref|default('') }}`)
-                .then(res => res.json())
-                .then(res => {
-                    corpo.innerHTML = '';
-                    if (res.sucesso && res.dados.length > 0) {
-                        res.dados.forEach(item => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td class="text-start fw-bold ps-4">👤 ${item.responsavel}</td>
-                                <td class="text-secondary fw-semibold">${item.total_inicial}</td>
-                                <td class="fw-bold" style="color: #d97706;">${item.base_atualizada}</td>
-                                <td class="text-end pe-4 text-success fw-bold">${item.diferenca}</td>
-                            `;
-                            corpo.appendChild(tr);
-                        });
-                    } else {
-                        corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Sem pendências registradas para esta seleção.</td></tr>';
-                    }
-                })
-                .catch(err => {
-                    corpo.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-danger">Falha de conexão com o servidor local.</td></tr>';
-                });
-        });
-    }
-});
-
-function descongelarBaseAtual() {
-    if(confirm("Deseja descongelar a meta atual? Uma cópia dela fica guardada e você poderá congelar de novo a partir da base de hoje. (Na virada de mês isso já é feito automaticamente ao importar a nova planilha.)")) {
-        fetch('/api/sistema/descongelar_metas', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            if(data.sucesso) window.location.reload();
-            else alert("Erro ao descongelar meta no banco de dados.");
-        });
-    }
-}
 
 let dadosFimDeMesGlobais = [];
 
@@ -1506,11 +1198,11 @@ function renderizarTabelaFimDeMes() {
     
     // Transforma o cabeçalho se um lote for selecionado
     if (filtro !== 'ALL') {
-        thProjecao.innerHTML = '💡 Melhor Dia p/ Geração';
-        thProjecao.style.color = '#f59e0b'; // Laranja
+        thProjecao.innerHTML = 'Melhor Dia p/ Geração';
+        thProjecao.style.color = 'var(--warn-text)'; // Laranja
     } else {
-        thProjecao.innerHTML = '🎯 Projeção Fim de Mês';
-        thProjecao.style.color = '#0ea5e9'; // Azul
+        thProjecao.innerHTML = 'Projeção Fim de Mês';
+        thProjecao.style.color = 'var(--accent)'; // Azul
     }
     
     dadosFimDeMesGlobais.forEach(dados => {
@@ -1518,23 +1210,23 @@ function renderizarTabelaFimDeMes() {
         
         somaTotal += dados.total;
         somaColetados += dados.coletados;
-        somaProjetados += dados.projetado;
+        somaProjetados += (dados.projetado || 0);
         
         let pctLote = parseFloat(dados.pct.replace(',', '.'));
-        let badgeLote = pctLote >= 80 ? 'bg-success' : (pctLote >= 50 ? 'bg-primary' : (pctLote >= 20 ? 'bg-warning text-dark' : 'bg-danger'));
+        let badgeLote = pctLote >= 80 ? 'bg-success' : (pctLote >= 50 ? 'bg-info' : (pctLote >= 20 ? 'bg-warning text-dark' : 'bg-danger'));
         
         let txtColunaDinamica = '';
         
         // Transforma o dado da célula (Projeção % vs Melhor Dia)
         if (filtro !== 'ALL') {
-            txtColunaDinamica = `<span class="text-warning fw-bold" style="font-size: 1.05rem; cursor: help;" title="${dados.motivo_dia}">📅 Dia ${dados.melhor_dia}</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">⚙️ Simular Datas</button>`;
+            txtColunaDinamica = `<span class="text-warning fw-bold" style="font-size: 1.05rem; cursor: help;" title="${dados.motivo_dia}">Dia ${dados.melhor_dia}</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">Simular Datas</button>`;
         } else {
-            txtColunaDinamica = `<span class="text-info fw-bold" style="font-size: 1rem;">${dados.pct_proj}%</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">⚙️ Simular Datas</button>`;
+            txtColunaDinamica = `<span class="text-info fw-bold" style="font-size: 1rem;">${dados.pct_proj !== undefined ? dados.pct_proj + '%' : '-'}</span> <br> <button class="btn btn-sm btn-outline-primary mt-1 px-2 py-0" style="font-size: 0.75rem;" onclick="abrirSimuladorLote('${dados.lote}')">Simular Datas</button>`;
         }
 
         corpo.innerHTML += `
-            <tr style="background-color: #ffffff; border-bottom: 1px solid #e2e8f0;">
-                <td class="text-start ps-4 fw-bold text-dark" style="font-size: 0.95rem;">📦 ${dados.lote}</td>
+            <tr style="background-color: #ffffff; border-bottom: 1px solid var(--line);">
+                <td class="text-start ps-4 fw-bold text-dark" style="font-size: 0.95rem;">${dados.lote}</td>
                 <td class="text-secondary fw-semibold">${dados.total}</td>
                 <td class="fw-bold text-success" style="font-size: 1.05rem;">${dados.coletados}</td>
                 <td>
@@ -1641,7 +1333,7 @@ function renderizarMatrizSimulacao() {
             matriz[e][v] += q;
             total += q;
             
-            // 🎯 A MÁGICA ACONTECE AQUI: A regra do prazo!
+            // A MÁGICA ACONTECE AQUI: A regra do prazo!
             if (e <= diaDefinitivo) {
                 capturados += q;
             } else {
@@ -1656,7 +1348,7 @@ function renderizarMatrizSimulacao() {
     document.getElementById('simPerdidos').innerText = `${perdidos} (${((perdidos/total)*100 || 0).toFixed(1)}%)`;
 
     // Desenha o Cabeçalho
-    let htmlHead = `<tr><th style="min-width: 90px; background: #0f172a; z-index: 3;">Vencimento →<br>Emissão ↓</th>`;
+    let htmlHead = `<tr><th style="min-width: 90px; background: var(--deep); z-index: 3;">Vencimento →<br>Emissão ↓</th>`;
     for(let v = 1; v <= 31; v++) htmlHead += `<th>${v}</th>`;
     htmlHead += `</tr>`;
     head.innerHTML = htmlHead;
@@ -1664,16 +1356,16 @@ function renderizarMatrizSimulacao() {
     // Desenha o Corpo com as cores da simulação
     let htmlCorpo = '';
     for(let e = 1; e <= 31; e++) {
-        htmlCorpo += `<tr><th style="background: #1e293b; color: white; position: sticky; left: 0; z-index: 1;">${e}</th>`;
+        htmlCorpo += `<tr><th style="background: var(--deep); color: white; position: sticky; left: 0; z-index: 1;">${e}</th>`;
         for(let v = 1; v <= 31; v++) {
             let val = matriz[e][v];
             if (val > 0) {
                 // Pinta de verde se a emissão for menor ou igual à data definitiva
-                let corFundo = (e <= diaDefinitivo) ? '#dcfce7' : '#fee2e2';
-                let corTexto = (e <= diaDefinitivo) ? '#166534' : '#991b1b';
+                let corFundo = (e <= diaDefinitivo) ? 'var(--ok-bg)' : 'var(--danger-bg)';
+                let corTexto = (e <= diaDefinitivo) ? 'var(--ok-text)' : 'var(--danger-text)';
                 htmlCorpo += `<td style="background-color: ${corFundo}; color: ${corTexto}; font-weight: bold;">${val}</td>`;
             } else {
-                htmlCorpo += `<td style="color: #cbd5e1;">-</td>`;
+                htmlCorpo += `<td style="color: var(--line);">-</td>`;
             }
         }
         htmlCorpo += `</tr>`;
@@ -1681,6 +1373,276 @@ function renderizarMatrizSimulacao() {
     corpo.innerHTML = htmlCorpo;
 }
 
+/* ===================== HOME OFFICE ===================== */
+const DIAS_HOME = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+let estadoHome = {};
+let homeAlterado = false;
+let modalHomeInstancia = null;
+
+function abrirHomeOffice() {
+    if (!modalHomeInstancia) {
+        const el = document.getElementById('modalHomeOffice');
+        modalHomeInstancia = new bootstrap.Modal(el);
+        el.addEventListener('hidden.bs.modal', function () {
+            if (homeAlterado) {
+                if (typeof ativarLoading === 'function') ativarLoading();
+                window.location.reload();
+            }
+        });
+    }
+    homeAlterado = false;
+    definirStatusHome('', '');
+    modalHomeInstancia.show();
+    carregarHomeOffice();
+}
+
+function definirStatusHome(texto, classe) {
+    const el = document.getElementById('homeStatus');
+    el.textContent = texto;
+    el.className = classe || '';
+}
+
+function carregarHomeOffice() {
+    fetch('/api/sistema/home_office')
+    .then(r => r.json())
+    .then(res => {
+        if (!res.sucesso) { throw new Error(res.msg || 'Falha ao carregar'); }
+        estadoHome = {};
+        res.colaboradores.forEach(c => { estadoHome[c.usuario] = { dias: new Set(c.dias), fixo: c.fixo }; });
+        renderizarHomeOffice();
+    })
+    .catch(() => {
+        document.getElementById('listaHomeOffice').innerHTML = '<div class="dg-empty">Não foi possível carregar. Recarregue a página e tente de novo.</div>';
+    });
+}
+
+function renderizarHomeOffice() {
+    const lista = document.getElementById('listaHomeOffice');
+    lista.innerHTML = '';
+    Object.keys(estadoHome).forEach(nome => {
+        const c = estadoHome[nome];
+        const linha = document.createElement('div');
+        linha.className = 'dg-home-row';
+
+        const who = document.createElement('div');
+        who.className = 'who';
+        who.textContent = nome;
+        linha.appendChild(who);
+
+        const dias = document.createElement('div');
+        dias.className = 'days';
+        DIAS_HOME.forEach((rotulo, i) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'dg-day';
+            b.textContent = rotulo;
+            b.setAttribute('aria-pressed', c.dias.has(i) ? 'true' : 'false');
+            b.setAttribute('aria-label', nome + ', ' + rotulo);
+            b.addEventListener('click', () => alternarDiaHome(nome, i, b));
+            dias.appendChild(b);
+        });
+        linha.appendChild(dias);
+
+        const acao = document.createElement('div');
+        if (!c.fixo) {
+            const x = document.createElement('button');
+            x.type = 'button';
+            x.className = 'x';
+            x.title = 'Remover ' + nome;
+            x.setAttribute('aria-label', 'Remover ' + nome);
+            x.textContent = '×';
+            x.addEventListener('click', () => removerColaboradorHome(nome));
+            acao.appendChild(x);
+        }
+        linha.appendChild(acao);
+        lista.appendChild(linha);
+    });
+}
+
+function alternarDiaHome(nome, dia, botao) {
+    const conjunto = estadoHome[nome].dias;
+    const marcado = !conjunto.has(dia);
+    if (marcado) conjunto.add(dia); else conjunto.delete(dia);
+    botao.setAttribute('aria-pressed', marcado ? 'true' : 'false');
+    definirStatusHome('Salvando...', '');
+
+    fetch('/api/sistema/home_office', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: nome, dias: Array.from(conjunto).sort() })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (!res.sucesso) { throw new Error(res.msg || 'Falha ao salvar'); }
+        homeAlterado = true;
+        definirStatusHome('Salvo', 'is-ok');
+    })
+    .catch(err => {
+        if (marcado) conjunto.delete(dia); else conjunto.add(dia);
+        botao.setAttribute('aria-pressed', marcado ? 'false' : 'true');
+        definirStatusHome('Não foi possível salvar. ' + (err.message || ''), 'is-err');
+    });
+}
+
+function removerColaboradorHome(nome) {
+    fetch('/api/sistema/home_office', {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: nome })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (!res.sucesso) { throw new Error(res.msg || 'Falha ao remover'); }
+        homeAlterado = true;
+        delete estadoHome[nome];
+        renderizarHomeOffice();
+        definirStatusHome('Removido', 'is-ok');
+    })
+    .catch(err => definirStatusHome('Não foi possível remover. ' + (err.message || ''), 'is-err'));
+}
+
+function adicionarColaboradorHome(ev) {
+    ev.preventDefault();
+    const campo = document.getElementById('novoColaboradorHome');
+    // Mesma padronização do servidor: sem acento e com Inicial Maiúscula
+    let nome = campo.value.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\s+/g, ' ');
+    nome = nome.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+    if (!nome) { definirStatusHome('Digite o nome do colaborador.', 'is-err'); return false; }
+    if (nome === 'Giovanna') nome = 'Geovanna';
+    if (!estadoHome[nome]) {
+        estadoHome[nome] = { dias: new Set(), fixo: false };
+        renderizarHomeOffice();
+    }
+    campo.value = '';
+    definirStatusHome('Marque os dias de home office de ' + nome + ' para salvar.', '');
+    return false;
+}
+
+/* ===================== TABELA POR VENCIMENTO ===================== */
+function fmtNum(v) { return v.toLocaleString('pt-BR'); }
+function fmtPct(v) { return v.toFixed(1).replace('.', ','); }
+function fmtBaixados(v) {
+    return v < 0 ? '<span class="dg-new" title="Boletos que entraram na base depois do congelamento">+' + fmtNum(-v) + '</span>' : fmtNum(v);
+}
+
+function filtrarTabelaDias(origem) {
+    const selectPeriodo = document.getElementById('filtroPeriodoDias');
+    const selectDia = document.getElementById('filtroDiaUnico');
+
+    if (origem === 'periodo' && selectPeriodo.value !== 'ALL') selectDia.value = 'ALL';
+    else if (origem === 'dia' && selectDia.value !== 'ALL') selectPeriodo.value = 'ALL';
+
+    const periodo = selectPeriodo.value;
+    const diaUnico = selectDia.value;
+    const tabela = document.getElementById('tabelaAcompanhamentoDias');
+    if (!tabela) return;
+    const tbody = tabela.querySelector('tbody');
+    const temColunaPend = !!document.getElementById('ftPend');
+
+    const antiga = document.getElementById('linhaAgrupadaPeriodo');
+    if (antiga) antiga.remove();
+
+    let sMeta = 0, sBase = 0, sBaix = 0, sPend = 0, achou = 0;
+
+    tbody.querySelectorAll('tr[data-dia]:not(.dynamic-period-row)').forEach(row => {
+        const diaStr = row.getAttribute('data-dia');
+        const diaNum = parseInt(diaStr, 10);
+
+        let okPeriodo = true;
+        if (periodo === '1-4') okPeriodo = (diaNum >= 1 && diaNum <= 4);
+        else if (periodo === '5-9') okPeriodo = (diaNum >= 5 && diaNum <= 9);
+        else if (periodo === '10-14') okPeriodo = (diaNum >= 10 && diaNum <= 14);
+        else if (periodo === '15-31') okPeriodo = (diaNum >= 15 && diaNum <= 31);
+        const okDia = (diaUnico === 'ALL') || (diaStr === diaUnico);
+
+        if (okPeriodo && okDia) {
+            row.style.display = (periodo !== 'ALL') ? 'none' : '';  // com período escolhido, mostra só a linha somada
+            sMeta += parseInt(row.dataset.meta, 10) || 0;
+            sBase += parseInt(row.dataset.base, 10) || 0;
+            sBaix += parseInt(row.dataset.baix, 10) || 0;
+            sPend += parseInt(row.dataset.pend, 10) || 0;
+            achou++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    const pct = sMeta > 0 ? Math.max(0, sBaix / sMeta * 100) : 0;
+
+    if (periodo !== 'ALL' && achou > 0) {
+        const rotulos = { '1-4': 'Dias 01 a 04', '5-9': 'Dias 05 a 09', '10-14': 'Dias 10 a 14', '15-31': 'Dias 15 a 31' };
+        const tr = document.createElement('tr');
+        tr.id = 'linhaAgrupadaPeriodo';
+        tr.className = 'is-click clickable-row dynamic-period-row';
+        tr.style.backgroundColor = 'var(--accent-soft)';
+        tr.setAttribute('data-dia', periodo);  // "1-4" faz o modal buscar o período inteiro
+        tr.setAttribute('data-bs-toggle', 'modal');
+        tr.setAttribute('data-bs-target', '#modalDetalheDia');
+        tr.innerHTML =
+            '<td class="name">' + (rotulos[periodo] || ('Período ' + periodo)) + '</td>' +
+            '<td>' + fmtNum(sMeta) + '</td>' +
+            '<td>' + fmtNum(sBase) + '</td>' +
+            '<td>' + fmtBaixados(sBaix) + '</td>' +
+            '<td><span class="dg-meter is-slate"><span style="width:' + Math.min(pct, 100) + '%"></span></span><span class="dg-pct">' + fmtPct(pct) + '%</span></td>' +
+            (temColunaPend ? '<td>' + fmtNum(sPend) + '</td>' : '');
+        tbody.prepend(tr);
+    }
+
+    document.getElementById('ftMeta').textContent = fmtNum(sMeta);
+    document.getElementById('ftBase').textContent = fmtNum(sBase);
+    document.getElementById('ftBaix').innerHTML = fmtBaixados(sBaix);
+    document.getElementById('ftPct').textContent = fmtPct(pct) + '%';
+    if (temColunaPend) document.getElementById('ftPend').textContent = fmtNum(sPend);
+}
+
+/* ===================== GRÁFICOS E MODAL DO DIA ===================== */
+document.addEventListener('DOMContentLoaded', function () {
+    // Matriz: já abre rolada até a linha de hoje
+    const linhaHoje = document.querySelector('.dg-matrix tr.is-hoje');
+    if (linhaHoje) {
+        const caixa = linhaHoje.closest('.dg-matrix-wrap');
+        if (caixa) {
+            const topo = linhaHoje.getBoundingClientRect().top - caixa.getBoundingClientRect().top + caixa.scrollTop;
+            caixa.scrollTop = Math.max(0, topo - caixa.clientHeight / 2);
+        }
+    }
+
+    // Detalhe por responsável (dia ou período)
+    const modalDetalheDia = document.getElementById('modalDetalheDia');
+    if (modalDetalheDia) {
+        modalDetalheDia.addEventListener('show.bs.modal', function (event) {
+            const row = event.relatedTarget;
+            if (!row) return;
+            const dia = row.getAttribute('data-dia');
+            const titulo = document.getElementById('detalheDiaTitulo');
+            const corpo = document.getElementById('detalheDiaCorpo');
+
+            titulo.textContent = dia.includes('-') ? ('dias ' + dia.replace('-', ' a ')) : ('dia ' + dia);
+            corpo.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-secondary" role="status"></div> Buscando dados...</td></tr>';
+
+            fetch('/api/dashboard/resumo_por_dia?dia=' + encodeURIComponent(dia) + '&mes_ref=' + encodeURIComponent({{ (mes_ref or '') | tojson }}))
+                .then(res => res.json())
+                .then(res => {
+                    corpo.innerHTML = '';
+                    if (res.sucesso && res.dados.length > 0) {
+                        res.dados.forEach(item => {
+                            const tr = document.createElement('tr');
+                            const td = (txt, cls) => { const c = document.createElement('td'); if (cls) c.className = cls; c.textContent = txt; return c; };
+                            tr.appendChild(td(item.responsavel, 'text-start ps-4 fw-semibold'));
+                            tr.lastChild.style.color = 'var(--dg-ink)';
+                            tr.appendChild(td(fmtNum(item.base_atual)));
+                            tr.appendChild(td(fmtNum(item.coletados)));
+                            tr.appendChild(td(fmtNum(item.pendentes), 'text-end pe-4 fw-semibold'));
+                            corpo.appendChild(tr);
+                        });
+                    } else {
+                        corpo.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Nenhum boleto para esta seleção.</td></tr>';
+                    }
+                })
+                .catch(() => {
+                    corpo.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Não foi possível carregar. Tente novamente.</td></tr>';
+                });
+        });
+    }
+});
 </script>
 
 {% endblock %}

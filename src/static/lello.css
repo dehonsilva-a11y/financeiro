@@ -1,0 +1,280 @@
+/* =============================================================================
+   lello.css — Design System Lello aplicado ao Sistema de Gestão (tema CLARO)
+   Fonte dos valores: "Design System Lello" (rodada 2, 22/10/2026).
+   Carregado DEPOIS do Bootstrap: troca cores, fonte, cantos e sombras sem mexer na lógica das telas.
+   Para o tema bordô (futuro): bastaria redefinir as variáveis em [data-theme="bordo"].
+   ============================================================================= */
+/* Fonte Anek Latin hospedada no próprio sistema (static/fonts): funciona sem internet e sem depender do Google */
+@font-face { font-family: "Anek Latin"; font-weight: 300; font-style: normal; font-display: swap; src: url("fonts/AnekLatin-Light.ttf") format("truetype"); }
+@font-face { font-family: "Anek Latin"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/AnekLatin-Regular.ttf") format("truetype"); }
+@font-face { font-family: "Anek Latin"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/AnekLatin-SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "Anek Latin"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/AnekLatin-Bold.ttf") format("truetype"); }
+
+/* TEMA LELLO: vermelho nas ações, bordô nas estruturas
+   Botões, links, destaques e a marca usam o vermelho Lello (--accent). A barra superior, os cabeçalhos de tabela e de janela
+   e o cartão de destaque usam o bordô do guia (--deep). Para trocar uma estrutura de bordô para vermelho, use var(--accent). */
+:root{
+    --bg:#F7F4F3;
+    --surface:#FFFFFF;
+    --sunk:#EFEAE9;
+    --line:#E2D9D8;
+    --line-strong:#8C7B80;
+    --ink:#1E0B11;
+    --muted:#6A5860;
+    --ink-2:#4A3840;
+    --accent:#C20332;
+    --accent-soft:#FBE6EB;
+    --accent-detail:#9E0229;
+    --accent-detail-soft:#FBE6EB;
+    --on-accent-detail:#FFFFFF;
+    --on-accent:#FFFFFF;
+    --focus:#0058A0;
+    --brand-red:#C20332;
+    --brand-bordo:#5C0521;
+    --deep:#5C0521;
+    --brand-white:#FFFFFF;
+    --brand-black:#000000;
+    --sec-bege:#EAE5C1;
+    --sec-azul-claro:#C3ECED;
+    --sec-verde:#CAD868;
+    --sec-laranja:#FFAB66;
+    --sec-vermelho-intenso:#F22200;
+    --sec-azul-escuro:#0058A0;
+    --sec-roxo:#8D3393;
+    --area-locacao:#0058A0;
+    --area-venda:#C20332;
+    --area-condominio:#8D3393;
+    --area-lancamento:#C2570A;
+    --area-servico:#5E7A10;
+    --ok:#2B7A46;
+    --warn:#B26A00;
+    --danger:#D42A0B;
+    --info:#0058A0;
+    --ok-text:#1F6B3A;
+    --warn-text:#7A4A00;
+    --danger-text:#A61B00;
+    --info-text:#00508F;
+    --ok-bg:#E6F3EA;
+    --warn-bg:#FCEFD6;
+    --danger-bg:#FFE9E4;
+    --info-bg:#E3F0FB;
+    --ring-track:#E4DCDB;
+    --glass:rgba(30,11,17,0.04);
+    --glass-line:rgba(30,11,17,0.08);
+    --data-1:#0058A0;
+    --data-2:#C20332;
+    --data-3:#8D3393;
+    --data-4:#C2570A;
+    --data-5:#5E7A10;
+    --data-neutral:#8C7B80;
+    --data-target:#6A5860;
+    --data-grid:#E2D9D8;
+    --data-band:#E6F3EA;
+    --heat-0:#EFEAE9;
+    --heat-1:#F6CAD4;
+    --heat-2:#E98DA2;
+    --heat-3:#D4456A;
+    --heat-4:#9E0229;
+    --space-1:4px;
+    --space-2:8px;
+    --space-3:12px;
+    --space-4:16px;
+    --space-5:20px;
+    --space-6:24px;
+    --space-7:32px;
+    --radius-sm:10px;
+    --radius-md:14px;
+    --radius-lg:18px;
+    --radius-card:24px;
+    --radius-sheet:28px;
+    --radius-pill:999px;
+    --shadow-card:0 1px 2px rgba(30,11,17,0.05), 0 12px 30px rgba(92,5,33,0.08);
+    --shadow-float:0 12px 30px rgba(92,5,33,0.16);
+    --font-sans:"Anek Latin", Trebuchet MS, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /* Bootstrap lendo os tokens da Lello */
+    --bs-body-font-family: var(--font-sans);
+    --bs-body-bg: var(--bg);
+    --bs-body-color: var(--ink);
+    --bs-secondary-color: var(--muted);
+    --bs-border-color: var(--line);
+    --bs-border-radius: var(--radius-sm);
+    --bs-link-color: var(--accent-detail);
+    --bs-link-hover-color: var(--accent);
+    --bs-link-color-rgb: 158, 2, 41;
+    --bs-link-hover-color-rgb: 194, 3, 50;
+    --bs-primary-rgb: 194, 3, 50;
+    --bs-secondary-rgb: 106, 88, 96;
+    --bs-success-rgb: 43, 122, 70;
+    --bs-danger-rgb: 212, 42, 11;
+    --bs-warning-rgb: 255, 171, 102;
+    --bs-info-rgb: 0, 88, 160;
+    --bs-light-rgb: 239, 234, 233;
+    --bs-dark-rgb: 92, 5, 33;
+}
+
+html, body { font-family: var(--font-sans); }
+body { background-color: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.45; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3, h4, h5, h6 { letter-spacing: -.01em; }
+
+/* ---------- cores utilitárias do Bootstrap, no padrão Lello ---------- */
+.text-dark { color: var(--ink) !important; }
+.text-secondary, .text-muted { color: var(--muted) !important; }
+.text-success { color: var(--ok-text) !important; }
+.text-danger { color: var(--danger-text) !important; }
+.text-warning { color: var(--warn-text) !important; }
+.text-info { color: var(--info-text) !important; }
+.bg-light { background-color: var(--sunk) !important; }
+.bg-white { background-color: var(--surface) !important; }
+.bg-dark { background-color: var(--deep) !important; }
+.border-light, .border { border-color: var(--line) !important; }
+.border-dark { border-color: var(--ink) !important; }
+.border-warning { border-color: var(--warn) !important; }
+.border-danger { border-color: var(--danger) !important; }
+.badge { border-radius: var(--radius-pill); font-weight: 600; letter-spacing: 0; }
+.badge.bg-warning, .badge.bg-light { color: var(--ink) !important; }
+.badge.bg-info { color: #fff !important; }
+
+/* ---------- botões: PADRÃO LELLO ----------
+   Só dois jeitos: vermelho cheio (ação) e branco com borda. Nada de verde, azul ou amarelo em botão
+   (as cores de status continuam nos selos, avisos e textos). */
+.btn { --bs-btn-border-radius: var(--radius-md); --bs-btn-font-weight: 600; font-weight: 600; letter-spacing: 0; }
+.btn-sm { --bs-btn-border-radius: var(--radius-sm); }
+.btn-primary, .btn-success, .btn-info, .btn-warning, .btn-danger, .btn-dark {
+    --bs-btn-color: #fff; --bs-btn-bg: var(--accent); --bs-btn-border-color: var(--accent);
+    --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #9E0229; --bs-btn-hover-border-color: #9E0229;
+    --bs-btn-active-color: #fff; --bs-btn-active-bg: #7D0120; --bs-btn-active-border-color: #7D0120;
+    --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent);
+    --bs-btn-focus-shadow-rgb: 194, 3, 50; }
+.btn-primary.text-dark, .btn-success.text-dark, .btn-info.text-dark, .btn-warning.text-dark, .btn-danger.text-dark, .btn-dark.text-dark { color: #fff !important; }
+.btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-warning, .btn-outline-danger {
+    --bs-btn-color: var(--accent); --bs-btn-border-color: var(--accent);
+    --bs-btn-hover-color: var(--accent); --bs-btn-hover-bg: var(--accent-soft); --bs-btn-hover-border-color: var(--accent);
+    --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--accent); --bs-btn-active-border-color: var(--accent);
+    --bs-btn-disabled-color: var(--accent); --bs-btn-disabled-border-color: var(--accent);
+    --bs-btn-focus-shadow-rgb: 194, 3, 50; }
+.btn-secondary, .btn-light, .btn-outline-secondary, .btn-outline-dark {
+    --bs-btn-color: var(--ink); --bs-btn-bg: var(--surface); --bs-btn-border-color: var(--line-strong);
+    --bs-btn-hover-color: var(--ink); --bs-btn-hover-bg: var(--sunk); --bs-btn-hover-border-color: var(--line-strong);
+    --bs-btn-active-color: var(--ink); --bs-btn-active-bg: var(--sunk); --bs-btn-active-border-color: var(--ink);
+    --bs-btn-disabled-color: var(--muted); --bs-btn-disabled-bg: var(--surface); --bs-btn-disabled-border-color: var(--line); }
+.btn-link { color: var(--accent-detail); font-weight: 600; }
+
+/* ---------- campos ---------- */
+.form-control, .form-select, input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="date"], input[type="search"], select, textarea {
+    background-color: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    border-radius: var(--radius-md) !important;
+    font-size: .95rem;
+    box-shadow: none !important;
+    transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+.form-control::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+    border-color: var(--focus) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(0, 88, 160, .18) !important;
+    background-color: var(--surface) !important;
+}
+.form-control.bg-light, .form-control.border-light { background-color: var(--surface) !important; border-color: var(--line-strong) !important; }
+.form-check-input { border-color: var(--line-strong); }
+.form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+.form-check-input:focus { box-shadow: 0 0 0 3px rgba(0, 88, 160, .18); border-color: var(--focus); }
+.form-label { color: var(--muted); font-weight: 600; }
+
+/* ---------- cartões, caixas e janelas ---------- */
+.card { border-radius: var(--radius-lg); border-color: var(--line); }
+.shadow-sm { box-shadow: var(--shadow-card) !important; }
+.shadow, .shadow-lg { box-shadow: var(--shadow-float) !important; }
+.modal-content { border-radius: var(--radius-card) !important; border: 1px solid var(--line) !important; box-shadow: var(--shadow-float) !important; overflow: hidden; }
+.modal-header { border-bottom-color: var(--line); }
+.modal-footer { border-top-color: var(--line); }
+.dropdown-menu { border-radius: var(--radius-md); border: 1px solid var(--line); box-shadow: var(--shadow-float); }
+.dropdown-item:hover, .dropdown-item:focus { background-color: var(--accent-soft); color: var(--accent-detail); }
+.progress { background-color: var(--ring-track); border-radius: var(--radius-pill); }
+.progress-bar { background-color: var(--accent); }
+.alert { border-radius: var(--radius-md); }
+.alert-info { --bs-alert-color: var(--info-text); --bs-alert-bg: var(--info-bg); --bs-alert-border-color: var(--info); }
+.alert-warning { --bs-alert-color: var(--warn-text); --bs-alert-bg: var(--warn-bg); --bs-alert-border-color: var(--warn); }
+.alert-danger { --bs-alert-color: var(--danger-text); --bs-alert-bg: var(--danger-bg); --bs-alert-border-color: var(--danger); }
+.alert-success { --bs-alert-color: var(--ok-text); --bs-alert-bg: var(--ok-bg); --bs-alert-border-color: var(--ok); }
+.nav-tabs .nav-link.active { color: var(--ink); border-color: var(--line) var(--line) var(--surface); font-weight: 700; }
+.nav-pills .nav-link.active { background-color: var(--accent); }
+.list-group { --bs-list-group-active-bg: var(--accent); --bs-list-group-active-border-color: var(--accent); --bs-list-group-active-color: #fff; --bs-list-group-border-color: var(--line); }
+.page-link { color: var(--accent-detail); }
+.page-item.active .page-link { background-color: var(--accent); border-color: var(--accent); }
+
+/* ---------- tabelas ---------- */
+.table { --bs-table-color: var(--ink); --bs-table-border-color: var(--line); --bs-table-striped-bg: var(--glass); --bs-table-hover-bg: var(--accent-detail-soft); }
+.table > thead > tr > th, .table thead th { background-color: var(--deep); color: #fff; border-color: var(--deep); }
+
+/* =============================================================================
+   BARRA DE NAVEGAÇÃO (bordô, como a "superfície bordô" do guia)
+   ============================================================================= */
+.top-navbar {
+    background-color: var(--brand-bordo);
+    padding: 8px 0;
+    box-shadow: 0 8px 24px rgba(42, 1, 16, .28);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.nav-links-container { display: flex; align-items: center; flex-wrap: nowrap; gap: 4px; justify-content: center; }
+.nav-link-custom {
+    color: rgba(255, 255, 255, .74); font-weight: 600; font-size: .85rem; text-decoration: none;
+    padding: 7px 11px; border-radius: var(--radius-pill);
+    transition: background-color .18s ease, color .18s ease;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.nav-link-custom i { font-size: 1rem; opacity: .85; }
+.nav-link-custom:hover { color: #fff; background-color: rgba(255, 255, 255, .12); }
+.nav-link-custom.active { color: #fff; background-color: rgba(255, 255, 255, .16); box-shadow: inset 0 -2px 0 #FF8FA8; }
+.nav-link-custom.active i { color: #FF8FA8; opacity: 1; }
+.nav-link-destaque { color: #FFB3C2; }
+.nav-link-premium { border: 1px solid rgba(255, 255, 255, .38); color: #fff; margin-left: 4px; }
+.nav-link-premium:hover, .nav-link-premium.active { background-color: #fff; color: var(--brand-bordo); box-shadow: none; }
+.nav-link-premium:hover i, .nav-link-premium.active i { color: var(--brand-bordo); }
+.nav-link-admin { background-color: var(--sec-bege); color: var(--ink); }
+.nav-link-admin:hover, .nav-link-admin.active { background-color: #F3EFD2; color: var(--ink); box-shadow: none; }
+.nav-link-admin i, .nav-link-admin:hover i, .nav-link-admin.active i { color: var(--brand-bordo); }
+
+/* logo oficial na barra: para mudar o tamanho, mexa SÓ em --logo-largura (o guia do Design System pede no mínimo 100px; 80px é uma escolha do sistema) */
+:root { --logo-largura: 80px; }
+.nav-logo { display: inline-flex; align-items: center; flex-shrink: 0; margin-right: 14px; border-radius: var(--radius-sm); }
+.nav-logo img { display: block; width: var(--logo-largura); height: auto; object-fit: contain; }
+.nav-logo:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+/* plano B (só se o logo branco não estiver na pasta): o PNG colorido vai sobre etiqueta branca */
+.nav-logo.nav-logo-chip { background: #fff; padding: 5px 8px; }
+.nav-logo.nav-logo-chip img { width: auto; height: calc(var(--logo-largura) * 0.3); }
+
+.user-profile { display: flex; align-items: center; gap: 10px; padding: 4px 12px 4px 6px; border-radius: var(--radius-md); border: 1px solid transparent; margin-right: 10px; flex-shrink: 0; transition: background-color .18s; }
+.user-profile:hover { background-color: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .14); }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; border: 1px solid rgba(255, 255, 255, .3); text-transform: uppercase; }
+.user-info { display: flex; flex-direction: column; justify-content: center; }
+.user-name { font-size: .85rem; font-weight: 600; color: #fff; line-height: 1.2; text-transform: capitalize; }
+.logout-link { font-size: .72rem; color: var(--sec-laranja); text-decoration: none; font-weight: 600; }
+.logout-link:hover { color: #FFD0A8; text-decoration: underline; }
+.main-wrapper { max-width: 1350px; margin: 0 auto; padding: 30px 15px; }
+
+/* tela de carregamento */
+#overlayCarregamento { background: rgba(42, 1, 16, .86) !important; backdrop-filter: blur(8px); }
+#overlayCarregamento .spinner-border { color: #FF8FA8 !important; }
+#textoDistracao { color: #FFB3C2 !important; }
+
+/* ---------- selos de status (ícone/palavra + cor, nunca só cor) ---------- */
+.lo-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-pill); padding: 3px 10px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+.lo-pill-ok { color: var(--ok-text); background: var(--ok-bg); }
+.lo-pill-warn { color: var(--warn-text); background: var(--warn-bg); }
+.lo-pill-danger { color: var(--danger-text); background: var(--danger-bg); }
+.lo-pill-info { color: var(--info-text); background: var(--info-bg); }
+.lo-pill-neutral { color: var(--muted); background: var(--sunk); }
+.lo-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* ---------- rodada 3: tabelas escuras e cabeçalhos ---------- */
+/* .table-dark do Bootstrap usa cinza fixo: aqui vira bordô (rodapés de total) */
+.table-dark { --bs-table-color: #fff; --bs-table-bg: var(--deep); --bs-table-border-color: rgba(255, 255, 255, .16); --bs-table-striped-bg: var(--deep); --bs-table-hover-bg: #7A0A2E; color: #fff; }
+/* cabeçalho de tabela é sempre branco sobre bordô, mesmo que a tela tenha posto text-secondary/text-muted nele */
+.table thead th.text-secondary, .table thead th.text-muted, .table thead th.text-dark { color: #fff !important; }

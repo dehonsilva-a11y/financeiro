@@ -10,6 +10,9 @@ Fluxo por conta (login):
   2. O site cai em um de dois lugares:
        a) DIRETO  -> painel do condomínio (aInicioSkin.asp).
        b) LISTA   -> wmVinculoLista.asp (cards). Acha o card com o empreendimento (+ unidade).
+          Se a unidade NÃO aparece em nenhum card, o robô entra em cada card do mesmo empreendimento
+          e procura a unidade na lista suspensa da 2ª via (um card pode dar acesso a outras unidades).
+          Só dá erro depois de testar todos os cards do empreendimento.
   3. Abre "2ª via de boleto". Se houver lista de unidades, seleciona a do cadastro.
   4. Identifica os boletos em aberto e baixa o PDF como <nº do imóvel>.pdf.
   5. Marca o imóvel como COLETADO no banco de dados.
@@ -28,7 +31,8 @@ from urllib.parse import urljoin
 
 import requests
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchElementException, StaleElementReferenceException,
+from selenium.common.exceptions import (InvalidSessionIdException, NoSuchElementException,
+                                        NoSuchWindowException, StaleElementReferenceException,
                                         TimeoutException, WebDriverException)
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -85,6 +89,22 @@ JS_VS_OPCOES = r"""
         .filter(e => e.offsetParent !== null)
         .map(e => [e, (e.textContent || '').trim()]);"""
 
+# Rola o menu suspenso (v-select do Vuetify só renderiza ~20 itens por vez; o resto carrega ao rolar).
+# arguments[0]: 'subir' (volta ~300px, garante um novo evento de scroll) ou 'descer' (vai até o fim).
+JS_VS_ROLAR = r"""
+    const raiz = document.querySelector('.menuable__content__active') || document;
+    const itens = Array.from(raiz.querySelectorAll('.v-list-item')).filter(e => e.offsetParent !== null);
+    if (!itens.length) return false;
+    let cont = itens[itens.length - 1].parentElement;
+    while (cont && cont !== document.body) {
+        const oy = getComputedStyle(cont).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && cont.scrollHeight > cont.clientHeight + 1) break;
+        cont = cont.parentElement;
+    }
+    if (!cont || cont === document.body) return false;
+    cont.scrollTop = (arguments[0] === 'subir') ? Math.max(0, cont.scrollHeight - cont.clientHeight - 300) : cont.scrollHeight;
+    return true;"""
+
 JS_MOUSE = """
     const el = arguments[0];
     for (const tipo of ['mousedown', 'mouseup', 'click']) {
@@ -117,6 +137,30 @@ class FalhaColeta(Exception):
         super().__init__(detalhe)
         self.tipo = tipo
         self.detalhe = detalhe
+
+
+class ConsultarIndisponivel(FalhaColeta):
+    """Botão Consultar não habilitou (site lento ou seleção que não 'pegou'): vale recarregar a tela e tentar de novo."""
+
+
+# O Chrome (ou a aba) morreu: não adianta insistir com o mesmo driver, é preciso reabrir o navegador.
+JANELA_PERDIDA = (NoSuchWindowException, InvalidSessionIdException)
+
+
+def resumir_erro(e, limite=300):
+    """'NomeDoErro: primeira linha da mensagem' (o nome da exceção ajuda a entender o que aconteceu)."""
+    linhas = [l.strip() for l in str(e).strip().splitlines() if l.strip()]
+    primeira = re.sub(r"^Message:\s*", "", linhas[0]) if linhas else ""
+    return f"{type(e).__name__}: {primeira}"[:limite]
+
+
+def janela_viva(driver):
+    """True se o Chrome responde e a aba atual ainda existe."""
+    try:
+        _ = driver.current_url
+        return True
+    except Exception:
+        return False
 
 
 def log(msg):
@@ -225,29 +269,137 @@ def registrar_erro(imovel, login, emp, unid, tipo, detalhe):
 # =============================================================================
 # BANCO
 # =============================================================================
+STATUS_FINAIS = ("PAGO", "PAGO NA ADM", "PAGO NA 275", "COLETADO")
+STATUS_FINALIZADOS = STATUS_FINAIS     # (nome usado pelo trecho copiado do sistema)
+
+
+# --- Escolha do boleto: copiado do sistema (app.py) para o robô decidir EXATAMENTE como ele. -------------
+# Boleto = imóvel + vencimento. Desconto (2 linhas, mesmo vencimento) anda junto; vencimento alternativo
+# (dia 05 e dia 15) são boletos separados.
+def _data_br(texto):
+    """'15/11/2026', '15/11/26' ou '15-11-2026' -> datetime (ou None)."""
+    achou = re.search(r'(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})', str(texto or ''))
+    if not achou:
+        return None
+    dia, mes, ano = int(achou.group(1)), int(achou.group(2)), int(achou.group(3))
+    if ano < 100:
+        ano += 2000
+    try:
+        return datetime(ano, mes, dia)
+    except ValueError:
+        return None
+
+
+def _venc_texto(texto):
+    """O vencimento sempre no mesmo formato (dd/mm/aaaa), para comparar sem susto."""
+    data = _data_br(texto)
+    return data.strftime('%d/%m/%Y') if data else ''
+
+
+def escolher_linhas_do_boleto(linhas, vencimento_robo=''):
+    """Qual boleto o robô acabou de baixar? Função PURA (testável) usada por /api/automacao/coletar.
+    linhas = linhas ativas do imóvel [{'id','vencimento','status_interno'}].
+    Devolve {'ids', 'vencimento', 'ja_resolvido', 'aviso', 'erro', 'pendentes', 'todos'}.
+    Regra: o boleto tem que ser identificado pelo VENCIMENTO. Sem ele, só dá para saber de qual
+    boleto se trata quando o imóvel tem um vencimento pendente só — com dois, não se adivinha."""
+    por_venc = {}
+    for l in linhas:
+        chave = _venc_texto(l['vencimento']) or str(l['vencimento'] or '').strip()
+        por_venc.setdefault(chave, []).append(l)
+    ordenar = lambda v: (_data_br(v) or datetime.max, v)   # noqa: E731
+    finalizados = {v for v, ls in por_venc.items()
+                   if any(str(x['status_interno'] or '').strip().upper() in STATUS_FINALIZADOS for x in ls)}
+    pendentes = sorted((v for v in por_venc if v not in finalizados), key=ordenar)
+    r = {'ids': [], 'vencimento': '', 'ja_resolvido': False, 'aviso': '', 'erro': '',
+         'pendentes': pendentes, 'todos': sorted(por_venc, key=ordenar)}
+    if not por_venc:
+        r['erro'] = 'Imóvel não localizado.'
+        return r
+
+    def alvo_em(venc):
+        r['vencimento'] = venc
+        r['ids'] = sorted(int(x['id']) for x in por_venc[venc])
+        return r
+
+    informado = _venc_texto(vencimento_robo)
+    if informado:
+        if informado in por_venc:
+            if informado in finalizados:
+                r['vencimento'], r['ja_resolvido'] = informado, True
+                return r
+            return alvo_em(informado)
+        if not pendentes:
+            r['vencimento'], r['ja_resolvido'] = informado, True
+            r['aviso'] = f'Todos os vencimentos deste imóvel já estavam resolvidos (o robô baixou o de {informado}).'
+            return r
+        if len(pendentes) == 1:
+            r['aviso'] = (f'O boleto baixado vence em {informado}, mas a base só tem o vencimento '
+                          f'{pendentes[0]} pendente: marquei esse.')
+            return alvo_em(pendentes[0])
+        data = _data_br(informado)
+        do_mes = [v for v in pendentes if data and _data_br(v)
+                  and (_data_br(v).month, _data_br(v).year) == (data.month, data.year)]
+        if not do_mes:
+            r['erro'] = (f'O boleto baixado vence em {informado}, que não bate com nenhum vencimento pendente '
+                         f'deste imóvel ({", ".join(pendentes)}).')
+            return r
+        escolhido = min(do_mes, key=lambda v: abs((_data_br(v) - data).days))
+        r['aviso'] = f'O boleto baixado vence em {informado}; o vencimento mais próximo na base é {escolhido}: marquei esse.'
+        return alvo_em(escolhido)
+
+    if len(pendentes) == 1:
+        return alvo_em(pendentes[0])
+    if not pendentes:
+        r['ja_resolvido'] = True
+        return r
+    r['erro'] = (f'Este imóvel tem {len(pendentes)} vencimentos pendentes ({", ".join(pendentes)}) e o robô '
+                 f'não informou o vencimento do boleto que baixou. Marque pelo painel.')
+    return r
+
+
+def vencimentos_do_imovel(linhas):
+    """linhas ativas do imóvel [{'vencimento','status_interno'}] -> (pendentes, todos), dd/mm/aaaa ordenados.
+    Pendente = vencimento em que NENHUMA linha está coletada/paga (a linha-gêmea do desconto conta junto)."""
+    por_venc = {}
+    for l in linhas:
+        chave = _venc_texto(l["vencimento"]) or str(l["vencimento"] or "").strip()
+        por_venc.setdefault(chave, []).append(l)
+    ordem = lambda v: (_data_br(v) or datetime.max, v)   # noqa: E731
+    pendentes = [v for v, ls in por_venc.items()
+                 if not any(str(x["status_interno"] or "").strip().upper() in STATUS_FINAIS for x in ls)]
+    return sorted(pendentes, key=ordem), sorted(por_venc, key=ordem)
+
+
 def buscar_pendencias(filtro_imoveis, filtro_login):
     con = sqlite3.connect(CAMINHO_BANCO)
     con.row_factory = sqlite3.Row
     try:
-        linhas = con.execute(f"""
-            SELECT MIN(i.id) AS id, i.imovel, MAX(i.vencimento) AS vencimento,
+        linhas = con.execute("""
+            SELECT i.id, i.imovel, i.vencimento, i.status_interno,
                    c.login_acesso, c.senha_acesso, c.webware_empreendimento, c.webware_unidade
             FROM imoveis i
             JOIN cadastro_mestre_imoveis c ON LTRIM(c.imovel, '0') = LTRIM(i.imovel, '0')
             WHERE i.ativo = 1
               AND UPPER(TRIM(c.portal)) = 'WEBWARE'
               AND COALESCE(TRIM(c.login_acesso), '') <> ''
-              AND (i.status_interno IS NULL OR i.status_interno NOT IN {ENCERRADOS})
-              AND NOT EXISTS (SELECT 1 FROM imoveis x WHERE x.ativo = 1
-                              AND LTRIM(x.imovel, '0') = LTRIM(i.imovel, '0') AND x.status_interno IN {ENCERRADOS})
-            GROUP BY i.imovel
-            ORDER BY c.login_acesso, c.webware_empreendimento, i.imovel
+            ORDER BY c.login_acesso, c.webware_empreendimento, i.imovel, i.id
         """).fetchall()
     finally:
         con.close()
+    grupos = {}
+    for r in linhas:                      # um grupo por imóvel (as linhas dele: desconto e/ou vencimentos alternativos)
+        grupos.setdefault(r["imovel"], []).append(r)
     tarefas = []
-    for r in linhas:
-        t = {k: (str(r[k]).strip() if r[k] is not None else "") for k in r.keys()}
+    for imovel, rs in grupos.items():
+        pendentes, todos = vencimentos_do_imovel(rs)
+        if not pendentes:                 # todos os vencimentos já coletados/pagos
+            continue
+        r = rs[0]
+        t = {k: (str(r[k]).strip() if r[k] is not None else "") for k in
+             ("imovel", "login_acesso", "senha_acesso", "webware_empreendimento", "webware_unidade")}
+        t["id"] = str(min(x["id"] for x in rs))
+        t["vencimento"] = pendentes[0]    # o mais próximo que falta (a base antiga mandava o MAIOR de todos)
+        t["venc_pend"], t["venc_todos"] = pendentes, todos
         if filtro_imoveis and t["imovel"] not in filtro_imoveis:
             continue
         if filtro_login and t["login_acesso"].lower() != filtro_login.lower():
@@ -256,23 +408,36 @@ def buscar_pendencias(filtro_imoveis, filtro_login):
     return tarefas
 
 
-def marcar_coletado(imovel, observacao):
+def marcar_coletado(imovel, observacao, vencimento=""):
+    """Marca como COLETADO o boleto (imóvel + vencimento) que o robô baixou. 'vencimento' = o do boleto do site."""
     con = sqlite3.connect(CAMINHO_BANCO)
     con.row_factory = sqlite3.Row
     try:
-        caso = con.execute("SELECT id, observacao FROM imoveis WHERE LTRIM(imovel, '0') = LTRIM(?, '0') "
-                           "AND ativo = 1 LIMIT 1", (imovel,)).fetchone()
-        if not caso:
+        linhas = [dict(l) for l in con.execute(
+            "SELECT id, imovel, vencimento, status_interno, observacao FROM imoveis "
+            "WHERE LTRIM(imovel, '0') = LTRIM(?, '0') AND ativo = 1 ORDER BY id", (imovel,)).fetchall()]
+        escolha = escolher_linhas_do_boleto(linhas, vencimento if _venc_texto(vencimento) else "")
+        if escolha["erro"]:
+            log(f"   ! {escolha['erro']}")
             return False
-        antiga = caso["observacao"] or ""
-        obs = antiga if (not observacao or observacao in antiga) else (f"{antiga} | {observacao}" if antiga else observacao)
+        if escolha["aviso"]:
+            log(f"   ! {escolha['aviso']}")
+        if escolha["ja_resolvido"]:
+            return True                   # já estava coletado/pago: nada a fazer (e não rebaixa um PAGO)
+        por_id = {l["id"]: l for l in linhas}
+        ids = escolha["ids"]
+        id_prod = max(ids)
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        con.execute("UPDATE imoveis SET status_interno = 'COLETADO', observacao = ? WHERE id = ?", (obs, caso["id"]))
-        con.execute("DELETE FROM produtividade WHERE imovel_id = ? AND acao = 'COLETOU BOLETO'", (caso["id"],))
+        for id_linha in ids:
+            antiga = por_id[id_linha]["observacao"] or ""
+            obs = antiga if (not observacao or observacao in antiga) else (f"{antiga} | {observacao}" if antiga else observacao)
+            con.execute("UPDATE imoveis SET status_interno = 'COLETADO', observacao = ? WHERE id = ?", (obs, id_linha))
+        rotulo = f" (vencimento {escolha['vencimento']})" if escolha["vencimento"] else ""
+        con.execute("DELETE FROM produtividade WHERE imovel_id = ? AND acao = 'COLETOU BOLETO'", (id_prod,))
         con.execute("INSERT INTO historico_observacoes (imovel_id, data_hora, usuario, texto) VALUES (?, ?, ?, ?)",
-                    (caso["id"], agora, NOME_ROBO, "Processado via automação. Status atribuído: COLETADO"))
+                    (id_prod, agora, NOME_ROBO, "Processado via automação. Status atribuído: COLETADO" + rotulo))
         con.execute("INSERT INTO produtividade (usuario, acao, imovel_id, data_hora) VALUES (?, ?, ?, ?)",
-                    (NOME_ROBO, "COLETOU BOLETO", caso["id"], agora))
+                    (NOME_ROBO, "COLETOU BOLETO", id_prod, agora))
         con.commit()
         return True
     except sqlite3.Error as e:
@@ -351,11 +516,12 @@ def detectar_tela(driver, timeout=25):
 # =============================================================================
 # LISTA DE VÍNCULOS
 # =============================================================================
-def clicar_vinculo(driver, emp, unid):
+def cards_do_empreendimento(driver, emp):
+    """Cards da lista de vínculos cujo título é IDÊNTICO ao empreendimento. Retorna [(card, texto_do_corpo)]."""
     try:
         WebDriverWait(driver, 20).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.box")))
     except TimeoutException:
-        return False
+        return []
     alvo = norm_nome(emp)
     do_emp = []
     for card in driver.find_elements(By.CSS_SELECTOR, "div.box"):
@@ -366,18 +532,38 @@ def clicar_vinculo(driver, emp, unid):
             continue
         if norm_nome(titulo) == alvo:
             do_emp.append((card, corpo))
+    return do_emp
 
-    achados = [c for c, corpo in do_emp if unidade_confere(unid, corpo)]
-    if not achados:
-        frouxos = [c for c, corpo in do_emp if unidade_confere_frouxo(unid, corpo)]
-        if len(frouxos) == 1:
-            log("   AVISO: unidade casada pelo plano B (sem tipo/bloco 0); confira no cadastro.")
-            achados = frouxos
-    if not achados:
+
+def ordem_candidatos(corpos, unid, preferido=None):
+    """Define a ordem de tentativa dos cards do empreendimento.
+
+    1) cards que trazem a unidade escrita (idêntica);  2) card que já deu certo nesta conta;
+    3) plano B (unidade sem tipo/bloco 0, só se for único);  4) todos os demais cards do empreendimento.
+    Retorna (ordem, confiaveis): 'confiaveis' são os índices em que o próprio card cita a unidade
+    (nesses, uma tela de boletos sem lista de unidades ainda é aceita, como sempre foi).
+    """
+    exatos = [i for i, c in enumerate(corpos) if unidade_confere(unid, c)]
+    frouxos = [i for i, c in enumerate(corpos) if i not in exatos and unidade_confere_frouxo(unid, c)]
+    confiaveis = set(exatos)
+    if not exatos and len(frouxos) == 1:
+        log("   AVISO: unidade casada pelo plano B (sem tipo/bloco 0); confira no cadastro.")
+        confiaveis = set(frouxos)
+
+    ordem = list(exatos)
+    if preferido is not None and 0 <= preferido < len(corpos) and preferido not in ordem:
+        ordem.append(preferido)
+    ordem += [i for i in frouxos if i not in ordem]
+    ordem += [i for i in range(len(corpos)) if i not in ordem]
+    return ordem, confiaveis
+
+
+def clicar_vinculo_idx(driver, emp, idx):
+    """Clica em 'Acessar' do idx-ésimo card do empreendimento (a lista é relida, pois os elementos expiram)."""
+    cards = cards_do_empreendimento(driver, emp)
+    if idx >= len(cards):
         return False
-    if len(achados) > 1:
-        log(f"   AVISO: {len(achados)} cards iguais; usando o primeiro.")
-    botao = achados[0].find_element(By.CSS_SELECTOR, "a.bt")
+    botao = cards[idx][0].find_element(By.CSS_SELECTOR, "a.bt")
     driver.execute_script("arguments[0].click();", botao)
     aguardar_pronto(driver)
     return True
@@ -473,6 +659,33 @@ def abrir_vselect(driver):
     raise FalhaColeta("Falha de Navegação", "A lista de unidades não abriu")
 
 
+def rolar_ate_achar(driver, alvo, opcoes, max_rodadas=80, paradas_para_desistir=3):
+    """Rola o menu para carregar as demais unidades. Para quando acha a unidade, ou quando a rolagem deixa de
+    trazer opções novas por 'paradas_para_desistir' rodadas seguidas (= chegou ao fim da lista)."""
+    total, paradas = len(opcoes), 0
+    for _ in range(max_rodadas):
+        try:
+            driver.execute_script(JS_VS_ROLAR, "subir")
+            time.sleep(0.2)
+            if not driver.execute_script(JS_VS_ROLAR, "descer"):
+                break  # não há barra de rolagem / menu fechou
+        except WebDriverException:
+            break
+        time.sleep(0.5)
+        opcoes = driver.execute_script(JS_VS_OPCOES)
+        achada = next(((el, txt) for el, txt in opcoes if chave_unidade(txt) == alvo), None)
+        if achada:
+            log(f"   Unidade encontrada após rolar a lista ({len(opcoes)} opções carregadas)")
+            return opcoes, achada
+        if len(opcoes) > total:
+            total, paradas = len(opcoes), 0
+        else:
+            paradas += 1
+            if paradas >= paradas_para_desistir:
+                break
+    return opcoes, None
+
+
 def selecionar_unidade_vselect(driver, unid):
     alvo = chave_unidade(unid)
     atual = driver.execute_script(JS_VS_ATUAL)
@@ -481,11 +694,13 @@ def selecionar_unidade_vselect(driver, unid):
     opcoes = abrir_vselect(driver)
     achada = next(((el, txt) for el, txt in opcoes if chave_unidade(txt) == alvo), None)
     if not achada:
+        opcoes, achada = rolar_ate_achar(driver, alvo, opcoes)
+    if not achada:
         vistas = [t for _, t in opcoes][:15]
         driver.find_element(By.TAG_NAME, "body").send_keys("\ue00c")
         diagnosticar(driver, f"unidade_nao_achada_{alvo.replace('/', '_')}")
         raise FalhaColeta("Unidade Não Encontrada",
-                          f"'{unid}' não está na lista do site ({len(opcoes)} opções; ex.: {vistas})")
+                          f"'{unid}' não está na lista do site (conferi as {len(opcoes)} opções, rolando até o fim; ex.: {vistas})")
     el, texto = achada
     driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", el)
     for tentar in (lambda: el.click(), lambda: driver.execute_script("arguments[0].click();", el)):
@@ -512,24 +727,55 @@ def selecionar_unidade_nativa(driver, unid):
     raise FalhaColeta("Unidade Não Encontrada", f"'{unid}' não está na lista do site (ex.: {vistas})")
 
 
-def clicar_consultar(driver):
-    fim = time.time() + 10
-    botao = None
+def clicar_consultar(driver, rotulo="", timeout=25):
+    """Espera o Consultar habilitar (o site pode demorar a liberar o botão após escolher a unidade)."""
+    fim = time.time() + timeout
+    botao, achou_desabilitado = None, False
     while time.time() < fim:
         for b in driver.find_elements(By.XPATH, XP_CONSULTAR):
             try:
-                if b.is_displayed() and b.is_enabled() and b.get_attribute("disabled") is None:
+                if not b.is_displayed():
+                    continue
+                if b.is_enabled() and b.get_attribute("disabled") is None:
                     botao = b
                     break
+                achou_desabilitado = True
             except WebDriverException:
                 continue
         if botao:
             break
         time.sleep(0.4)
     if not botao:
-        diagnosticar(driver, "consultar_indisponivel")
-        raise FalhaColeta("Falha de Navegação", "Botão Consultar não ficou disponível")
+        diagnosticar(driver, f"consultar_indisponivel_{rotulo}")
+        motivo = "botão visível, porém desabilitado" if achou_desabilitado else "botão não apareceu na tela"
+        raise ConsultarIndisponivel("Falha de Navegação", f"Botão Consultar não ficou disponível - {motivo}")
     driver.execute_script("arguments[0].click();", botao)
+
+
+def selecionar_e_consultar(driver, modo, unid, rotulo, tentativas=2):
+    """Escolhe a unidade e clica em Consultar. Se o botão não habilitar, recarrega a tela de 2ª via
+    (volta ao estado inicial do formulário) e repete uma vez antes de dar a falha."""
+    for n in range(1, tentativas + 1):
+        try:
+            if modo == "VSELECT":
+                selecionar_unidade_vselect(driver, unid)
+            else:
+                selecionar_unidade_nativa(driver, unid)
+            clicar_consultar(driver, rotulo)
+            return
+        except ConsultarIndisponivel as e:
+            if n >= tentativas:
+                raise
+            log(f"   ! {e.detalhe}; recarregando a 2ª via e tentando de novo ({n}/{tentativas - 1})")
+            try:
+                driver.refresh()
+            except TimeoutException:
+                pass
+            aguardar_pronto(driver)
+            novo_modo = esperar_tela(driver)
+            if novo_modo not in ("VSELECT", "NATIVO"):
+                raise
+            modo = novo_modo
 
 
 def listar_cards(driver):
@@ -563,7 +809,9 @@ def conferir_unidade_exibida(driver, unid):
         raise FalhaColeta("Unidade Divergente", f"O site mostra '{m.group(1).strip()}' e o cadastro é '{unid}'")
 
 
-def escolher_boleto(cards, venc_base):
+def escolher_boletos(cards, venc_base, pendentes=(), resolvidos=()):
+    """Quais cards baixar. Cada VENCIMENTO é um boleto: imóvel com dia 05 e dia 15 tem dois, e o sistema
+    precisa saber qual foi coletado. 'pendentes' = vencimentos que faltam; 'resolvidos' = os já coletados/pagos."""
     candidatos = cards
     alvo = mes_ano(venc_base)
     if EXIGIR_MES_DO_VENCIMENTO and alvo and any(c["venc"] for c in cards):
@@ -572,7 +820,32 @@ def escolher_boleto(cards, venc_base):
             datas = ", ".join(c["venc"] or "sem data" for c in cards)
             raise FalhaColeta("Sem Boleto do Mês",
                               f"Boletos no site: {datas}; nenhum do mês {alvo[0]:02d}/{alvo[1]} (base: {venc_base})")
-    return max(candidatos, key=lambda c: data_ord(c["venc"]))
+    pendentes = sorted({p for p in pendentes if p} or ({venc_base} if venc_base else set()), key=data_ord)
+    sobra = [c for c in candidatos if not c["venc"] or c["venc"] not in set(resolvidos)]
+    if not sobra:
+        raise FalhaColeta("Sem Boleto do Vencimento",
+                          f"Pendente(s) no sistema: {', '.join(pendentes) or '-'}; no site só há vencimento(s) já coletado(s)/pago(s)")
+    por_venc = {}
+    for c in sobra:
+        atual = por_venc.get(c["venc"])
+        if atual is None or (c.get("href") and not atual.get("href")):
+            por_venc[c["venc"]] = c
+    exatos = [por_venc[p] for p in pendentes if p in por_venc]
+    if exatos:
+        return exatos
+    if len(pendentes) <= 1:               # comportamento de sempre: o mais novo do mês (a data do site pode diferir da da base)
+        return [max(sobra, key=lambda c: data_ord(c["venc"]))]
+    if len(por_venc) == len(pendentes):   # datas diferem, mas a contagem bate: pareia em ordem de data
+        return [por_venc[v] for v in sorted(por_venc, key=data_ord)]
+    raise FalhaColeta("Sem Boleto do Vencimento",
+                      f"Pendentes no sistema: {', '.join(pendentes)}; no site: {', '.join(c['venc'] or 'sem data' for c in sobra)}")
+
+
+def nome_do_pdf(imovel, venc, mais_cedo, varios):
+    """<imovel>.pdf como sempre; só quando há mais de um boleto o(s) seguinte(s) leva(m) o vencimento no nome."""
+    if not varios or venc == mais_cedo or not re.match(r"\d{2}/\d{2}/\d{4}$", venc or ""):
+        return f"{imovel}.pdf"
+    return f"{imovel}_{venc.replace('/', '-')}.pdf"
 
 
 # =============================================================================
@@ -664,13 +937,19 @@ def baixar_boleto(driver, card):
         try:
             driver.switch_to.window(aba)
         except WebDriverException:
-            pass
+            # a aba original não existe mais: ao menos não deixa o driver apontando para uma aba morta
+            try:
+                restantes = driver.window_handles
+                if restantes:
+                    driver.switch_to.window(restantes[0])
+            except WebDriverException:
+                pass
     diagnosticar(driver, "download_falhou")
     raise FalhaColeta("Falha no Download", "Cliquei em Gerar Boleto mas nenhum PDF chegou em 60s")
 
 
-def salvar_pdf(dados, destino, imovel):
-    nome = f"{imovel}.pdf"
+def salvar_pdf(dados, destino, imovel, nome=None):
+    nome = nome or f"{imovel}.pdf"
     caminho = os.path.join(destino, nome)
     tmp = caminho + ".tmp"
     with open(tmp, "wb") as f:
@@ -682,16 +961,17 @@ def salvar_pdf(dados, destino, imovel):
 # =============================================================================
 # UM IMÓVEL
 # =============================================================================
-def coletar_imovel(driver, t, destino):
+def coletar_imovel(driver, t, destino, exigir_lista=False):
+    """exigir_lista=True: card tentado só porque é do mesmo empreendimento (a unidade não estava escrita nele).
+    Nesse caso só vale se a tela de 2ª via tiver a lista de unidades e a unidade do cadastro estiver nela;
+    uma tela direta (sem lista) não permite confirmar a unidade e pegaria o boleto de outra pessoa."""
     modo = abrir_tela_boletos(driver)
     log(f"   Tela de boletos: {'com lista de unidades' if modo in ('VSELECT', 'NATIVO') else 'direta'}")
+    if exigir_lista and modo not in ("VSELECT", "NATIVO"):
+        raise FalhaColeta("Unidade Não Encontrada", "este card abre a 2ª via direta (sem lista de unidades); não dá para confirmar a unidade")
 
-    if modo == "VSELECT":
-        selecionar_unidade_vselect(driver, t["webware_unidade"])
-        clicar_consultar(driver)
-    elif modo == "NATIVO":
-        selecionar_unidade_nativa(driver, t["webware_unidade"])
-        clicar_consultar(driver)
+    if modo in ("VSELECT", "NATIVO"):
+        selecionar_e_consultar(driver, modo, t["webware_unidade"], t["imovel"])
 
     cards = aguardar_cards(driver)
     if not cards:
@@ -699,33 +979,133 @@ def coletar_imovel(driver, t, destino):
         raise FalhaColeta("Sem Boletos", "Nenhum boleto em aberto na tela de 2ª via")
     conferir_unidade_exibida(driver, t["webware_unidade"])
 
-    escolhido = escolher_boleto(cards, t["vencimento"])
-    dados = baixar_boleto(driver, escolhido)
-    caminho = salvar_pdf(dados, destino, t["imovel"])
-    log(f"   Boleto salvo: {caminho} (venc {escolhido['venc'] or '?'})")
-    return escolhido["venc"], caminho
+    pendentes = t.get("venc_pend") or []
+    resolvidos = [v for v in (t.get("venc_todos") or []) if v not in pendentes]
+    escolhidos = escolher_boletos(cards, t["vencimento"], pendentes, resolvidos)
+    mais_cedo = min((c["venc"] for c in cards if c["venc"]), key=data_ord, default="")
+    varios = len({c["venc"] for c in cards}) > 1 or len(pendentes) > 1
+    baixados = []
+    for escolhido in escolhidos:
+        dados = baixar_boleto(driver, escolhido)
+        caminho = salvar_pdf(dados, destino, t["imovel"], nome_do_pdf(t["imovel"], escolhido["venc"], mais_cedo, varios))
+        log(f"   Boleto salvo: {caminho} (venc {escolhido['venc'] or '?'})")
+        baixados.append((escolhido["venc"], caminho))
+    return baixados
 
 
-def processar(driver, t, destino, marcar, contagem):
+# Falhas que, num card "por empreendimento", só significam "a unidade não está neste card": tenta o próximo.
+TIPOS_TENTAR_PROXIMO_CARD = {"Unidade Não Encontrada", "Unidade Divergente"}
+
+
+def processar(driver, t, destino, marcar, contagem, tentar_proximo=False, exigir_lista=False):
+    """Retorna True quando o imóvel foi resolvido (baixado OU falha já registrada) e False quando
+    'tentar_proximo' está ligado e a unidade simplesmente não estava neste card (nada foi registrado)."""
     try:
-        venc, _ = coletar_imovel(driver, t, destino)
-        ok = marcar_coletado(t["imovel"], f"Webware: boleto venc {venc or '?'} baixado") if marcar else None
+        baixados = coletar_imovel(driver, t, destino, exigir_lista=exigir_lista)
+        # cada boleto baixado é marcado com o SEU vencimento (dia 05 não marca o dia 15)
+        ok = all([marcar_coletado(t["imovel"], f"Webware: boleto venc {venc or '?'} baixado", venc or "")
+                  for venc, _ in baixados]) if marcar else None
         if marcar and not ok:
             registrar_erro(t["imovel"], t["login_acesso"], t["webware_empreendimento"], t["webware_unidade"],
                            "Erro ao Marcar", "PDF salvo, mas não consegui marcar COLETADO no banco")
         contagem["BAIXADO"] = contagem.get("BAIXADO", 0) + 1
         log(f"   => BAIXADO" + (" e marcado COLETADO" if ok else (" (NÃO marcado)" if marcar else " (sem marcar)")))
     except FalhaColeta as e:
+        if tentar_proximo and e.tipo in TIPOS_TENTAR_PROXIMO_CARD:
+            log(f"   - unidade não está neste card ({e.detalhe[:140]})")
+            return False
         diagnosticar(driver, f"falha_{t['imovel']}")
         registrar_erro(t["imovel"], t["login_acesso"], t["webware_empreendimento"], t["webware_unidade"], e.tipo, e.detalhe)
         contagem[e.tipo] = contagem.get(e.tipo, 0) + 1
         log(f"   => {e.tipo}: {e.detalhe}")
     except WebDriverException as e:
+        if isinstance(e, JANELA_PERDIDA) or not janela_viva(driver):
+            raise  # janela/Chrome morreu: quem decide é o main (reabre o navegador e tenta de novo)
         diagnosticar(driver, f"erro_{t['imovel']}")
-        msg = (str(e).strip().splitlines() or [""])[0][:200]
+        msg = resumir_erro(e)
         registrar_erro(t["imovel"], t["login_acesso"], t["webware_empreendimento"], t["webware_unidade"], "Erro", msg)
         contagem["Erro"] = contagem.get("Erro", 0) + 1
         log(f"   => Erro: {msg}")
+    return True
+
+
+def coletar_pela_lista(driver, t, url_lista, destino, marcar, contagem, memoria):
+    """Tela de vínculos: acha o card da unidade e, se ela não estiver em nenhum card, procura a unidade
+    dentro dos outros cards do mesmo empreendimento (a lista suspensa da 2ª via pode listar mais unidades)."""
+    emp, unid, login = t["webware_empreendimento"], t["webware_unidade"], t["login_acesso"]
+    chave_emp = norm_nome(emp)
+
+    cards = cards_do_empreendimento(driver, emp)
+    if not cards:
+        diagnosticar(driver, f"vinculo_nao_achado_{t['imovel']}")
+        registrar_erro(t["imovel"], login, emp, unid, "Condomínio Não Encontrado",
+                       "Nenhum card com este empreendimento (idêntico) na lista de vínculos")
+        contagem["Condomínio Não Encontrado"] = contagem.get("Condomínio Não Encontrado", 0) + 1
+        log("   => Condomínio Não Encontrado")
+        return
+
+    ordem, confiaveis = ordem_candidatos([corpo for _, corpo in cards], unid, memoria.get(chave_emp))
+    total = len(ordem)
+    log(f"   {total} card(s) do empreendimento na lista de vínculos")
+
+    for tentativa, idx in enumerate(ordem, start=1):
+        if tentativa > 1:
+            driver.get(url_lista)
+            aguardar_pronto(driver)
+        if not clicar_vinculo_idx(driver, emp, idx):
+            log(f"   - card {idx + 1} sumiu da lista; pulando")
+            continue
+        exigir = idx not in confiaveis
+        log(f"   Card {tentativa}/{total}: " + ("unidade escrita no card" if not exigir
+                                              else "buscando a unidade na lista suspensa da 2ª via"))
+        if processar(driver, t, destino, marcar, contagem, tentar_proximo=True, exigir_lista=exigir):
+            memoria[chave_emp] = idx
+            return
+
+    diagnosticar(driver, f"unidade_nao_achada_{t['imovel']}")
+    registrar_erro(t["imovel"], login, emp, unid, "Unidade Não Encontrada",
+                   f"A unidade não apareceu em nenhum dos {total} card(s) deste empreendimento "
+                   f"(nem no card nem na lista suspensa da 2ª via)")
+    contagem["Unidade Não Encontrada"] = contagem.get("Unidade Não Encontrada", 0) + 1
+    log(f"   => Unidade Não Encontrada (testei {total} card(s))")
+
+
+def rodar_imovel(driver, t, tela, url_inicio, destino, marcar, contagem, memoria_cards, primeiro):
+    usuario = t["login_acesso"]
+    if not primeiro:
+        driver.get(url_inicio)
+        aguardar_pronto(driver)
+
+    if tela == "LISTA":
+        coletar_pela_lista(driver, t, url_inicio, destino, marcar, contagem, memoria_cards)
+        return
+    if VALIDAR_TITULO_NO_ACESSO_DIRETO:
+        titulo, emp = norm_nome(driver.title), norm_nome(t["webware_empreendimento"])
+        if titulo and emp and emp not in titulo and titulo not in emp:
+            registrar_erro(t["imovel"], usuario, t["webware_empreendimento"], t["webware_unidade"],
+                           "Condomínio Divergente", f"O acesso direto abriu '{driver.title}'")
+            contagem["Condomínio Divergente"] = contagem.get("Condomínio Divergente", 0) + 1
+            log(f"   => Condomínio Divergente: site mostra '{driver.title}'")
+            return
+
+    processar(driver, t, destino, marcar, contagem)
+
+
+def reabrir_sessao(driver, headless, usuario, senha):
+    """Fecha o Chrome (se ainda existir), abre outro e refaz o login.
+    Retorna (driver, tela, url_inicio); tela=None quando não deu para voltar a logar."""
+    try:
+        driver.quit()
+    except Exception:
+        pass
+    try:
+        novo = criar_driver(headless)
+    except Exception as e:
+        log(f"   ! não consegui reabrir o Chrome: {type(e).__name__}")
+        return driver, None, ""
+    if not realizar_login(novo, usuario, senha):
+        return novo, None, ""
+    return novo, detectar_tela(novo), novo.current_url
 
 
 def preparar_destino(caminho):
@@ -785,6 +1165,14 @@ def main():
     try:
         for (usuario, senha), lista in contas.items():
             log(f"\n=== Conta {usuario} ({len(lista)} imóveis) ===")
+            if not janela_viva(driver):
+                # sem isto, janela morta vira falso "Falha de Login" para a conta inteira
+                log("   ! o Chrome/janela não responde; reiniciando o navegador")
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
+                driver = criar_driver(args.headless)
             if not realizar_login(driver, usuario, senha):
                 log("   ! falha de login")
                 for t in lista:
@@ -805,37 +1193,28 @@ def main():
                 contagem["Página Desconhecida"] = contagem.get("Página Desconhecida", 0) + len(lista)
                 continue
 
+            memoria_cards = {}  # empreendimento -> índice do card que deu certo nesta conta (tenta ele primeiro)
             for n, t in enumerate(lista, start=1):
                 log(f"[{n}/{len(lista)}] Imóvel {t['imovel']} | {t['webware_empreendimento']} | {t['webware_unidade']}")
-                try:
-                    if n > 1:
-                        driver.get(url_inicio)
-                        aguardar_pronto(driver)
-
-                    if tela == "LISTA":
-                        if not clicar_vinculo(driver, t["webware_empreendimento"], t["webware_unidade"]):
-                            diagnosticar(driver, f"vinculo_nao_achado_{t['imovel']}")
-                            registrar_erro(t["imovel"], usuario, t["webware_empreendimento"], t["webware_unidade"],
-                                           "Condomínio Não Encontrado",
-                                           "Nenhum card com este empreendimento (idêntico) e esta unidade na lista de vínculos")
-                            contagem["Condomínio Não Encontrado"] = contagem.get("Condomínio Não Encontrado", 0) + 1
-                            log("   => Condomínio Não Encontrado")
-                            continue
-                    elif VALIDAR_TITULO_NO_ACESSO_DIRETO:
-                        titulo, emp = norm_nome(driver.title), norm_nome(t["webware_empreendimento"])
-                        if titulo and emp and emp not in titulo and titulo not in emp:
-                            registrar_erro(t["imovel"], usuario, t["webware_empreendimento"], t["webware_unidade"],
-                                           "Condomínio Divergente", f"O acesso direto abriu '{driver.title}'")
-                            contagem["Condomínio Divergente"] = contagem.get("Condomínio Divergente", 0) + 1
-                            log(f"   => Condomínio Divergente: site mostra '{driver.title}'")
-                            continue
-
-                    processar(driver, t, destino, marcar, contagem)
-                except WebDriverException as e:
-                    registrar_erro(t["imovel"], usuario, t["webware_empreendimento"], t["webware_unidade"],
-                                   "Erro", (str(e).strip().splitlines() or [""])[0][:200])
-                    contagem["Erro"] = contagem.get("Erro", 0) + 1
-                    log("   => Erro de navegador")
+                for tentativa in (1, 2):
+                    try:
+                        if not janela_viva(driver):
+                            raise NoSuchWindowException("janela do Chrome indisponível")
+                        rodar_imovel(driver, t, tela, url_inicio, destino, marcar, contagem, memoria_cards,
+                                     primeiro=(n == 1 and tentativa == 1))
+                        break
+                    except WebDriverException as e:
+                        if tentativa == 1 and (isinstance(e, JANELA_PERDIDA) or not janela_viva(driver)):
+                            log("   ! a janela/Chrome fechou no meio da coleta; reabrindo e tentando este imóvel de novo")
+                            driver, nova_tela, nova_url = reabrir_sessao(driver, args.headless, usuario, senha)
+                            if nova_tela and nova_tela != "DESCONHECIDA":
+                                tela, url_inicio = nova_tela, nova_url
+                                continue
+                        registrar_erro(t["imovel"], usuario, t["webware_empreendimento"], t["webware_unidade"],
+                                       "Erro", resumir_erro(e))
+                        contagem["Erro"] = contagem.get("Erro", 0) + 1
+                        log(f"   => Erro de navegador: {resumir_erro(e)}")
+                        break
     finally:
         try:
             driver.quit()

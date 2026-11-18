@@ -34,7 +34,8 @@ try:
 except ImportError:
     pass
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import (ElementClickInterceptedException, StaleElementReferenceException,
+                                        TimeoutException, WebDriverException)
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -189,6 +190,16 @@ def log(msg):
 
 def colapsar(txt):
     return " ".join(str(txt or "").split())
+
+
+def resumir_erro(e, limite=300):
+    """'NomeDoErro: mensagem'. Em clique bloqueado, mostra QUEM está por cima do botão (a parte que antes era cortada)."""
+    txt = " ".join(str(e).split())
+    txt = re.sub(r"^Message:\s*", "", txt)
+    m = re.search(r"Other element would receive the click:\s*(<[^>]*>)", txt)
+    if m:
+        return f"{type(e).__name__}: clique bloqueado por {m.group(1)}"[:limite]
+    return f"{type(e).__name__}: {txt}"[:limite]
 
 
 def norm(txt):
@@ -539,12 +550,39 @@ def localizar_portal(driver, emp_site, administradora):
     return None, False, "", ultima_info
 
 
-def esperar_nova_aba(driver, antes, timeout):
+def abas_novas(driver, antes):
+    """Abas que apareceram depois de 'antes', na ordem em que foram abertas."""
     try:
-        WebDriverWait(driver, timeout).until(lambda d: len(set(d.window_handles) - antes) > 0)
-        return (set(driver.window_handles) - antes).pop()
-    except TimeoutException:
-        return None
+        return [h for h in driver.window_handles if h not in antes]
+    except WebDriverException:
+        return []
+
+
+def esperar_nova_aba(driver, antes, timeout):
+    """Espera uma aba nova. Devolve a PRIMEIRA que abriu (antes usava .pop(), que pegava qualquer uma)."""
+    fim = time.time() + timeout
+    while time.time() < fim:
+        novas = abas_novas(driver, antes)
+        if novas:
+            return novas[0]
+        time.sleep(0.2)
+    return None
+
+
+def manter_uma_aba(driver, antes):
+    """Se mais de uma aba abriu para o mesmo condomínio (o window.open demorou e o clique reserva
+    abriu outra), fica com a primeira e fecha as demais. Era isso que deixava duas janelas na tela."""
+    novas = abas_novas(driver, antes)
+    if len(novas) > 1:
+        log(f"   AVISO: {len(novas)} abas abriram para o mesmo condomínio; fico com a primeira e fecho as outras.")
+        for h in novas[1:]:
+            try:
+                driver.switch_to.window(h)
+                driver.close()
+            except WebDriverException:
+                pass
+        novas = abas_novas(driver, antes)
+    return novas[0] if novas else None
 
 
 def abrir_em_nova_aba(driver, elemento):
@@ -571,7 +609,7 @@ def abrir_em_nova_aba(driver, elemento):
         driver.execute_script("window.open(arguments[0], '_blank');", url_destino)
         nova = esperar_nova_aba(driver, antes, 8)
 
-    if not nova:
+    if not nova and not abas_novas(driver, antes):
         driver.execute_script("""
             const el = arguments[0];
             const a = el.closest('a') || el;
@@ -583,7 +621,7 @@ def abrir_em_nova_aba(driver, elemento):
             pass
         nova = esperar_nova_aba(driver, antes, 6)
 
-    if not nova:
+    if not nova and not abas_novas(driver, antes):
         try:
             driver.execute_script("""
                 const el = arguments[0];
@@ -596,6 +634,9 @@ def abrir_em_nova_aba(driver, elemento):
             nova = esperar_nova_aba(driver, antes, 6)
         except Exception:
             pass
+
+    # a tentativa anterior pode ter aberto a aba depois do tempo de espera: fica com uma só
+    nova = manter_uma_aba(driver, antes) or nova
 
     if not nova:
         diagnosticar(driver, "nao_abriu_nova_guia", html=True)
@@ -908,16 +949,72 @@ def escolher_opcao(driver, id_container, valor, rotulo, alternativas=()):
     raise FalhaColeta("ERRO", f"A seleção de {rotulo} não confirmou (ficou '{colapsar(escolhido)}')")
 
 
+# Devolve '' se o botão está livre para clique; senão, um resumo do elemento que está por cima dele.
+JS_COBERTURA = r"""
+    const b = arguments[0];
+    const r = b.getBoundingClientRect();
+    if (!r.width || !r.height) return 'botão sem tamanho na tela';
+    const topo = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    if (!topo || b === topo || b.contains(topo)) return '';
+    return (topo.outerHTML || topo.tagName || '').replace(/\s+/g, ' ').slice(0, 160);
+"""
+
+
+def _botoes_filtrar(driver):
+    for xpath in (XP_FILTRAR, "//button[contains(normalize-space(.), 'Filtrar')]"):
+        botoes = []
+        for b in driver.find_elements(By.XPATH, xpath):
+            try:
+                if b.is_displayed() and b.is_enabled():
+                    botoes.append(b)
+            except StaleElementReferenceException:
+                continue
+        if botoes:
+            return botoes
+    return []
+
+
 def clicar_filtrar(driver):
-    botoes = [b for b in driver.find_elements(By.XPATH, XP_FILTRAR) if b.is_displayed() and b.is_enabled()]
-    if not botoes:
-        botoes = [b for b in driver.find_elements(By.XPATH, "//button[contains(normalize-space(.), 'Filtrar')]")
-                  if b.is_displayed() and b.is_enabled()]
+    """Clica em 'Filtrar'. Se algo estiver por cima do botão (tela de carregando, lista select2 aberta, aviso),
+    espera sair; se persistir, fecha o select2 e tenta de novo; como último recurso clica via JavaScript
+    (o ng-click do Angular dispara normalmente)."""
+    if not _botoes_filtrar(driver):
+        diagnosticar(driver, "sem_botao_filtrar", html=True)
+        raise FalhaColeta("ERRO", "Botão 'Filtrar' não encontrado")
+
+    cobre = ""
+    for tentativa in (1, 2):
+        try:
+            botoes = _botoes_filtrar(driver)
+            if not botoes:
+                time.sleep(1.0)
+                continue
+            botao = botoes[0]
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", botao)
+            time.sleep(0.3)
+            fim = time.time() + 10
+            while time.time() < fim:
+                cobre = driver.execute_script(JS_COBERTURA, botao)
+                if not cobre:
+                    break
+                time.sleep(0.4)
+            if not cobre:
+                botao.click()
+                time.sleep(1.5)
+                return
+            log(f"   AVISO: 'Filtrar' está coberto por: {cobre}")
+        except (ElementClickInterceptedException, StaleElementReferenceException) as e:
+            log(f"   AVISO: clique em 'Filtrar' não passou ({type(e).__name__}); tentativa {tentativa}/2")
+        fechar_select2(driver)
+        time.sleep(1.0)
+
+    botoes = _botoes_filtrar(driver)
     if not botoes:
         diagnosticar(driver, "sem_botao_filtrar", html=True)
         raise FalhaColeta("ERRO", "Botão 'Filtrar' não encontrado")
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", botoes[0])
-    botoes[0].click()
+    log("   AVISO: clicando em 'Filtrar' via JavaScript (clique normal bloqueado)")
+    diagnosticar(driver, "filtrar_coberto", html=True)
+    driver.execute_script("arguments[0].click();", botoes[0])
     time.sleep(1.5)
 
 
@@ -1049,7 +1146,41 @@ def data_para_ordenar(venc):
         return dt.datetime.min
 
 
+def escolher_boletos(candidatos, pendentes, resolvidos=()):
+    """Quais boletos do site baixar. O sistema trata cada VENCIMENTO como um boleto (imóvel com vencimento
+    alternativo, dia 05 e dia 15, tem dois). 'pendentes' = vencimentos que ainda faltam coletar (dd/mm/aaaa);
+    'resolvidos' = vencimentos do imóvel que já estão coletados/pagos (não baixar de novo).
+    Devolve a lista de itens do site, do vencimento mais cedo para o mais tarde (vazia = nenhum serve)."""
+    candidatos = [i for i in candidatos if i["venc"] not in set(resolvidos)]
+    if not candidatos:
+        return []
+    pendentes = sorted({p for p in pendentes if p}, key=data_para_ordenar)
+    por_venc = {}
+    for i in candidatos:
+        atual = por_venc.get(i["venc"])
+        if atual is None or (i["href"] and not atual["href"]):
+            por_venc[i["venc"]] = i
+    exatos = [por_venc[p] for p in pendentes if p in por_venc]
+    if exatos:
+        return exatos
+    if len(pendentes) <= 1:              # comportamento de sempre: o mais novo do mês (a data do site pode diferir da da base)
+        com_link = [i for i in candidatos if i["href"]] or candidatos
+        return [max(com_link, key=lambda i: data_para_ordenar(i["venc"]))]
+    if len(por_venc) == len(pendentes):  # as datas diferem, mas a contagem bate: pareia em ordem de data
+        return [por_venc[v] for v in sorted(por_venc, key=data_para_ordenar)]
+    return []                            # vários pendentes e nenhum casa: não se adivinha qual é qual
+
+
+def nome_do_pdf(imovel, venc, mais_cedo, varios):
+    """<imovel>.pdf como sempre; só quando o imóvel tem mais de um boleto aberto o(s) seguinte(s)
+    ganha(m) o vencimento no nome, para um não sobrescrever o outro."""
+    if not varios or venc == mais_cedo or not re.match(r"\d{2}/\d{2}/\d{4}$", venc or ""):
+        return f"{imovel}.pdf"
+    return f"{imovel}_{venc.replace('/', '-')}.pdf"
+
+
 def coletar_boleto(driver, t, destino):
+    """Baixa o(s) boleto(s) pendente(s) do imóvel. Devolve ([{'venc','arquivo'}...], observação)."""
     itens = aguardar_itens(driver)
     if not itens:
         diagnosticar(driver, f"sem_boleto_{t['imovel']}", html=True)
@@ -1069,28 +1200,41 @@ def coletar_boleto(driver, t, destino):
                               f"Boletos em aberto ({datas}); nenhum do mês {alvo[0]:02d}/{alvo[1]} (base: {t['venc_base']})")
         candidatos = do_mes
 
-    com_link = [i for i in candidatos if i["href"]]
-    if com_link:
-        candidatos = com_link
-    escolhido = max(candidatos, key=lambda i: data_para_ordenar(i["venc"]))
-    if not escolhido["href"]:
-        diagnosticar(driver, f"aberto_sem_link_{t['imovel']}", html=True)
-        raise FalhaColeta("ERRO", f"Boleto {escolhido['venc']} em aberto sem link para download")
+    pendentes = t.get("venc_pend") or ([t["venc_base"]] if t.get("venc_base") else [])
+    resolvidos = [v for v in (t.get("venc_todos") or []) if v not in pendentes]
+    escolhidos = escolher_boletos(candidatos, pendentes, resolvidos)
+    if not escolhidos:
+        datas = ", ".join(i["venc"] for i in candidatos)
+        raise FalhaColeta("SEM BOLETO DO VENCIMENTO",
+                          f"Pendente(s) no sistema: {', '.join(pendentes) or '-'}; em aberto no site: {datas}")
+    mais_cedo = min((i["venc"] for i in candidatos), key=data_para_ordenar)
+    varios = len({i["venc"] for i in candidatos}) > 1 or len(pendentes) > 1
 
-    pdf = baixar_pdf(driver, escolhido["href"])
-    nome = f"{t['imovel']}.pdf"
-    caminho = os.path.join(destino, nome)
-    temporario = caminho + ".tmp"
-    with open(temporario, "wb") as f:
-        f.write(pdf)
-    os.replace(temporario, caminho)
-    log(f"   Boleto salvo: {caminho} (venc {escolhido['venc']})")
+    baixados = []
+    for escolhido in escolhidos:
+        if not escolhido["href"]:
+            diagnosticar(driver, f"aberto_sem_link_{t['imovel']}", html=True)
+            raise FalhaColeta("ERRO", f"Boleto {escolhido['venc']} em aberto sem link para download")
+        pdf = baixar_pdf(driver, escolhido["href"])
+        nome = nome_do_pdf(t["imovel"], escolhido["venc"], mais_cedo, varios)
+        caminho = os.path.join(destino, nome)
+        temporario = caminho + ".tmp"
+        with open(temporario, "wb") as f:
+            f.write(pdf)
+        os.replace(temporario, caminho)
+        log(f"   Boleto salvo: {caminho} (venc {escolhido['venc']})")
+        baixados.append({"venc": escolhido["venc"], "arquivo": nome})
 
     obs = ""
+    nao_baixados = [i["venc"] for i in abertos if i["venc"] not in {b["venc"] for b in baixados}]
     if len(abertos) > 1:
-        outros = ", ".join(i["venc"] for i in abertos if i is not escolhido)
-        obs = f"{len(abertos)} em aberto; baixado o de {escolhido['venc']}. Outros: {outros}"
-    return escolhido["venc"], nome, obs
+        obs = f"{len(abertos)} em aberto; baixado(s) o(s) de {', '.join(b['venc'] for b in baixados)}."
+        if nao_baixados:
+            obs += f" Outros: {', '.join(nao_baixados)}"
+    faltou = [p for p in pendentes if p not in {b['venc'] for b in baixados}] if len(baixados) < len(pendentes) else []
+    if faltou:
+        obs += (" | " if obs else "") + f"Ainda pendente no sistema: {', '.join(faltou)}"
+    return baixados, obs
 
 
 # =============================================================================
@@ -1115,10 +1259,13 @@ def carregar_tarefas_api(colaborador, filtro_imoveis, limite):
         imovel = colapsar(d.get("imovel"))
         if filtro_imoveis and imovel not in filtro_imoveis:
             continue
+        pend = [colapsar(v) for v in (d.get("vencimentos_pendentes") or []) if colapsar(v)]
         tarefas.append({
             "imovel": imovel, "emp": colapsar(d.get("winker_condominio")), "div": colapsar(d.get("winker_predio")),
             "unid": colapsar(d.get("winker_unidade")), "adm": colapsar(d.get("administradora")),
-            "venc_base": colapsar(d.get("vencimento"))})
+            "venc_base": colapsar(d.get("vencimento")) or (pend[0] if pend else ""),
+            # vencimentos que ainda faltam coletar e todos os do imóvel (o sistema trata cada vencimento como um boleto)
+            "venc_pend": pend, "venc_todos": [colapsar(v) for v in (d.get("vencimentos_base") or []) if colapsar(v)]})
     return tarefas[:limite] if limite else tarefas
 
 
@@ -1126,7 +1273,8 @@ def marcar_coletado(imovel, vencimento, observacao=""):
     obs = f"Winker: boleto venc {vencimento} coletado" + (f" | {observacao}" if observacao else "")
     try:
         r = requests.post(f"{API_BASE}/api/automacao/coletar", timeout=30, json={
-            "token": TOKEN_API, "imovel": imovel, "status": "COLETADO", "observacao": obs, "nome_robo": NOME_ROBO})
+            "token": TOKEN_API, "imovel": imovel, "status": "COLETADO", "observacao": obs, "nome_robo": NOME_ROBO,
+            "vencimento": vencimento if re.match(r"\d{2}/\d{2}/\d{4}$", vencimento or "") else ""})
         return bool(r.ok and r.json().get("sucesso"))
     except (requests.RequestException, ValueError):
         return False
@@ -1136,7 +1284,7 @@ def marcar_coletado(imovel, vencimento, observacao=""):
 # PROCESSAMENTO DE UM IMÓVEL
 # =============================================================================
 def processar_tarefa(driver, aba_lista, t, destino):
-    res = {"status": "ERRO", "mensagem": "", "vencimento": "", "arquivo": ""}
+    res = {"status": "ERRO", "mensagem": "", "vencimento": "", "arquivo": "", "boletos": []}
     try:
         fechar_outras_abas(driver, aba_lista)
 
@@ -1165,12 +1313,13 @@ def processar_tarefa(driver, aba_lista, t, destino):
         elif modo == "FILTRAR":
             filtrar_direto(driver, t)
 
-        venc, arquivo, obs = coletar_boleto(driver, t, destino)
-        res.update(status="BAIXADO", vencimento=venc, arquivo=arquivo, mensagem=obs)
+        baixados, obs = coletar_boleto(driver, t, destino)
+        res.update(status="BAIXADO", boletos=baixados, mensagem=obs,
+                   vencimento=" + ".join(b["venc"] for b in baixados), arquivo=" + ".join(b["arquivo"] for b in baixados))
     except FalhaColeta as e:
         res.update(status=e.status, mensagem=e.mensagem)
     except Exception as e:
-        res.update(status="ERRO", mensagem=f"{type(e).__name__}: {str(e).strip().splitlines()[0][:200] if str(e).strip() else ''}")
+        res.update(status="ERRO", mensagem=resumir_erro(e))
         diagnosticar(driver, f"erro_{t['imovel']}", html=True)
     finally:
         try:
@@ -1289,7 +1438,8 @@ def main():
                 res = processar_tarefa(driver, aba_lista, t, destino)
                 marcado = "-"
                 if res["status"] == "BAIXADO" and marcar:
-                    ok = marcar_coletado(t["imovel"], res["vencimento"], res["mensagem"])
+                    # cada boleto baixado é marcado com o SEU vencimento (dia 05 não marca o dia 15)
+                    ok = all([marcar_coletado(t["imovel"], b["venc"], res["mensagem"]) for b in res["boletos"]])
                     marcado = "SIM" if ok else "NÃO"
                     if not ok:
                         res["mensagem"] = (res["mensagem"] + " | " if res["mensagem"] else "") + \

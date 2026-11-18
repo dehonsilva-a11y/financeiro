@@ -63,6 +63,14 @@
             {{ imovel['imovel'] }}
         </a>
         <span id="selo_novo_{{ imovel['id'] }}"></span>
+        {% if imovel['inc'] %}
+            <div><a href="{{ url_for('index', rapido='inconsistencia') }}" class="badge border px-1 py-0 text-decoration-none" style="background:var(--danger-bg); color:var(--danger-text); font-size:.68rem;" title="Devolução do Bradesco ({{ imovel['inc']['ocorrencia'] }} — {{ imovel['inc']['descricao'] }}) PENDENTE na planilha Inc. Bradesco. Clique para atuar.">⚠️ Inconsistência {{ imovel['inc']['ocorrencia'] }}</a></div>
+        {% endif %}
+        {% if imovel['auto_tipo'] == 'erro' %}
+            <div><span class="badge border px-1 py-0" style="background:var(--warn-bg); color:var(--warn-text); font-size:.68rem; cursor:help;" title="{{ imovel['auto_aviso'] }}">🤖⚠️ robô falhou</span></div>
+        {% elif imovel['auto_tipo'] == 'oculto' %}
+            <div><span class="badge border px-1 py-0" style="background:var(--sunk); color:var(--muted); font-size:.68rem; cursor:help;" title="{{ imovel['auto_aviso'] }}">🤖 oculto</span></div>
+        {% endif %}
     </td>
     
     <td class="text-secondary text-center">{{ imovel['endereco'] }}</td> 

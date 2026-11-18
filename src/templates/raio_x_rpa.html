@@ -3,52 +3,7 @@
 {% block title %}Raio-X RPA - Diagnóstico de Falhas{% endblock %}
 
 {% block extra_styles %}
-<style>
-    .kpi-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 16px 10px;
-        text-align: center;
-        transition: all 0.2s ease;
-        height: 100%;
-        cursor: pointer;
-    }
-    .kpi-card:hover, .kpi-card.active {
-        transform: translateY(-3px);
-        border-color: #0284c7;
-        box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.15);
-    }
-    .kpi-icon { font-size: 1.5rem; margin-bottom: 6px; display: inline-block; }
-    .kpi-label { font-size: 0.70rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-    .kpi-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1; }
-
-    .item-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        transition: all 0.2s ease;
-    }
-    .item-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
-
-    .status-pill {
-        display: inline-flex; align-items: center; gap: 6px;
-        font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-    }
-    .pill-unidade { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-    .pill-condominio { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
-    .pill-login { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .pill-faltam_dados { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-    .pill-ajustado { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-    .pill-outros { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
-
-    .tag-site {
-        background: #f8fafc; border: 1px dashed #cbd5e1;
-        padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #334155;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/raio_x_rpa.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -71,6 +26,8 @@
                     <i class="bi bi-search"></i>
                 </button>
             </div>
+
+            <button type="button" class="btn btn-sm btn-dark fw-bold" id="btnMeusCasos" style="display: none;"></button>
 
             <select id="filtroResponsavel" class="form-select form-select-sm fw-bold border-secondary" style="width: 160px;">
                 <option value="todos">👤 Todos Operadores</option>
@@ -136,10 +93,18 @@
             </div>
         </div>
         <div class="col-xl col-md-4 col-6">
+            <div class="kpi-card" data-cat="SENHA_PDF" title="PDF do e-mail com senha que nenhum CPF abriu: informe o CPF certo e o robô usa nos próximos meses">
+                <div class="kpi-icon" style="color: var(--info-text);"><i class="bi bi-file-earmark-lock"></i></div>
+                <div class="kpi-label">Senha do PDF</div>
+                <div class="kpi-value" style="color: var(--info-text);" id="kpi_senha_pdf">0</div>
+                <div class="kpi-sub" id="kpi_emails_pdf"></div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6">
             <div class="kpi-card" data-cat="OUTROS">
-                <div class="kpi-icon" style="color: #7e22ce;"><i class="bi bi-wrench-adjustable"></i></div>
+                <div class="kpi-icon" style="color: var(--sec-roxo);"><i class="bi bi-wrench-adjustable"></i></div>
                 <div class="kpi-label">Falha Técnica</div>
-                <div class="kpi-value" style="color: #7e22ce;" id="kpi_outros">0</div>
+                <div class="kpi-value" style="color: var(--sec-roxo);" id="kpi_outros">0</div>
             </div>
         </div>
         <div class="col-xl col-md-4 col-6">
@@ -168,7 +133,7 @@
             </div>
         </div>
 
-        <div id="barraSelecao" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2 d-none" style="background-color: #e0f2fe;">
+        <div id="barraSelecao" class="px-3 py-2 border-bottom d-flex flex-wrap align-items-center gap-2 d-none" style="background-color: var(--info-bg);">
             <span class="fw-bold small text-dark" id="qtdSelecionados">0 selecionado(s)</span>
             <button type="button" class="btn btn-sm btn-outline-secondary fw-bold py-0 px-2" id="btnLimparSelecao">Limpar seleção</button>
 
@@ -179,6 +144,20 @@
                 <button type="button" class="btn btn-sm btn-success fw-bold px-3 shadow-sm" id="btnTestarRobo">
                     🤖 Testar no robô
                 </button>
+            </div>
+        </div>
+
+        <div class="px-3 pt-3 bg-light" id="painelEmailsPdf" style="display: none;">
+            <div class="alert alert-info border-0 shadow-sm mb-2 p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="fw-bold small">
+                        <i class="bi bi-envelope-exclamation me-1"></i>
+                        <span id="tituloEmailsPdf">E-mails com PDF protegido sem imóvel identificado</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-dark fw-bold py-0 px-2" id="btnVerEmailsPdf">Mostrar</button>
+                </div>
+                <div class="small text-muted mt-1">O robô de e-mail não conseguiu abrir o PDF (senha) nem descobrir de qual imóvel é. Informe o imóvel e o CPF que abre o PDF: nos próximos meses o robô tenta esse CPF primeiro.</div>
+                <div id="listaEmailsPdf" class="mt-2" style="display: none;"></div>
             </div>
         </div>
 
@@ -240,12 +219,30 @@
             <div class="modal-body p-4 bg-light">
                 <input type="hidden" id="ajuste_imovel">
 
-                <div class="alert alert-danger border-0 p-3 mb-4 rounded-3 shadow-sm">
+                <div class="alert alert-danger border-0 p-3 mb-3 rounded-3 shadow-sm">
                     <div class="fw-bold small text-danger"><i class="bi bi-bug-fill me-1"></i>ÚLTIMO RETORNO DO ROBÔ:</div>
                     <div id="modalErroDetalhe" class="small mt-1 text-dark"></div>
                 </div>
 
-                <div class="row g-3">
+                <div id="avisoLoginObrigatorio" class="alert alert-warning border-0 p-2 px-3 mb-3 small fw-semibold" style="display: none;">
+                    <i class="bi bi-shield-lock me-1"></i>Erro de login: para tirar da fila é obrigatório informar <b>login, senha, unidade e bloco</b>
+                    — ou marcar que <b>não possui login</b> (o imóvel vai para DIVERSOS).
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label small fw-bold text-secondary mb-1">Possui login e senha de acesso ao site?</div>
+                    <div class="btn-group btn-group-sm escolha-login" role="group" aria-label="Possui login e senha">
+                        <input type="radio" class="btn-check" name="ajuste_possui" id="ajuste_possui_sim" value="SIM" checked>
+                        <label class="btn btn-outline-success fw-bold px-3" for="ajuste_possui_sim">Sim, possui</label>
+                        <input type="radio" class="btn-check" name="ajuste_possui" id="ajuste_possui_nao" value="NAO">
+                        <label class="btn btn-outline-danger fw-bold px-3" for="ajuste_possui_nao">Não possui login</label>
+                    </div>
+                    <div id="textoSemLogin" class="small text-danger fw-semibold mt-1" style="display: none;">
+                        O imóvel passa para o portal <b>DIVERSOS</b>, sai dos robôs de site e o login/senha antigos são apagados.
+                    </div>
+                </div>
+
+                <div class="row g-3" id="camposAcessoAjuste">
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-secondary">Portal:</label>
                         <select id="ajuste_portal" class="form-select form-select-sm fw-bold">
@@ -264,6 +261,10 @@
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-secondary">Divisão / Bloco (Site):</label>
                         <input type="text" id="ajuste_bloco" class="form-control form-control-sm fw-bold" placeholder="Ex: BLOCO A">
+                        <div class="form-check mt-1">
+                            <input class="form-check-input" type="checkbox" id="ajuste_sem_bloco">
+                            <label class="form-check-label small text-muted" for="ajuste_sem_bloco">Condomínio sem bloco/divisão</label>
+                        </div>
                     </div>
 
                     <div class="col-md-8">
@@ -280,18 +281,64 @@
                         <label class="form-label small fw-bold text-secondary">Senha de Acesso:</label>
                         <input type="text" id="ajuste_senha" class="form-control form-control-sm" placeholder="Senha do site...">
                     </div>
+                    <div class="col-12" id="avisoLoginCompartilhado" style="display: none;">
+                        <div class="small text-muted"><i class="bi bi-people me-1"></i>Neste portal o robô entra com a conta compartilhada da Lello: login e senha por imóvel não são obrigatórios.</div>
+                    </div>
                 </div>
+                <div id="erroAjuste" class="alert alert-danger small fw-semibold mt-3 mb-0 p-2" style="display: none;"></div>
             </div>
             <div class="modal-footer bg-light border-top p-3">
                 <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-3" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-sm btn-success fw-bold px-4" id="btnSalvarAjuste">
-                    <i class="bi bi-check-circle me-1"></i>Salvar e Tirar da Fila de Erros
+                <button type="button" class="btn btn-sm btn-outline-success fw-bold px-4" id="btnSalvarAjuste">
+                    <i class="bi bi-save me-1"></i>Salvar
+                </button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-4" id="btnTirarFilaAjuste">
+                    <i class="bi bi-check-circle me-1"></i>Tirar da Fila
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal: CPF da senha do PDF (robô de e-mail) -->
+<div class="modal fade" id="modalCpfPdf" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white p-3">
+                <div>
+                    <h6 class="modal-title fw-bold m-0"><i class="bi bi-file-earmark-lock text-info me-2"></i>CPF que abre o PDF do boleto</h6>
+                    <small class="text-muted" id="cpfSubtitulo">Imóvel: -</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <input type="hidden" id="cpf_imovel">
+                <div class="alert alert-info border-0 p-3 mb-3 small" id="cpfDetalhe"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary" for="cpf_valor">CPF ou CNPJ correto:</label>
+                        <input type="text" id="cpf_valor" class="form-control form-control-sm fw-bold" inputmode="numeric" autocomplete="off" placeholder="Só números ou com pontuação">
+                        <div class="small text-muted mt-1" id="cpfBase"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary" for="cpf_regra">Regra da senha:</label>
+                        <select id="cpf_regra" class="form-select form-select-sm fw-bold"></select>
+                        <div class="small text-muted mt-1">Na dúvida, deixe em automático: o robô tenta as variações (4 primeiros, 4 últimos, completo...).</div>
+                    </div>
+                </div>
+                <div id="erroCpf" class="alert alert-danger small fw-semibold mt-3 mb-0 p-2" style="display: none;"></div>
+            </div>
+            <div class="modal-footer bg-light border-top p-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-4" id="btnSalvarCpf">
+                    <i class="bi bi-check-circle me-1"></i>Salvar CPF e tirar da fila
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>window.USUARIO_LOGADO = {{ (session.get('usuario') or '')|tojson }};</script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -300,8 +347,13 @@
     if (window.__raioXIniciado) return;
     window.__raioXIniciado = true;
 
-    var VERSAO_TELA = '2026-10-16.3';
+    var VERSAO_TELA = '2026-11-05.1';
     var $ = function(id) { return document.getElementById(id); };
+
+    // O painel manda a pessoa para cá já filtrada (/raio_x_rpa?responsavel=Ryan).
+    // O select ainda não existe quando a primeira consulta sai, então o valor fica guardado aqui.
+    var respDesejado = '';
+    try { respDesejado = new URLSearchParams(window.location.search).get('responsavel') || ''; } catch (e) { respDesejado = ''; }
 
     var versaoServidor = null;
     var dadosCarregados = [];
@@ -319,10 +371,13 @@
     var ultimaPrevia = null;
     var ultimoResultadoTeste = null;
     var iniciandoTeste = false;
+    var regrasSenhaPdf = [];
+    var emailsPdfAbertos = false;
+    var emailsPdfQtd = 0;
 
     var NOME_CATEGORIA = {
         TODOS: 'Todos', FALTAM_DADOS: 'Faltam dados', UNIDADE_BLOCO: 'Unidade / Bloco', CONDOMINIO: 'Condomínio',
-        LOGIN: 'Login / Senha', OUTROS: 'Falha técnica', AJUSTADO: 'Já ajustados'
+        LOGIN: 'Login / Senha', SENHA_PDF: 'Senha do PDF', OUTROS: 'Falha técnica', AJUSTADO: 'Já ajustados'
     };
 
     function esc(v) {
@@ -336,10 +391,12 @@
     }
 
     function valoresTela() {
+        var resp = $('filtroResponsavel').value;
+        if (respDesejado && !respCarregados) resp = respDesejado;   // antes do select existir
         return {
             pesquisa: $('campoPesquisa').value.trim(),
             portal: $('filtroPortal').value,
-            resp: $('filtroResponsavel').value,
+            resp: resp,
             verAjustados: $('checkVerAjustados').checked
         };
     }
@@ -405,6 +462,13 @@
                     res.responsaveis.forEach(function(nome) { selectResp.appendChild(new Option('👤 ' + nome, nome)); });
                     selectResp.appendChild(new Option('👤 Sem responsável', 'Não Atribuído'));
                     respCarregados = true;
+                    if (respDesejado) {
+                        selectResp.value = respDesejado;
+                        if (selectResp.value !== respDesejado) selectResp.value = 'todos';   // nome que não existe aqui
+                        respDesejado = '';
+                        ultimaAssinatura = assinatura();
+                    }
+                    montarAtalhoMeusCasos(selectResp);
                 }
 
                 var t = res.totais;
@@ -413,7 +477,10 @@
                 $('kpi_unidade_bloco').innerText = t.unidade_bloco;
                 $('kpi_condominio').innerText = t.condominio;
                 $('kpi_login').innerText = t.login;
+                $('kpi_senha_pdf').innerText = t.senha_pdf || 0;
                 $('kpi_outros').innerText = t.outros;
+                if (res.regras_senha_pdf) regrasSenhaPdf = res.regras_senha_pdf;
+                atualizarAvisoEmailsPdf(res.emails_pdf_pendentes || 0);
                 $('kpi_ajustados').innerText = t.ajustados;
 
                 renderizarLista();
@@ -424,6 +491,18 @@
                 marcarCarregando(false);
                 $('containerLista').innerHTML = '<div class="alert alert-danger p-3 m-0">Falha ao carregar dados: ' + esc(err.message || err) + '</div>';
             });
+    }
+
+    // Atalho de um clique para a própria carteira: o número grande da tela é da operação
+    // inteira e assusta; o que a pessoa resolve é o pedaço dela.
+    function montarAtalhoMeusCasos(selectResp) {
+        var eu = (window.USUARIO_LOGADO || '').trim();
+        var btn = $('btnMeusCasos');
+        if (!btn || !eu) return;
+        var existe = Array.prototype.some.call(selectResp.options, function(o) { return o.value === eu; });
+        if (!existe) { btn.style.display = 'none'; return; }
+        btn.style.display = '';
+        btn.innerText = (selectResp.value === eu) ? '👥 Ver todos' : '👤 Meus casos';
     }
 
     function marcarCardAtivo() {
@@ -504,9 +583,24 @@
             else if (item.categoria_erro === 'CONDOMINIO') pillClass = 'pill-condominio';
             else if (item.categoria_erro === 'LOGIN') pillClass = 'pill-login';
             else if (item.categoria_erro === 'FALTAM_DADOS') pillClass = 'pill-faltam_dados';
+            else if (item.categoria_erro === 'SENHA_PDF') pillClass = 'pill-senha_pdf';
             else if (item.categoria_erro === 'AJUSTADO') pillClass = 'pill-ajustado';
 
             var detalheErro = item.ultimo_detalhe_erro || 'Faltam dados essenciais para o robô acessar.';
+            var ehLogin = item.categoria_erro === 'LOGIN';
+            var ehSenhaPdf = item.categoria_erro === 'SENHA_PDF';
+            var selos = '';
+            if (item.fica_ate_resolver) {
+                selos += '<span class="selo-fixo" title="Não some quando a base é atualizada: só sai quando o caso for resolvido">' +
+                    '<i class="bi bi-lock-fill"></i> fica até resolver</span>';
+            }
+            if (item.persistente) {
+                selos += '<span class="selo-ciclo" title="O erro é de antes da última atualização da base e continua sem solução">' +
+                    '<i class="bi bi-arrow-repeat"></i> vem do ciclo anterior</span>';
+            }
+            var bolinha = item.dificuldade
+                ? '<span class="dif-dot dif-' + esc(item.dificuldade) + '" title="' + esc(item.dificuldade_motivo || '') + '"></span>'
+                : '';
             var dataFalha = item.data_ultima_falha ? item.data_ultima_falha : 'Pendente de preenchimento';
 
             html += '<div class="item-card ' + (item.esta_ajustado ? 'border-success border-opacity-50 bg-white' : '') + '">' +
@@ -514,13 +608,14 @@
                     '<div style="flex: 1; min-width: 280px;">' +
                         '<div class="d-flex align-items-center gap-2 mb-1">' +
                             '<input type="checkbox" class="form-check-input m-0 rx-sel" style="width: 1.1rem; height: 1.1rem;" data-acao="selecionar" data-imovel="' + esc(item.imovel) + '" ' + (selecionados.has(String(item.imovel)) ? 'checked' : '') + '>' +
+                            bolinha +
                             '<span class="fw-bold text-dark fs-6">#' + esc(item.imovel) + '</span>' +
                             '<span class="fw-bold text-secondary">•</span>' +
                             '<span class="fw-bold text-primary">' + (esc(item.empreendimento) || 'Empreendimento não informado') + '</span>' +
                             '<span class="status-pill ' + pillClass + '">' +
                                 '<i class="bi ' + (item.esta_ajustado ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill') + '"></i> ' + esc(item.motivo_resumido) +
-                            '</span>' +
-                        </div>' +
+                            '</span>' + selos +
+                        '</div>' +
                         '<div class="small text-muted mb-2">' +
                             '<span class="text-dark fw-bold"><i class="bi bi-person-badge text-primary"></i> Resp: <span class="badge bg-light text-dark border">' + esc(item.responsavel) + '</span></span>' +
                             '<span class="mx-2">|</span>' +
@@ -529,27 +624,40 @@
                             '<span><i class="bi bi-geo-alt"></i> Endereço base: ' + esc(item.endereco) + '</span>' +
                             '<span class="mx-2">|</span>' +
                             '<span><i class="bi bi-clock"></i> Último registro: ' + esc(dataFalha) + '</span>' +
-                        </div>' +
+                        '</div>' +
                         '<div class="p-2 rounded border bg-light small ' + (item.esta_ajustado ? 'text-success' : 'text-danger') + ' font-monospace" style="font-size: 0.78rem;">' +
                             '<b>' + (item.esta_ajustado ? 'Histórico:' : 'Retorno do Robô:') + '</b> ' + esc(detalheErro) +
                         '</div>' +
                     '</div>' +
                     '<div class="d-flex flex-column align-items-end justify-content-between gap-3 text-end" style="min-width: 260px;">' +
-                        '<div>' +
-                            '<div class="small text-muted mb-1">Configurado no Portal (<b>' + esc(item.portal) + '</b>):</div>' +
-                            '<div class="tag-site mb-1">Condomínio: <b>' + (item.emp_site ? esc(item.emp_site) : '<span class="text-danger">Vazio</span>') + '</b></div>' +
-                            '<div class="tag-site">' +
-                                (item.bloco_site ? 'Bloco: <b>' + esc(item.bloco_site) + '</b> | ' : '') +
-                                'Unidade: <b>' + (item.unid_site ? esc(item.unid_site) : '<span class="text-danger">Vazia</span>') + '</b>' +
-                            '</div>' +
-                        '</div>' +
+                        (ehSenhaPdf
+                            ? '<div>' +
+                                '<div class="small text-muted mb-1">Senha do PDF (robô de e-mail):</div>' +
+                                '<div class="tag-site mb-1">CPF informado: <b>' + (item.cpf_senha_pdf_mascarado ? esc(item.cpf_senha_pdf_mascarado) : '<span class="text-danger">nenhum</span>') + '</b></div>' +
+                                '<div class="tag-site">CPF da base: <b>' + (item.cpf_base_mascarado ? esc(item.cpf_base_mascarado) : '-') + '</b>' +
+                                    (item.regra_senha_pdf_rotulo && item.cpf_senha_pdf_mascarado ? ' | ' + esc(item.regra_senha_pdf_rotulo) : '') + '</div>' +
+                              '</div>'
+                            : '<div>' +
+                                '<div class="small text-muted mb-1">Configurado no Portal (<b>' + esc(item.portal) + '</b>):</div>' +
+                                '<div class="tag-site mb-1">Condomínio: <b>' + (item.emp_site ? esc(item.emp_site) : '<span class="text-danger">Vazio</span>') + '</b></div>' +
+                                '<div class="tag-site">' +
+                                    (item.bloco_site ? 'Bloco: <b>' + esc(item.bloco_site) + '</b> | ' : '') +
+                                    'Unidade: <b>' + (item.unid_site ? esc(item.unid_site) : '<span class="text-danger">Vazia</span>') + '</b>' +
+                                '</div>' +
+                              '</div>') +
                         '<div class="d-flex gap-2">' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger fw-bold px-2 shadow-sm d-flex align-items-center gap-1" data-acao="remover_erro" data-imovel="' + esc(item.imovel) + '">' +
-                                '<i class="bi bi-trash"></i> Remover' +
-                            '</button>' +
-                            '<button type="button" class="btn btn-sm ' + (item.esta_ajustado ? 'btn-outline-success' : 'btn-dark') + ' fw-bold px-3 shadow-sm d-flex align-items-center gap-1" data-acao="ajustar" data-imovel="' + esc(item.imovel) + '">' +
-                                '<i class="bi bi-pencil-square"></i> ' + (item.esta_ajustado ? 'Re-ajustar' : 'Ajustar Cadastro') +
-                            '</button>' +
+                            (ehLogin
+                                ? ''
+                                : '<button type="button" class="btn btn-sm btn-outline-danger fw-bold px-2 shadow-sm d-flex align-items-center gap-1" data-acao="remover_erro" data-imovel="' + esc(item.imovel) + '">' +
+                                    '<i class="bi bi-trash"></i> Remover' +
+                                  '</button>') +
+                            (ehSenhaPdf
+                                ? '<button type="button" class="btn btn-sm btn-primary fw-bold px-3 shadow-sm d-flex align-items-center gap-1" data-acao="cpf_pdf" data-imovel="' + esc(item.imovel) + '">' +
+                                    '<i class="bi bi-person-vcard"></i> Informar CPF' +
+                                  '</button>'
+                                : '<button type="button" class="btn btn-sm ' + (item.esta_ajustado ? 'btn-outline-success' : 'btn-dark') + ' fw-bold px-3 shadow-sm d-flex align-items-center gap-1" data-acao="ajustar" data-imovel="' + esc(item.imovel) + '">' +
+                                    '<i class="bi bi-pencil-square"></i> ' + (item.esta_ajustado ? 'Re-ajustar' : 'Ajustar Cadastro') +
+                                  '</button>') +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -663,8 +771,8 @@
             text: 'O caso sairá da lista agora. Se voltar a falhar na próxima execução, ele reaparecerá automaticamente.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b',
+            confirmButtonColor: 'var(--accent)',
+            cancelButtonColor: '#6A5860',
             confirmButtonText: 'Sim, remover erro',
             cancelButtonText: 'Cancelar'
         }).then(function(result) {
@@ -705,8 +813,8 @@
             text: 'Todos os casos selecionados sairão da lista de erros. Se falharem novamente na próxima execução, reaparecerão.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b',
+            confirmButtonColor: 'var(--accent)',
+            cancelButtonColor: '#6A5860',
             confirmButtonText: 'Sim, remover ' + qtd + ' erro(s)',
             cancelButtonText: 'Cancelar'
         }).then(function(result) {
@@ -721,12 +829,13 @@
                     if (res.sucesso) {
                         selecionados.clear();
                         atualizarBarraSelecao();
+                        var bloq = (res.bloqueados || []).length;
                         Swal.fire({
-                            icon: 'success',
+                            icon: bloq ? 'info' : 'success',
                             title: res.qtd + ' erro(s) removido(s)!',
-                            text: 'Os casos saíram da lista.',
-                            timer: 1800,
-                            showConfirmButton: false
+                            text: bloq ? res.msg : 'Os casos saíram da lista.',
+                            timer: bloq ? undefined : 1800,
+                            showConfirmButton: !!bloq
                         });
                         carregarDados();
                     } else {
@@ -950,35 +1059,97 @@
         carregarDados();
     }
 
+    var itemEmAjuste = null;
+
+    function portalCompartilhado(portal) {
+        var p = String(portal || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        return p === 'WINKER' || p === 'SUPERLOGICA';
+    }
+
+    function garantirOpcaoPortal(valor) {
+        var sel = $('ajuste_portal');
+        if (!valor) return;
+        var existe = Array.prototype.some.call(sel.options, function(o) { return o.value === valor; });
+        if (!existe) sel.appendChild(new Option(valor, valor));   // SUPERLÓGICA, CTRL, AUTÔNOMA...: nunca trocar por engano
+    }
+
+    function aplicarEscolhaLogin() {
+        var semLogin = $('ajuste_possui_nao').checked;
+        ['ajuste_portal', 'ajuste_emp', 'ajuste_bloco', 'ajuste_unid', 'ajuste_login', 'ajuste_senha', 'ajuste_sem_bloco'].forEach(function(id) {
+            $(id).disabled = semLogin;
+        });
+        $('camposAcessoAjuste').style.opacity = semLogin ? '0.4' : '';
+        $('textoSemLogin').style.display = semLogin ? '' : 'none';
+        if (!semLogin) $('ajuste_bloco').disabled = $('ajuste_sem_bloco').checked;
+        $('avisoLoginCompartilhado').style.display = (!semLogin && portalCompartilhado($('ajuste_portal').value)) ? '' : 'none';
+    }
+
     function abrirModalAjuste(imovelNum) {
         var item = dadosCarregados.find(function(x) { return String(x.imovel) === String(imovelNum); });
         if (!item) return;
+        itemEmAjuste = item;
 
         $('ajuste_imovel').value = item.imovel;
         $('modalSubtitulo').innerText = 'Imóvel #' + item.imovel + ' — ' + (item.empreendimento || '') + ' (Resp: ' + item.responsavel + ')';
         $('modalErroDetalhe').innerText = item.ultimo_detalhe_erro || 'Faltam dados essenciais no cadastro.';
+        $('avisoLoginObrigatorio').style.display = item.categoria_erro === 'LOGIN' ? '' : 'none';
+        $('erroAjuste').style.display = 'none';
 
+        garantirOpcaoPortal(item.portal);
         $('ajuste_portal').value = item.portal || 'WINKER';
         $('ajuste_emp').value = item.emp_site || '';
         $('ajuste_bloco').value = item.bloco_site || '';
+        $('ajuste_sem_bloco').checked = false;
         $('ajuste_unid').value = item.unid_site || '';
         $('ajuste_login').value = item.login_acesso || '';
-        $('ajuste_senha').value = item.senha_acesso || '';
+        // erro de login: a senha que falhou não serve; a pessoa digita a certa
+        $('ajuste_senha').value = item.categoria_erro === 'LOGIN' ? '' : (item.senha_acesso || '');
+        $('ajuste_senha').placeholder = item.categoria_erro === 'LOGIN' ? 'Digite a senha correta' : 'Senha do site...';
+        $('ajuste_possui_nao').checked = String(item.possui_login || '').toUpperCase() === 'NAO';
+        $('ajuste_possui_sim').checked = !$('ajuste_possui_nao').checked;
+        aplicarEscolhaLogin();
 
         bootstrap.Modal.getOrCreateInstance($('modalAjuste')).show();
     }
 
-    function salvarAjuste() {
+    function salvarAjuste() { executarAjuste('salvar'); }
+    function tirarDaFilaAjuste() { executarAjuste('tirar_fila'); }
+
+    // acao: 'salvar' (só grava os dados, continua na fila) ou 'tirar_fila' (grava e marca AJUSTADO)
+    function executarAjuste(acao) {
+        var semLogin = $('ajuste_possui_nao').checked;
         var payload = {
             imovel: $('ajuste_imovel').value,
+            sem_login: semLogin,
             portal: $('ajuste_portal').value,
-            emp_site: $('ajuste_emp').value,
-            bloco_site: $('ajuste_bloco').value,
-            unid_site: $('ajuste_unid').value,
-            login_acesso: $('ajuste_login').value,
-            senha_acesso: $('ajuste_senha').value
+            emp_site: $('ajuste_emp').value.trim(),
+            bloco_site: $('ajuste_bloco').value.trim(),
+            sem_bloco: $('ajuste_sem_bloco').checked,
+            unid_site: $('ajuste_unid').value.trim(),
+            login_acesso: $('ajuste_login').value.trim(),
+            senha_acesso: $('ajuste_senha').value.trim(),
+            acao: acao
         };
+        var erro = $('erroAjuste');
+        erro.style.display = 'none';
 
+        // "Tirar da Fila" exige os dados completos (mesma regra do servidor, só para avisar antes).
+        // "Salvar" sozinho não exige: a pessoa pode só guardar o que já tem e completar depois.
+        if (acao === 'tirar_fila' && itemEmAjuste && itemEmAjuste.categoria_erro === 'LOGIN' && !semLogin) {
+            var falta = [];
+            if (!payload.login_acesso && !portalCompartilhado(payload.portal)) falta.push('login');
+            if (!payload.senha_acesso && !portalCompartilhado(payload.portal)) falta.push('senha');
+            if (!payload.unid_site) falta.push('unidade');
+            if (!payload.bloco_site && !payload.sem_bloco) falta.push('bloco (ou marque "sem bloco")');
+            if (falta.length) {
+                erro.innerText = 'Falta informar: ' + falta.join(', ') + '. Ou marque "Não possui login".';
+                erro.style.display = '';
+                return;
+            }
+        }
+
+        $('btnSalvarAjuste').disabled = true;
+        $('btnTirarFilaAjuste').disabled = true;
         fetch('/api/raio_x/salvar_ajuste', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -986,23 +1157,179 @@
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {
+            $('btnSalvarAjuste').disabled = false;
+            $('btnTirarFilaAjuste').disabled = false;
             if (res.sucesso) {
-                bootstrap.Modal.getOrCreateInstance($('modalAjuste')).hide();
-                selecionados.add(String(payload.imovel));
-                atualizarBarraSelecao();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Cadastro Ajustado!',
-                    text: 'O caso foi marcado como resolvido e retirado da fila de erros.',
-                    timer: 1600,
-                    showConfirmButton: false
-                });
+                if (acao === 'tirar_fila') {
+                    bootstrap.Modal.getOrCreateInstance($('modalAjuste')).hide();
+                    if (!semLogin) selecionados.add(String(payload.imovel));
+                    atualizarBarraSelecao();
+                    Swal.fire({
+                        icon: 'success',
+                        title: semLogin ? 'Sem login registrado' : 'Cadastro Ajustado!',
+                        text: res.msg || 'O caso foi marcado como resolvido e retirado da fila de erros.',
+                        timer: 2200,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Dados salvos!',
+                        text: res.msg || 'Os dados foram salvos. O caso continua na fila até você clicar em "Tirar da Fila".',
+                        timer: 2200,
+                        showConfirmButton: false
+                    });
+                }
                 carregarDados();
             } else {
-                Swal.fire('Erro', res.msg || 'Não foi possível salvar', 'error');
+                erro.innerText = res.msg || 'Não foi possível salvar';
+                erro.style.display = '';
             }
         })
-        .catch(function(err) { Swal.fire('Erro de Rede', String(err), 'error'); });
+        .catch(function(err) {
+            $('btnSalvarAjuste').disabled = false;
+            $('btnTirarFilaAjuste').disabled = false;
+            Swal.fire('Erro de Rede', String(err), 'error');
+        });
+    }
+
+    // ---------- Senha do PDF (robô de e-mail) ----------
+    function preencherRegras(sel, valor) {
+        sel.innerHTML = '';
+        (regrasSenhaPdf.length ? regrasSenhaPdf : [{ valor: '', rotulo: 'Automático (o robô tenta todas as variações do CPF)' }])
+            .forEach(function(r) { sel.appendChild(new Option(r.rotulo, r.valor)); });
+        sel.value = valor || '';
+    }
+
+    function abrirModalCpf(imovelNum) {
+        var item = dadosCarregados.find(function(x) { return String(x.imovel) === String(imovelNum); });
+        if (!item) return;
+        $('cpf_imovel').value = item.imovel;
+        $('cpfSubtitulo').innerText = 'Imóvel #' + item.imovel + ' — ' + (item.empreendimento || '') + (item.sacado ? ' · Sacado: ' + item.sacado : '');
+        $('cpfDetalhe').innerText = item.ultimo_detalhe_erro || 'O PDF veio com senha e nenhum CPF conhecido abriu.';
+        $('cpfBase').innerText = item.cpf_base_mascarado ? 'CPF/CNPJ da base: ' + item.cpf_base_mascarado : '';
+        $('cpf_valor').value = '';
+        $('cpf_valor').placeholder = item.cpf_senha_pdf_mascarado ? 'Atual: ' + item.cpf_senha_pdf_mascarado : 'Só números ou com pontuação';
+        preencherRegras($('cpf_regra'), item.regra_senha_pdf || '');
+        $('erroCpf').style.display = 'none';
+        bootstrap.Modal.getOrCreateInstance($('modalCpfPdf')).show();
+    }
+
+    function digitosCpf(v) { return String(v || '').replace(/\D/g, ''); }
+
+    function salvarCpf() {
+        var cpf = digitosCpf($('cpf_valor').value);
+        var erro = $('erroCpf');
+        if (cpf.length !== 11 && cpf.length !== 14) {
+            erro.innerText = 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos).';
+            erro.style.display = '';
+            return;
+        }
+        $('btnSalvarCpf').disabled = true;
+        fetch('/api/raio_x/salvar_cpf_pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imovel: $('cpf_imovel').value, cpf: cpf, regra: $('cpf_regra').value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            $('btnSalvarCpf').disabled = false;
+            if (!res.sucesso) { erro.innerText = res.msg || 'Não foi possível salvar.'; erro.style.display = ''; return; }
+            bootstrap.Modal.getOrCreateInstance($('modalCpfPdf')).hide();
+            Swal.fire({ icon: 'success', title: 'CPF gravado!', text: res.msg, timer: 2200, showConfirmButton: false });
+            carregarDados();
+        })
+        .catch(function(err) { $('btnSalvarCpf').disabled = false; Swal.fire('Erro de Rede', String(err), 'error'); });
+    }
+
+    function atualizarAvisoEmailsPdf(qtd) {
+        emailsPdfQtd = qtd;
+        $('kpi_emails_pdf').innerText = qtd ? '+ ' + qtd + ' e-mail(s) sem imóvel' : '';
+        var mostrar = qtd > 0 && (filtroErroAtual === 'TODOS' || filtroErroAtual === 'SENHA_PDF');
+        $('painelEmailsPdf').style.display = mostrar ? '' : 'none';
+        $('tituloEmailsPdf').innerText = qtd + ' e-mail(s) com PDF protegido sem imóvel identificado';
+        if (mostrar && (emailsPdfAbertos || filtroErroAtual === 'SENHA_PDF')) carregarEmailsPdf();
+    }
+
+    function carregarEmailsPdf() {
+        emailsPdfAbertos = true;
+        $('btnVerEmailsPdf').innerText = 'Esconder';
+        var lista = $('listaEmailsPdf');
+        lista.style.display = '';
+        lista.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+        fetch('/api/raio_x/emails_pdf_protegido')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (!d.sucesso) { lista.innerHTML = '<div class="text-danger small">Não consegui carregar os e-mails.</div>'; return; }
+                if (!d.emails.length) { lista.innerHTML = '<div class="text-muted small">Nenhum e-mail pendente.</div>'; return; }
+                var opcoes = (regrasSenhaPdf.length ? regrasSenhaPdf : [{ valor: '', rotulo: 'Automático' }])
+                    .map(function(r) { return '<option value="' + esc(r.valor) + '">' + esc(r.rotulo) + '</option>'; }).join('');
+                lista.innerHTML = d.emails.map(function(e) {
+                    return '<div class="email-pdf-linha" data-email="' + esc(e.id) + '">' +
+                        '<div class="d-flex flex-wrap justify-content-between gap-2 small">' +
+                            '<div><b>' + esc(e.assunto || '(sem assunto)') + '</b>' +
+                                '<div class="text-muted">' + esc(e.remetente || '') + ' · ' + esc(e.data_hora || '') +
+                                (e.regra ? ' · regra no e-mail: ' + esc(e.regra) : '') + '</div></div>' +
+                            (e.link ? '<a href="' + esc(e.link) + '" target="_blank" rel="noopener" class="fw-bold">Abrir e-mail ↗</a>' : '') +
+                        '</div>' +
+                        '<div class="row g-2 mt-1 align-items-end">' +
+                            '<div class="col-sm-3"><label class="small fw-bold text-secondary">Nº do imóvel</label>' +
+                                '<input type="text" class="form-control form-control-sm em-imovel" placeholder="Ex.: 12345"></div>' +
+                            '<div class="col-sm-3"><label class="small fw-bold text-secondary">CPF/CNPJ que abre</label>' +
+                                '<input type="text" class="form-control form-control-sm em-cpf" inputmode="numeric" autocomplete="off"></div>' +
+                            '<div class="col-sm-3"><label class="small fw-bold text-secondary">Regra</label>' +
+                                '<select class="form-select form-select-sm em-regra">' + opcoes + '</select></div>' +
+                            '<div class="col-sm-3 d-flex gap-1">' +
+                                '<button type="button" class="btn btn-sm btn-success fw-bold flex-grow-1" data-acao="email_salvar">Salvar</button>' +
+                                '<button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-acao="email_descartar" title="Não é boleto / não precisa">Descartar</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="small text-danger fw-semibold mt-1 em-erro"></div>' +
+                    '</div>';
+                }).join('');
+            })
+            .catch(function() { lista.innerHTML = '<div class="text-danger small">Falha de conexão.</div>'; });
+    }
+
+    function alternarEmailsPdf() {
+        if (emailsPdfAbertos) {
+            emailsPdfAbertos = false;
+            $('listaEmailsPdf').style.display = 'none';
+            $('btnVerEmailsPdf').innerText = 'Mostrar';
+        } else {
+            carregarEmailsPdf();
+        }
+    }
+
+    function acaoEmailPdf(botao) {
+        var linha = botao.closest('[data-email]');
+        if (!linha) return;
+        var idEmail = linha.dataset.email;
+        var erro = linha.querySelector('.em-erro');
+        erro.innerText = '';
+        if (botao.dataset.acao === 'email_descartar') {
+            fetch('/api/raio_x/emails_pdf_protegido/descartar', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_email: idEmail })
+            }).then(function(r) { return r.json(); }).then(function() { carregarDados(); });
+            return;
+        }
+        var imovel = linha.querySelector('.em-imovel').value.trim();
+        var cpf = digitosCpf(linha.querySelector('.em-cpf').value);
+        if (!imovel) { erro.innerText = 'Informe o número do imóvel.'; return; }
+        if (cpf.length !== 11 && cpf.length !== 14) { erro.innerText = 'Informe um CPF (11) ou CNPJ (14 dígitos).'; return; }
+        botao.disabled = true;
+        fetch('/api/raio_x/salvar_cpf_pdf', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imovel: imovel, cpf: cpf, regra: linha.querySelector('.em-regra').value, id_email: idEmail })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            botao.disabled = false;
+            if (!res.sucesso) { erro.innerText = res.msg || 'Não foi possível salvar.'; return; }
+            Swal.fire({ icon: 'success', title: 'CPF gravado!', text: res.msg, timer: 2000, showConfirmButton: false });
+            carregarDados();
+        })
+        .catch(function() { botao.disabled = false; erro.innerText = 'Falha de conexão.'; });
     }
 
     function ligar(id, evento, fn) {
@@ -1024,6 +1351,20 @@
         ligar('checkVerAjustados', 'change', alternarAjustados);
         ligar('btnCopiarDiag', 'click', copiarDiagnostico);
         ligar('btnSalvarAjuste', 'click', salvarAjuste);
+        ligar('btnTirarFilaAjuste', 'click', tirarDaFilaAjuste);
+        ligar('btnSalvarCpf', 'click', salvarCpf);
+        ligar('btnVerEmailsPdf', 'click', alternarEmailsPdf);
+        ligar('ajuste_possui_sim', 'change', aplicarEscolhaLogin);
+        ligar('ajuste_possui_nao', 'change', aplicarEscolhaLogin);
+        ligar('ajuste_sem_bloco', 'change', function() {
+            $('ajuste_bloco').disabled = $('ajuste_sem_bloco').checked;
+            if ($('ajuste_sem_bloco').checked) $('ajuste_bloco').value = '';
+        });
+        ligar('ajuste_portal', 'change', aplicarEscolhaLogin);
+        ligar('listaEmailsPdf', 'click', function(e) {
+            var b = e.target && e.target.closest ? e.target.closest('[data-acao^="email_"]') : null;
+            if (b) acaoEmailPdf(b);
+        });
         ligar('chkSelecionarTodos', 'change', function(e) { selecionarTodosDaLista(e.target.checked); });
         ligar('btnLimparSelecao', 'click', limparSelecao);
         ligar('btnTestarRobo', 'click', abrirTesteRobo);
@@ -1031,6 +1372,13 @@
         ligar('btnIniciarTeste', 'click', iniciarTeste);
         ligar('btnAtualizarAposTeste', 'click', atualizarAposTeste);
         ligar('btnVerTeste', 'click', verUltimoTeste);
+        ligar('btnMeusCasos', 'click', function() {
+            var selectResp = $('filtroResponsavel');
+            var eu = (window.USUARIO_LOGADO || '').trim();
+            selectResp.value = (selectResp.value === eu) ? 'todos' : eu;
+            montarAtalhoMeusCasos(selectResp);
+            carregarDados();
+        });
 
         $('containerLista').addEventListener('change', function(e) {
             var cb = e.target && e.target.closest ? e.target.closest('[data-acao="selecionar"]') : null;
@@ -1045,6 +1393,7 @@
             var alvo = e.target && e.target.closest ? e.target.closest('[data-acao]') : null;
             if (!alvo) return;
             if (alvo.dataset.acao === 'ajustar') abrirModalAjuste(alvo.dataset.imovel);
+            else if (alvo.dataset.acao === 'cpf_pdf') abrirModalCpf(alvo.dataset.imovel);
             else if (alvo.dataset.acao === 'remover_erro') removerErroIndividual(alvo.dataset.imovel);
             else if (alvo.dataset.acao === 'limpar') limparFiltros();
         });

@@ -1,356 +1,331 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Gerencial - Lello{% endblock %}
+{% block title %}Produtividade - Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    /* =========================================
-       CSS ULTRA PREMIUM - ESTILO SAAS CLARO
-       ========================================= */
-    body { background-color: #f8fafc; }
-    
-    .premium-banner {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #00a7e1 100%);
-        border-radius: 16px;
-        padding: 28px;
-        color: white;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .premium-banner::before {
-        content: ''; position: absolute; top: -50%; right: -20%; width: 350px; height: 400px;
-        background: rgba(0, 167, 225, 0.12); filter: blur(70px); border-radius: 50%;
-    }
-
-    /* CARDS DE KPI (INDICADORES) */
-    .kpi-card { 
-        background: #ffffff; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 14px; 
-        padding: 20px; 
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
-        position: relative; 
-        overflow: hidden;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    .kpi-card:hover { 
-        transform: translateY(-4px); 
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-    }
-    
-    .kpi-label { color: #64748b; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-    .kpi-value { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin: 0; color: #0f172a; letter-spacing: -1px; margin-top: auto; }
-    .kpi-subtitle { font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-bottom: 12px; }
-    
-    .icon-wrapper { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 12px; }
-
-    /* BORDAS DE CORES PARA OS KPIS */
-    .border-blue { border-top: 4px solid #3b82f6; }
-    .border-emerald { border-top: 4px solid #10b981; }
-    .border-amber { border-top: 4px solid #f59e0b; }
-    .border-purple { border-top: 4px solid #8b5cf6; }
-    .border-indigo { border-top: 4px solid #6366f1; }
-
-    /* PAINEL DE CLASSIFICAÇÃO (LISTAS) */
-    .panel-container {
-        background: #ffffff; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 14px; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); 
-        overflow: hidden;
-    }
-    
-    .modern-list-item {
-        padding: 16px 20px;
-        border-bottom: 1px solid #f1f5f9;
-        transition: background-color 0.2s;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: help;
-    }
-    .modern-list-item:hover { background-color: #f8fafc; }
-    .modern-list-item:last-child { border-bottom: none; }
-
-    .rank-circle {
-        width: 32px; height: 32px; 
-        border-radius: 50%; 
-        display: flex; align-items: center; justify-content: center; 
-        font-weight: 800; font-size: 0.75rem;
-        background-color: #f1f5f9; color: #64748b;
-    }
-    .rank-1 { background-color: #fef3c7; color: #d97706; } /* Ouro */
-    .rank-2 { background-color: #f1f5f9; color: #64748b; } /* Prata */
-    .rank-3 { background-color: #ffedd5; color: #b45309; } /* Bronze */
-
-    /* CUSTOM SCROLLBAR PARA AS LISTAS */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/relatorio_avancado.css') }}">
 {% endblock %}
 
+{% macro n(x) -%}{{ "{:,}".format(x|int)|replace(',', '.') }}{%- endmacro %}
+{% macro p(x) -%}{{ "%.1f"|format(x)|replace('.', ',') }}{%- endmacro %}
+
 {% block content %}
-<div class="container-fluid px-1">
+<div class="container-fluid px-1 prod">
 
-    <div class="premium-banner mb-4 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="boleto" id="faixaBoleto" aria-hidden="true"></div>
+
+    <div class="topo">
         <div>
-            <h3 class="fw-bold m-0 text-white" style="letter-spacing: -0.5px;">Inteligência de Produtividade</h3>
-            <p class="m-0 text-white-50 small mt-1">Desempenho operacional da competência: <strong class="text-white">{{ mes }}</strong></p>
+            <h1>Inteligência de Produtividade</h1>
+            <p>Competência de {{ mes }} — {% if resumo.base_congelada %}base congelada na virada do mês{% else %}boletos com vencimento no mês{% endif %}.</p>
         </div>
-        
-        <div class="d-flex align-items-center gap-4 flex-wrap">
-            <div class="bg-dark bg-opacity-25 p-2 rounded-3 border border-light border-opacity-10 d-flex align-items-center">
-                <form action="{{ url_for('relatorio_avancado') }}" method="GET" class="m-0 d-flex align-items-center">
-                    <span class="text-white-50 small fw-bold me-2 text-uppercase d-none d-sm-block" style="letter-spacing: 0.5px;">Competência:</span>
-                    <select name="mes" class="form-select form-select-sm fw-bold border-0 shadow-none cursor-pointer" style="background-color: rgba(255,255,255,0.9); color: #0f172a; width: 170px;" onchange="document.getElementById('inputAno').value = this.options[this.selectedIndex].getAttribute('data-ano'); this.form.submit();">
-                        {% if meses_disponiveis %}
-                            {% for opcao in meses_disponiveis %}
-                                <option value="{{ opcao.valor_mes }}" data-ano="{{ opcao.valor_ano }}" {% if mes_selecionado == opcao.valor_mes and ano_selecionado == opcao.valor_ano %}selected{% endif %}>
-                                    📅 {{ opcao.label }}
-                                </option>
-                            {% endfor %}
-                        {% else %}
-                            <option value="">Sem dados</option>
-                        {% endif %}
-                    </select>
-                    <input type="hidden" name="ano" id="inputAno" value="{{ ano_selecionado }}">
-                </form>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end ps-3 border-start border-light border-opacity-25">
-                    <h6 class="m-0 text-white-50 text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Volume Inicial</h6>
-                    <h2 class="fw-bold m-0 text-light opacity-75" style="font-size: 2.2rem; letter-spacing: -1px; line-height: 1;">{{ stats.total_meta_base }} <span class="fs-6 text-white-50 fw-normal">un</span></h2>
-                </div>
-                <div class="text-end ps-3 border-start border-light border-opacity-25">
-                    <h6 class="m-0 text-success text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Total Coletado</h6>
-                    <h2 class="fw-bold m-0 text-white" style="font-size: 2.2rem; letter-spacing: -1px; line-height: 1; text-shadow: 0 0 15px rgba(1, 53, 35, 0.097);">{{ stats.total_geral }} <span class="fs-6 text-white-50 fw-normal">un</span></h2>
-                </div>
-            </div>
-        </div>
+        <form class="seletor" action="{{ url_for('relatorio_avancado') }}" method="GET">
+            <span>Competência</span>
+            <select name="mes" onchange="document.getElementById('inputAno').value = this.options[this.selectedIndex].getAttribute('data-ano'); this.form.submit();">
+                {% for opcao in meses_disponiveis %}
+                <option value="{{ opcao.valor_mes }}" data-ano="{{ opcao.valor_ano }}"
+                        {% if mes_selecionado == opcao.valor_mes and ano_selecionado == opcao.valor_ano %}selected{% endif %}>{{ opcao.label }}</option>
+                {% else %}
+                <option value="">Sem dados</option>
+                {% endfor %}
+            </select>
+            <input type="hidden" name="ano" id="inputAno" value="{{ ano_selecionado }}">
+        </form>
     </div>
 
-    <div class="row g-3 mb-4 row-cols-1 row-cols-sm-2 row-cols-xl-5 align-items-start">
-        
-        <div class="col">
-            <div class="kpi-card border-blue" data-bs-toggle="collapse" data-bs-target="#collapseFinmail" style="cursor: pointer;">
-                <div class="position-absolute top-0 end-0 p-3 text-muted small fw-bold">▼</div>
-                <div class="icon-wrapper bg-primary bg-opacity-10 text-primary">📧</div>
-                <div class="kpi-label">Automação FinMail</div>
-                <div class="kpi-subtitle">Varredura de E-mails</div>
-                <div class="kpi-value text-primary">{{ stats.finmail }}</div>
-                
-                <div id="collapseFinmail" class="collapse w-100 mt-3 pt-3 border-top">
-                    <strong class="text-dark d-block mb-2" style="font-size: 0.7rem; text-transform: uppercase;">Origem dos Imóveis:</strong>
-                    {% for item in stats.lista_finmail %}
-                    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.8rem;">
-                        <span>{{ item.nome }}</span>
-                        <span class="fw-bold text-dark">{{ item.qtd }}</span>
-                    </div>
-                    {% else %}
-                    <div class="text-muted small">Nenhuma coleta.</div>
-                    {% endfor %}
-                </div>
-            </div>
+    <dl class="abertura">
+        <div>
+            <dt>Base do mês</dt>
+            <dd>{{ n(resumo.volume) }}<u>boletos</u></dd>
+            <small>{% if resumo.base_congelada %}primeira planilha do ciclo{% else %}contagem da base atual{% endif %}</small>
         </div>
-
-        <div class="col">
-            <div class="kpi-card border-emerald" data-bs-toggle="collapse" data-bs-target="#collapseWebware" style="cursor: pointer;">
-                <div class="position-absolute top-0 end-0 p-3 text-muted small fw-bold">▼</div>
-                <div class="icon-wrapper bg-success bg-opacity-10 text-success">🌐</div>
-                <div class="kpi-label">Automação Webware</div>
-                <div class="kpi-subtitle">Extração de Portal</div>
-                <div class="kpi-value text-success">{{ stats.webware }}</div>
-                
-                <div id="collapseWebware" class="collapse w-100 mt-3 pt-3 border-top">
-                    <strong class="text-dark d-block mb-2" style="font-size: 0.7rem; text-transform: uppercase;">Origem dos Imóveis:</strong>
-                    {% for item in stats.lista_webware %}
-                    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.8rem;">
-                        <span>{{ item.nome }}</span>
-                        <span class="fw-bold text-dark">{{ item.qtd }}</span>
-                    </div>
-                    {% else %}
-                    <div class="text-muted small">Nenhuma coleta.</div>
-                    {% endfor %}
-                </div>
-            </div>
+        <div class="destaque">
+            <dt>Total coletado</dt>
+            <dd>{{ n(resumo.entregues) }}<u>boletos</u></dd>
+            <small>soma exata das origens abaixo</small>
         </div>
-
-        <div class="col">
-            <div class="kpi-card border-amber" data-bs-toggle="collapse" data-bs-target="#collapseWinker" style="cursor: pointer;">
-                <div class="position-absolute top-0 end-0 p-3 text-muted small fw-bold">▼</div>
-                <div class="icon-wrapper bg-warning bg-opacity-10 text-warning" style="color: #d97706 !important;">🏢</div>
-                <div class="kpi-label">Automação Winker</div>
-                <div class="kpi-subtitle">Extração de Portal</div>
-                <div class="kpi-value text-warning" style="color: #d97706 !important;">{{ stats.winker }}</div>
-                
-                <div id="collapseWinker" class="collapse w-100 mt-3 pt-3 border-top">
-                    <strong class="text-dark d-block mb-2" style="font-size: 0.7rem; text-transform: uppercase;">Origem dos Imóveis:</strong>
-                    {% for item in stats.lista_winker %}
-                    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.8rem;">
-                        <span>{{ item.nome }}</span>
-                        <span class="fw-bold text-dark">{{ item.qtd }}</span>
-                    </div>
-                    {% else %}
-                    <div class="text-muted small">Nenhuma coleta.</div>
-                    {% endfor %}
-                </div>
-            </div>
+        <div>
+            <dt>Pendentes</dt>
+            <dd>{{ n(resumo.pendentes) }}<u>boletos</u></dd>
+            <small>{% if resumo.fora_da_base %}+ {{ n(resumo.fora_da_base) }} saíram da base sem registro{% else %}ainda na planilha ativa{% endif %}</small>
         </div>
-
-        <div class="col">
-            <div class="kpi-card border-purple" data-bs-toggle="collapse" data-bs-target="#collapseScanner" style="cursor: pointer;">
-                <div class="position-absolute top-0 end-0 p-3 text-muted small fw-bold">▼</div>
-                <div class="icon-wrapper bg-purple" style="background-color: #f3e8ff; color: #7e22ce;">📄</div>
-                <div class="kpi-label">Scanner Físico</div>
-                <div class="kpi-subtitle">Boletos Digitalizados</div>
-                <div class="kpi-value" style="color: #7e22ce;">{{ stats.scanner }}</div>
-                
-                <div id="collapseScanner" class="collapse w-100 mt-3 pt-3 border-top">
-                    <strong class="text-dark d-block mb-2" style="font-size: 0.7rem; text-transform: uppercase;">Origem dos Imóveis:</strong>
-                    {% for item in stats.lista_scanner %}
-                    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.8rem;">
-                        <span>{{ item.nome }}</span>
-                        <span class="fw-bold text-dark">{{ item.qtd }}</span>
-                    </div>
-                    {% else %}
-                    <div class="text-muted small">Nenhuma coleta.</div>
-                    {% endfor %}
-                </div>
-            </div>
+        <div>
+            <dt>Cobertura</dt>
+            <dd>{{ p(resumo.cobertura) }}<u>%</u></dd>
+            <small>coletado sobre a base</small>
         </div>
+    </dl>
 
-        <div class="col">
-            <div class="kpi-card border-indigo" data-bs-toggle="collapse" data-bs-target="#collapseManual" style="cursor: pointer;">
-                <div class="position-absolute top-0 end-0 p-3 text-muted small fw-bold">▼</div>
-                <div class="icon-wrapper bg-indigo" style="background-color: #e0e7ff; color: #4f46e5;">👥</div>
-                <div class="kpi-label">Equipe - Manual</div>
-                <div class="kpi-subtitle">Coletas Manuais</div>
-                <div class="kpi-value" style="color: #4f46e5;">{{ stats.equipe_manual }}</div>
-                
-        <div id="collapseManual" class="collapse w-100 mt-3 pt-3 border-top">
-    <strong class="text-dark d-block mb-2" style="font-size: 0.7rem; text-transform: uppercase;">Coletas por Colaborador:</strong>
-    {% for item in stats.lista_manual %}
-    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.8rem;">
-        <span>{{ item.nome }}</span>
-        <span class="fw-bold text-dark">{{ item.qtd }}</span>
-    </div>
-    {% else %}
-    <div class="text-muted small">Nenhuma coleta manual.</div>
-    {% endfor %}
-</div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row g-4 mb-5">
-        
-        <div class="col-lg-6">
-            <div class="panel-container h-100 d-flex flex-column">
-                <div class="p-4 border-bottom bg-white d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="icon-wrapper bg-success bg-opacity-10 text-success m-0" style="width: 42px; height: 42px; font-size: 1.2rem;">🎯</div>
-                        <div>
-                            <h6 class="fw-bold text-dark m-0">Performance de Coletas</h6>
-                            <span class="text-muted" style="font-size: 0.75rem;">Análise por Responsável</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex-grow-1 custom-scroll" style="max-height: 450px; overflow-y: auto;">
-                    {% if stats.ranking_carteiras %}
-                        {% for carteira in stats.ranking_carteiras %}
-                        <div class="border-bottom border-light">
-                            <div class="modern-list-item" data-bs-toggle="collapse" data-bs-target="#detalhe-{{ loop.index }}" style="cursor: pointer; border-bottom: none;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rank-circle {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
-                                        {{ loop.index }}º
-                                    </div>
-                                    <span class="fw-bold text-secondary" style="font-size: 0.95rem;">{{ carteira.nome }}</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 fw-bold" style="font-size: 0.85rem;">
-                                        {{ carteira.total }} coletados
-                                    </span>
-                                    <span class="text-muted small fw-bold ms-1" style="font-size: 0.6rem;">▼</span>
-                                </div>
+    <!-- QUEM COLETOU -->
+    <section class="secao">
+        <header>
+            <h2>Quem coletou</h2>
+            <p>Autor do último registro de entrega de cada boleto. Clique numa linha para abrir o detalhe.</p>
+        </header>
+        <div class="caixa com-rodape">
+            <table class="origem">
+                <caption class="visually-hidden">Origem das coletas da competência</caption>
+                <tbody>
+                {% set com_coleta = cartoes|selectattr('qtd')|list %}
+                {% set maior_origem = com_coleta|map(attribute='qtd')|max if com_coleta else 0 %}
+                {% for c in com_coleta %}
+                    {% set familia = 'fam-pessoa' if c.chave == 'manual' else ('fam-planilha' if c.chave in ['sistema', 'saiu'] else 'fam-robo') %}
+                    <tr class="{{ familia }} {{ '' if c.chave == 'manual' else 'abrivel' }}"
+                        {% if c.chave != 'manual' %}data-bs-toggle="collapse" data-bs-target="#origem-{{ c.chave }}"{% endif %}>
+                        <td class="rotulo">{{ c.titulo }}<span class="tipo">{{ c.subtitulo }}</span></td>
+                        <td class="barra">
+                            <div class="trilho" role="img" aria-label="{{ p(c.pct) }}% do total coletado">
+                                <span style="width: {{ (c.qtd / maior_origem * 100) if maior_origem else 0 }}%;"></span>
                             </div>
-                            
-                            <div id="detalhe-{{ loop.index }}" class="collapse">
-                                <div class="p-3 bg-light rounded-3 mb-3 mx-3 border shadow-sm" style="font-size: 0.85rem;">
-                                    <strong class="text-dark d-block mb-2" style="font-size: 0.75rem; text-transform: uppercase;">Origem das Coletas:</strong>
-                                    {% for det in carteira.detalhes %}
-                                    <div class="d-flex justify-content-between text-secondary mb-1">
-                                        <span>{{ det.ex }}</span>
-                                        <span class="fw-bold">{{ det.q }}</span>
-                                    </div>
+                        </td>
+                        <td class="num qtd">{{ n(c.qtd) }}</td>
+                        <td class="num pct">{{ p(c.pct) }}%</td>
+                        <td class="seta">{{ '' if c.chave == 'manual' else '▼' }}</td>
+                    </tr>
+                    {% if c.chave == 'manual' %}
+                        {% for item in c.lista %}
+                        <tr class="pessoa">
+                            <td class="rotulo">{{ item.nome }}</td>
+                            <td class="barra">
+                                <div class="trilho"><span style="width: {{ (item.qtd / maior_origem * 100) if maior_origem else 0 }}%;"></span></div>
+                            </td>
+                            <td class="num qtd">{{ n(item.qtd) }}</td>
+                            <td class="num pct">{{ p(item.qtd / c.qtd * 100) }}%</td>
+                            <td class="seta"></td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr class="detalhe-origem">
+                        <td colspan="5" class="p-0">
+                            <div class="collapse" id="origem-{{ c.chave }}">
+                                <div class="grade">
+                                    {% for item in c.lista %}
+                                    <div><span>{{ item.nome }}</span><b>{{ n(item.qtd) }}</b></div>
+                                    {% else %}
+                                    <div class="text-muted">Nenhuma coleta nesta origem.</div>
                                     {% endfor %}
                                 </div>
                             </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-5">
-                            <h1 class="text-muted opacity-25 m-0" style="font-size: 3.5rem;">📁</h1>
-                            <p class="text-muted mt-3 fw-medium">Nenhuma coleta registrada nesta competência.</p>
-                        </div>
+                        </td>
+                    </tr>
                     {% endif %}
-                </div>
-                
-                {% if stats.ranking_carteiras %}
-                <div class="p-2 text-center bg-light border-top">
-                    <small class="text-muted fw-bold" style="font-size: 0.7rem; text-transform: uppercase;">
-                        💡 Clique sobre um nome para expandir e ver quem realizou a coleta.
-                    </small>
-                </div>
-                {% endif %}
+                {% else %}
+                    <tr><td colspan="5" class="vazio-painel">Nenhuma coleta registrada nesta competência.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="rodape-caixa">
+            <span style="color: var(--c-robo); font-weight: 600;">■</span> automações &nbsp;
+            <span style="color: var(--c-pessoa); font-weight: 600;">■</span> equipe &nbsp;
+            <span style="color: var(--c-planilha); font-weight: 600;">■</span> baixa pela planilha
+            &nbsp;·&nbsp; somam os {{ n(resumo.entregues) }} boletos coletados. Origens sem coleta no mês não aparecem.
+        </div>
+    </section>
+
+    <!-- EVOLUÇÃO -->
+    <section class="secao">
+        <header>
+            <h2>Evolução mês a mês</h2>
+            <p>A base de cada competência e quanto dela foi coletado. Clique no mês para abri-lo acima.</p>
+        </header>
+        <div class="caixa">
+            <div class="table-responsive">
+                <table class="dados">
+                    <caption class="visually-hidden">Base, coletas e cobertura por competência</caption>
+                    <thead>
+                        <tr>
+                            <th>Competência</th>
+                            <th class="num">Base</th>
+                            <th class="num">Coletado</th>
+                            <th class="num">Pendentes</th>
+                            <th style="width: 30%;">Cobertura</th>
+                            <th class="num" title="Entre as coletas com autor, quantas foram de automação.">Automação</th>
+                            <th class="num">Disparos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for l in evolucao %}
+                        <tr class="{{ 'atual' if l.selecionado else '' }}">
+                            <td>
+                                <a class="mes" href="{{ url_for('relatorio_avancado', mes=l.chave[5:], ano=l.chave[:4]) }}">{{ l.rotulo }}</a>
+                                {% if l.em_andamento %}<span class="marca-andamento">em andamento</span>{% endif %}
+                            </td>
+                            <td class="num" {% if not l.base_congelada %}title="Mês sem base congelada: vale a contagem dos boletos encontrados."{% endif %}>
+                                {{ n(l.volume) }}{% if not l.base_congelada %} <span style="color: var(--tinta-3);">~</span>{% endif %}
+                            </td>
+                            <td class="num">{{ n(l.entregues) }}</td>
+                            <td class="num">{{ n(l.pendentes) if l.pendentes else '—' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="trilho-evo" role="img" aria-label="{{ p(l.cobertura) }}% coletado"><span style="width: {{ l.cobertura }}%;"></span></div>
+                                    <b style="min-width: 54px; text-align: right;">{{ p(l.cobertura) }}%</b>
+                                </div>
+                            </td>
+                            <td class="num">
+                                {{ p(l.pct_robos) }}%
+                                {% if not l.em_andamento and l.delta_robos is not none and l.delta_robos|abs >= 0.05 %}
+                                <span class="delta {{ 'sobe' if l.delta_robos > 0 else 'desce' }}">{{ '+' if l.delta_robos > 0 else '−' }}{{ p(l.delta_robos|abs) }} pp</span>
+                                {% endif %}
+                            </td>
+                            <td class="num">{{ n(l.disparos) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="vazio-painel">Sem dados.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </section>
 
-        <div class="col-lg-6">
-            <div class="panel-container h-100 d-flex flex-column">
-                <div class="p-4 border-bottom bg-white d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="icon-wrapper bg-primary bg-opacity-10 text-primary m-0" style="width: 42px; height: 42px; font-size: 1.2rem;">📤</div>
-                        <div>
-                            <h6 class="fw-bold text-dark m-0">Disparos de Cobrança (E-mail)</h6>
-                            <span class="text-muted" style="font-size: 0.75rem;">Atuação E-mails da equipe</span>
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <section class="secao h-100">
+                <header>
+                    <h2>Cobertura por carteira</h2>
+                    <p>Boletos coletados sobre os boletos da carteira, em {{ mes }}.</p>
+                </header>
+                <div class="caixa com-rodape">
+                    {% for carteira in ranking_carteiras %}
+                    <div class="carteira" data-bs-toggle="collapse" data-bs-target="#carteira-{{ loop.index }}">
+                        <div class="cab">
+                            <span class="nome">{{ carteira.nome }}</span>
+                            <span class="valor">{{ p(carteira.pct) }}%</span>
+                        </div>
+                        <div class="cab">
+                            <span class="conta">{{ n(carteira.entregues) }} de {{ n(carteira.base) }}{% if carteira.pendentes %} · {{ n(carteira.pendentes) }} pendentes{% endif %}</span>
+                        </div>
+                        <div class="trilho" role="img" aria-label="{{ p(carteira.pct) }}% coletado"><span style="width: {{ carteira.pct }}%;"></span></div>
+                    </div>
+                    <div class="collapse" id="carteira-{{ loop.index }}">
+                        <div class="detalhe-carteira">
+                            <div class="grade">
+                                {% for det in carteira.detalhes %}
+                                <div><span>{{ det.ex }}</span><b>{{ n(det.q) }}</b></div>
+                                {% else %}
+                                <div>Nenhuma coleta registrada.</div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="flex-grow-1 custom-scroll" style="max-height: 450px; overflow-y: auto;">
-                    {% if stats.ranking_disparos %}
-                        {% for membro in stats.ranking_disparos %}
-                        <div class="modern-list-item" style="cursor: default;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rank-circle {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
-                                    {{ loop.index }}º
-                                </div>
-                                <span class="fw-bold text-secondary" style="font-size: 0.95rem;">{{ membro.nome }}</span>
-                            </div>
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 fw-bold" style="font-size: 0.85rem;">
-                                {{ membro.qtd }} enviados
-                            </span>
-                        </div>
-                        {% endfor %}
                     {% else %}
-                        <div class="text-center py-5">
-                            <h1 class="text-muted opacity-25 m-0" style="font-size: 3.5rem;">✉️</h1>
-                            <p class="text-muted mt-3 fw-medium">Nenhum disparo de e-mail efetuado nesta competência.</p>
-                        </div>
-                    {% endif %}
+                    <div class="vazio-painel">Nenhum boleto nesta competência.</div>
+                    {% endfor %}
                 </div>
-            </div>
+                <div class="rodape-caixa">Clique numa carteira para ver quem fez as coletas dela.</div>
+            </section>
         </div>
 
+        <div class="col-xl-6">
+            <section class="secao h-100">
+                <header>
+                    <h2>Disparos de cobrança</h2>
+                    <p>E-mails enviados às administradoras em {{ mes }}.</p>
+                </header>
+                <div class="caixa com-rodape">
+                    {% set topo_disparos = ranking_disparos[0].qtd if ranking_disparos else 0 %}
+                    {% for membro in ranking_disparos %}
+                    <div class="fila">
+                        <span class="pos">{{ loop.index }}</span>
+                        <span class="nome">{{ membro.nome }}</span>
+                        <span class="trilho"><span style="width: {{ (membro.qtd / topo_disparos * 100) if topo_disparos else 0 }}%;"></span></span>
+                        <span class="valor">{{ n(membro.qtd) }}</span>
+                    </div>
+                    {% else %}
+                    <div class="vazio-painel">Nenhum e-mail disparado nesta competência.</div>
+                    {% endfor %}
+                </div>
+                <div class="rodape-caixa">
+                    {{ n(nao_emitido_mes) }} boletos marcados como não emitido no mês · {{ n(retrabalho_mes) }} com retrabalho.
+                </div>
+            </section>
+        </div>
     </div>
+
+    <!-- MAPAS DE CALOR -->
+    <div class="row g-4">
+        {% for titulo, sub, mt, unidade in [
+            ('Coletas por pessoa, mês a mês', 'Boletos coletados por cada pessoa da equipe', matriz_coletas, 'coletas'),
+            ('Disparos por pessoa, mês a mês', 'E-mails de cobrança enviados por pessoa', matriz_disparos, 'e-mails')] %}
+        <div class="col-xl-6">
+            <section class="secao">
+                <header class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+                    <div>
+                        <h2>{{ titulo }}</h2>
+                        <p>{{ sub }} — o mês em andamento ainda é parcial.</p>
+                    </div>
+                    <span class="escala d-none d-md-inline-flex">menos
+                        <i style="background: var(--h1);"></i><i style="background: var(--h2);"></i><i style="background: var(--h3);"></i><i style="background: var(--h4);"></i><i style="background: var(--h5);"></i><i style="background: var(--h6);"></i>
+                        mais</span>
+                </header>
+                <div class="caixa">
+                    {% if mt.linhas %}
+                    <div class="table-responsive p-2">
+                        <table class="calor">
+                            <caption class="visually-hidden">{{ titulo }}</caption>
+                            <thead>
+                                <tr>
+                                    <th class="text-start"></th>
+                                    {% for m in mt.meses %}<th class="{{ 'agora' if mt.selecionados[loop.index0] else '' }}">{{ m }}</th>{% endfor %}
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for l in mt.linhas %}
+                                <tr>
+                                    <td class="nome">{{ l.nome }}</td>
+                                    {% for v in l.valores %}
+                                    <td><span class="cel {{ 'f' ~ v.faixa if v.faixa else 'vazio' }}" title="{{ l.nome }} · {{ mt.meses[loop.index0] }}: {{ n(v.q) }} {{ unidade }}">{{ n(v.q) if v.q else '–' }}</span></td>
+                                    {% endfor %}
+                                    <td class="total">{{ n(l.total) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="nome">Total</td>
+                                    {% for t in mt.totais %}<td class="soma">{{ n(t) }}</td>{% endfor %}
+                                    <td class="total">{{ n(mt.total_geral) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="vazio-painel">Sem dados para mostrar.</div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+        {% endfor %}
+    </div>
+
+    <details class="leitura">
+        <summary>Como os números são contados</summary>
+        <ul>
+            <li><b>Boleto</b> é imóvel + vencimento. A planilha é reenviada várias vezes e cada envio cria uma linha nova; aqui só a linha mais recente conta, então ninguém é contado duas vezes.</li>
+            <li><b>Base do mês</b> é a primeira planilha do ciclo, congelada na virada de mês — o mesmo número da meta travada. É um número fixo: não muda conforme a equipe trabalha.</li>
+            <li>Meses anteriores à virada não têm base congelada. Nesses, a base é a contagem dos boletos encontrados e aparece com um <b>~</b> ao lado.</li>
+            <li>Quando <b>coletado + pendentes</b> não chega à base, a diferença são boletos que estavam na primeira planilha e saíram dela sem registro de coleta (ou linhas repetidas na planilha original). Esse número aparece embaixo de Pendentes.</li>
+            <li><b>Total coletado</b> é status final (Pago, Coletado, Pago na 275, Pago na ADM) <b>ou</b> ter saído da planilha, já que a planilha lista só boletos não recebidos. As origens somam exatamente esse total.</li>
+            <li><b>Quem coletou</b> só lista origens com coleta no mês; as pessoas da equipe aparecem abertas, abaixo da linha Equipe. É o autor do último evento de entrega do boleto. Automações (nomes que começam com AUTOMAÇÃO ou ROBÔ) nunca entram como equipe. Sem autor registrado, vai para <i>Sistema / Planilha</i> se tinha status final, ou <i>Saiu da planilha</i> se saiu sem status.</li>
+            <li>Meses já encerrados chegam perto de 100% porque a planilha só guarda o que ainda não foi recebido. O que muda de um mês para o outro é <i>quem</i> coletou. A competência em andamento não mostra variação, porque comparar um mês parcial com um mês fechado engana.</li>
+        </ul>
+    </details>
 </div>
+
+<script>
+(function () {
+    // mesma faixa de código de barras da tela de entrada
+    var faixa = document.getElementById('faixaBoleto');
+    if (!faixa) { return; }
+    var larguras = [2, 1, 1, 3, 1, 2, 1, 1, 4, 1, 1, 2, 3, 1, 1, 1, 2, 1, 3, 2, 1, 1, 2, 4, 1, 1, 3, 1, 2, 1, 1, 2];
+    for (var i = 0; i < 210; i++) {
+        var barra = document.createElement('i');
+        barra.style.flexGrow = larguras[i % larguras.length];
+        if (i % 2) { barra.className = 'vazio'; }
+        faixa.appendChild(barra);
+    }
+}());
+</script>
 {% endblock %}

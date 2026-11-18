@@ -3,37 +3,12 @@
 {% block title %}Matriz de Emissão x Vencimento - Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    body { background-color: #f8fafc; }
-    .matrix-container { background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
-    .table-responsive { max-height: 75vh; overflow: auto; }
-    
-    #tabelaMatriz { font-size: 0.72rem; border-collapse: separate; border-spacing: 0; width: 100%; margin: 0; }
-    #tabelaMatriz th { background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #1e293b; text-align: center; vertical-align: middle; padding: 6px 3px; position: sticky; top: 0; z-index: 10; font-weight: bold; }
-    #tabelaMatriz th.col-emissao { position: sticky; left: 0; z-index: 12; min-width: 90px; background-color: #0f172a !important; line-height: 1.3; }
-    #tabelaMatriz td { border: 1px solid #cbd5e1; text-align: center; vertical-align: middle; padding: 6px 3px; cursor: pointer; transition: all 0.15s ease; font-weight: 600; color: #334155; }
-    
-    #tabelaMatriz td:hover { background-color: #e0f2fe !important; color: #0284c7; font-weight: 800; transform: scale(1.2); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 5; position: relative; border-radius: 4px; }
-    #tabelaMatriz td.celula-vazia { color: #cbd5e1; font-weight: normal; pointer-events: none; }
-    
-    .diag-yellow { background-color: #fef08a !important; } 
-    .area-mes-atual { background-color: #ffffff !important; } 
-    .area-mes-seguinte { background-color: #e2e8f0 !important; } 
-    
-    #tabelaMatriz td.total-col { background-color: #1e293b !important; color: #ffffff !important; font-weight: bold; position: sticky; bottom: 0; z-index: 9; }
-    #tabelaMatriz td.total-linha { background-color: #1e293b !important; color: #ffffff !important; font-weight: bold; }
-    #tabelaMatriz th.total-corner { background-color: #020617 !important; color: #ffffff !important; }
-    
-    .divisor-coluna { border-left: 3px solid #0ea5e9 !important; }
-    .grand-total-badge { background-color: #0ea5e9; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
-    .badge-modo-real { background-color: #10b981; color: white; }
-    .badge-modo-planilha { background-color: #f59e0b; color: #1e293b; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/matriz.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4 py-3">
-    <div class="d-flex justify-content-between align-items-center mb-4 p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.1);">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4" style="background: var(--deep); border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(42, 1, 16, 0.18);">
         <div>
             <h4 class="fw-bold m-0 d-flex align-items-center gap-2">
                 📅 Matriz de Emissão x Vencimento 
@@ -42,10 +17,11 @@
             <p class="m-0 opacity-75 small">Análise cruzada de volumetria com soma combinada de operadores.</p>
         </div>
         <div class="text-end">
-            <span class="grand-total-badge shadow-sm d-block mb-2">📊 Volume Visível: <span id="lblTotalGeralMatriz">0</span></span>
+            <span class="grand-total-badge shadow-sm d-block mb-1">📊 Volume Visível: <span id="lblTotalGeralMatriz">0</span></span>
+            <span id="lblForaGrade" class="d-block small mb-2" style="color:#F6E3B4;"></span>
             
             <!-- 🎯 AQUI ENTRA A NOVA TAG DE PROJEÇÃO DE PORCENTAGEM -->
-            <span class="badge shadow-sm d-block fs-6 py-2 border border-light" id="lblProjecaoAntecipada" style="background: linear-gradient(to right, #10b981, #059669) !important;">🎯 Entregas Antecipadas: Calculando...</span>
+            <span class="badge shadow-sm d-block fs-6 py-2 border border-light" id="lblProjecaoAntecipada" style="background: rgba(255,255,255,.14) !important; color: #fff;">🎯 Entregas Antecipadas: Calculando...</span>
         </div>
     </div>
 
@@ -74,7 +50,18 @@
                 <span class="small fw-bold text-dark"><i class="fas fa-file-excel text-success"></i> Modo Projeção Total:</span>
                 <input type="file" id="arquivoBaseMatriz" class="form-control form-control-sm border-secondary shadow-none" accept=".xlsx, .xls, .csv" style="max-width: 220px;">
                 <button class="btn btn-sm btn-primary fw-bold px-3 shadow-none" onclick="gerarMatrizViaPlanilha()" id="btnGerarPlanilha">Projetar Mês</button>
-                <button class="btn btn-sm btn-danger fw-bold shadow-none" onclick="voltarModoReal()" id="btnVoltarReal" style="display:none;" title="Voltar para tempo real">✖ Fechar Projeção</button>
+                <button class="btn btn-sm btn-outline-secondary fw-bold shadow-none" onclick="voltarModoReal()" id="btnVoltarReal" style="display:none;" title="Voltar para tempo real">✖ Fechar Projeção</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 👥 QUANTO CADA COLABORADOR ENTREGA ATÉ O ÚLTIMO DIA DO MÊS -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px;">
+        <div class="card-body p-3">
+            <h6 class="fw-bold m-0">👥 Quanto cada colaborador entrega até o último dia do mês</h6>
+            <p class="text-muted small mb-2" id="subtituloCapacidade">Carregando...</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle m-0" id="tabelaCapacidade" style="font-size: 0.85rem;"></table>
             </div>
         </div>
     </div>
@@ -86,6 +73,32 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- MODAL: ORIGEM DOS BOLETOS (clique em "Até o fim de ...") -->
+<div class="modal fade" id="modalOrigemMatriz" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="tituloModalOrigem">Origem dos boletos</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="subtituloModalOrigem"></p>
+        <table class="table table-sm align-middle m-0" style="font-size: 0.9rem;">
+          <thead class="table-light">
+            <tr><th>Origem</th><th class="text-end">Boletos</th><th style="min-width:150px;">% do total</th></tr>
+          </thead>
+          <tbody id="tbodyOrigemMatriz"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer bg-light py-2">
+        <span class="fw-bold text-dark w-100 text-end fs-6">
+            Total: <span id="totalOrigemModal" class="text-success fs-5">0</span>
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL DE DETALHES -->
@@ -127,6 +140,7 @@
     let modoVisaoGlobal = 'pendentes'; // 🎯 Nova variável para o Toggle
     let nomeMesAtual = "Mês 1";
     let nomeMesSeguinte = "Mês 2";
+    let resumoServidor = {};   // base congelada do ciclo, base reconstruída, pendentes...
 
     // 🎯 Nova função de manipulação da visão
     function alternarModoVisao(modo) {
@@ -135,7 +149,7 @@
         let badge = document.getElementById('badgeModo');
         if(modo === 'todos') {
             badge.innerText = "Tempo Real (Base Total Oficial)";
-            badge.className = "badge bg-primary fs-6 ms-2 shadow-sm";
+            badge.className = "badge badge-modo-todos fs-6 ms-2 shadow-sm";
         } else {
             badge.innerText = "Tempo Real (Pendentes)";
             badge.className = "badge badge-modo-real fs-6 ms-2 shadow-sm";
@@ -157,15 +171,23 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (!data.sucesso) return;
+            if (!data.sucesso) {
+                document.getElementById('tabelaMatriz').innerHTML = `<tr><td class="text-danger p-4 text-center">Erro ao carregar a matriz: ${data.msg || 'falha no servidor'}</td></tr>`;
+                return;
+            }
             dadosMatrizGlobal = data.dados;
+            resumoServidor = data.resumo || {};
             
             if (data.meses_ativos && data.meses_ativos.length > 0) {
                 nomeMesAtual = data.meses_ativos[0] || "Mês Atual";
                 nomeMesSeguinte = data.meses_ativos[1] || "Próximo Mês"; 
             }
 
-            const responsaveisAtivos = data.responsaveis_disponiveis || [];
+            const responsaveisAtivos = (data.responsaveis_disponiveis || []).slice();
+            // 🎯 Casos sem responsável também precisam de checkbox, senão somem da soma ao filtrar
+            if (dadosMatrizGlobal.some(r => (r.responsavel || 'Não Atribuído') === 'Não Atribuído') && !responsaveisAtivos.includes('Não Atribuído')) {
+                responsaveisAtivos.push('Não Atribuído');
+            }
             
             let htmlFiltros = `
                 <div class="form-check form-check-inline m-0 border-end pe-3 me-3">
@@ -187,6 +209,13 @@
         });
     }
 
+    // A base travada só vale para a operação inteira. Com operador desmarcado, o certo
+    // é mostrar a soma real do que está na tela.
+    function todosOperadoresMarcados() {
+        const cbs = document.querySelectorAll('.check-operador-matriz');
+        return cbs.length > 0 && Array.from(cbs).every(cb => cb.checked);
+    }
+
     function marcarTodosMatriz(master) {
         document.querySelectorAll('.check-operador-matriz').forEach(cb => cb.checked = master.checked);
         filtrarMatrizLocal();
@@ -196,11 +225,12 @@
         const checkboxes = document.querySelectorAll('.check-operador-matriz');
         document.getElementById('chk_matriz_todos').checked = Array.from(checkboxes).every(cb => cb.checked);
         
-        let operadores = [];
-        document.querySelectorAll('.check-operador-matriz:checked').forEach(cb => operadores.push(cb.value.toLowerCase()));
+        let desmarcados = [];
+        document.querySelectorAll('.check-operador-matriz:not(:checked)').forEach(cb => desmarcados.push(cb.value.toLowerCase()));
         
         let baseParaFiltro = modoAtual === 'REAL' ? dadosMatrizGlobal : dadosMatrizProjecao;
-        let dadosFiltrados = baseParaFiltro.filter(item => operadores.includes(item.responsavel.toLowerCase()));
+        // Só esconde quem foi desmarcado (quem não tem checkbox, ex.: 'Não Atribuído' na projeção, continua contando)
+        let dadosFiltrados = baseParaFiltro.filter(item => !desmarcados.includes(String(item.responsavel || 'Não Atribuído').toLowerCase()));
         
         renderizarEstruturaMatriz(dadosFiltrados);
     }
@@ -282,7 +312,7 @@
             operadoresSelecionados.push(cb.value);
         });
 
-        document.getElementById('tituloModalMatriz').innerText = `Pendências - Emissão Dia ${emi} x Vencimento Dia ${ven}`;
+        document.getElementById('tituloModalMatriz').innerText = `${modoVisaoGlobal === 'todos' ? 'Base Total' : 'Pendências'} - Emissão Dia ${emi} x Vencimento Dia ${ven}`;
         document.getElementById('totalCasosModal').innerText = '0';
         
         const tbody = document.getElementById('tbodyDetalhesMatriz');
@@ -313,7 +343,7 @@
                     data.dados.forEach(item => {
                         let corBadge = item.status_interno === 'EM BRANCO' ? 'bg-secondary' : 'bg-warning text-dark';
                         // Se o boleto já tiver sido pago/coletado, pinta o badge de verde para fácil identificação
-                        if (['PAGO', 'COLETADO', 'PAGO NA 275', 'PAGO NA ADM'].includes(item.status_interno.toUpperCase())) {
+                        if (['PAGO', 'COLETADO', 'PAGO NA 275', 'PAGO NA ADM'].includes(item.status_interno.toUpperCase()) || item.status_interno.toUpperCase().startsWith('SAIU DA BASE')) {
                             corBadge = 'bg-success';
                         }
                         
@@ -333,11 +363,167 @@
         });
     }
 
+    function escHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // 🎯 ORIGEM (portal) dos boletos, por coluna da tabela de capacidade.
+    // Preenchido em renderizarCapacidade():
+    //   origensPorResp.base['Ryan'] = { WINKER: 400, WEBWARE: 300, DIVERSOS: 90 }
+    //   ...e o mesmo para 'ant' (até o fim do mês) e 'seg' (fica para o mês seguinte).
+    // '__TOTAL__' é a soma de todo mundo que está passando pelo filtro de operadores.
+    let origensPorResp = { base: {}, ant: {}, seg: {} };
+
+    const ROTULOS_ORIGEM = {
+        'WINKER':   { icone: '🤖', texto: 'Winker',   cor: 'bg-primary' },
+        'WEBWARE':  { icone: '🤖', texto: 'Webware',  cor: 'bg-info' },
+        'DIVERSOS': { icone: '📂', texto: 'Diversos (outros portais / manual)', cor: 'bg-secondary' },
+        '__FORA__':  { icone: '✅', texto: 'Já saíram da planilha (lançados no portal da Lello ou com vencimento alterado)', cor: 'bg-secondary' }
+    };
+
+    function abrirOrigem(el) {
+        const nome = el.dataset.nome;
+        const tipo = el.dataset.tipo || 'ant';
+        const origem = (origensPorResp[tipo] || {})[nome] || {};
+        const f = n => Number(n || 0).toLocaleString('pt-BR');
+
+        const total = Object.values(origem).reduce((a, b) => a + b, 0);
+        const peso = x => (x === 'WINKER' ? 0 : x === 'WEBWARE' ? 1 : x === 'DIVERSOS' ? 3 : x === '__FORA__' ? 4 : 2);
+        const ordem = Object.keys(origem).sort((a, b) => peso(a) - peso(b) || origem[b] - origem[a]);
+
+        const quem = nome === '__TOTAL__' ? 'Todos os colaboradores' : nome;
+        const recorte = {
+            base: `da <b>base do mês</b> (inclusive os que não têm média de emissão e, quando a base travada está valendo, os que já saíram da planilha)`,
+            ant:  `que entram <b>até o fim de ${escHtml(nomeMesAtual)}</b>`,
+            seg:  `que <b>ficam para ${escHtml(nomeMesSeguinte)}</b>`
+        }[tipo];
+        const titulo = { base: 'Base', ant: `Até o fim de ${nomeMesAtual}`, seg: `Fica para ${nomeMesSeguinte}` }[tipo];
+        document.getElementById('tituloModalOrigem').innerText = `Origem dos boletos - ${quem} · ${titulo}`;
+        document.getElementById('subtituloModalOrigem').innerHTML =
+            `Dos <b>${f(total)}</b> boletos ${recorte}, veja de onde cada um vem (portal definido no Cadastro Mestre do imóvel).`;
+        document.getElementById('totalOrigemModal').innerText = f(total);
+
+        let html = '';
+        ordem.forEach(portal => {
+            const qtd = origem[portal];
+            const pct = total > 0 ? (qtd / total * 100) : 0;
+            const r = ROTULOS_ORIGEM[portal] || { icone: '🌐', texto: portal, cor: 'bg-dark' };
+            html += `<tr>
+                <td class="fw-bold">${r.icone} ${escHtml(r.texto)}</td>
+                <td class="text-end fw-bold">${f(qtd)}</td>
+                <td><div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1 origem-barra"><div class="progress-bar ${r.cor}" style="width:${pct.toFixed(1)}%"></div></div>
+                    <span class="small text-muted" style="min-width:46px;">${pct.toFixed(1).replace('.', ',')}%</span>
+                </div></td>
+            </tr>`;
+        });
+        document.getElementById('tbodyOrigemMatriz').innerHTML = html || '<tr><td colspan="3" class="text-center text-muted p-3">Nenhum boleto nesta categoria.</td></tr>';
+
+        new bootstrap.Modal(document.getElementById('modalOrigemMatriz')).show();
+    }
+
+    // 👥 Quanto cada colaborador entrega até o último dia do mês
+    // Regra: emissão > vencimento = boleto emitido no mês atual (dá para entregar antes de virar o mês)
+    function renderizarCapacidade(porResp, semMediaTotal) {
+        const f = n => Number(n || 0).toLocaleString('pt-BR');
+        const nomes = Object.keys(porResp).sort((a, b) => porResp[b].antecipado - porResp[a].antecipado || porResp[b].base - porResp[a].base);
+        const visao = modoAtual === 'PLANILHA' ? 'Projeção (planilha)' : (modoVisaoGlobal === 'todos' ? 'Base Total' : 'Pendentes');
+
+        const notaBase = (modoAtual === 'REAL' && modoVisaoGlobal === 'todos')
+            ? ' A Base Total considera a base oficial (meta travada): inclui os já entregues, mesmo os que saíram da planilha ao atualizar.' : '';
+
+        // 🔒 Base travada do mês: o mesmo número do relatório de produtividade.
+        // Novembro/2026 vale pela 2ª base (5.126); os outros meses, pela primeira planilha do ciclo.
+        // Só entra quando a tela mostra a operação inteira em "Ver Base Total" e não é projeção.
+        const baseTravada = Number(resumoServidor.base_congelada || 0);
+        const usarBaseTravada = modoAtual === 'REAL' && modoVisaoGlobal === 'todos'
+                                && baseTravada > 0 && todosOperadoresMarcados();
+        document.getElementById('subtituloCapacidade').innerHTML =
+            `Visão: <b>${visao}</b>. "Até o fim de ${escHtml(nomeMesAtual)}" = casos com emissão em ${escHtml(nomeMesAtual)} (dia de emissão maior que o dia do vencimento). Acompanha os filtros de operador acima.${notaBase}`
+            + ` <b>Clique em qualquer número</b> (Base, até o fim de ${escHtml(nomeMesAtual)} ou fica p/ ${escHtml(nomeMesSeguinte)}) para ver de onde vêm esses boletos.`
+            + (usarBaseTravada
+               ? ` <br><span class="text-dark">🔒 <b>Base travada do mês: ${f(baseTravada)} boletos</b> — é o mesmo número do relatório de produtividade${resumoServidor.origem_base ? ' (' + escHtml(resumoServidor.origem_base) + ')' : ''}. Hoje a planilha tem ${f(resumoServidor.base_oficial || 0)}: a diferença já saiu dela, que é o que acontece quando o boleto é lançado no portal da Lello (alguns também mudam de vencimento). Como a base travada guarda só a quantidade por dia de vencimento, não dá para dizer de quem era cada um.</span>`
+               : '');
+
+        let t = { base: 0, antecipado: 0, seguinte: 0, semMedia: 0 };
+
+        // 🎯 Guarda a origem de cada coluna clicável (e o total da linha TOTAL)
+        origensPorResp = { base: { '__TOTAL__': {} }, ant: { '__TOTAL__': {} }, seg: { '__TOTAL__': {} } };
+        [['base', 'origemBase'], ['ant', 'origemAnt'], ['seg', 'origemSeg']].forEach(([tipo, campo]) => {
+            nomes.forEach(n => {
+                const origem = porResp[n][campo] || {};
+                origensPorResp[tipo][n] = Object.assign({}, origem);
+                Object.entries(origem).forEach(([p, q]) => {
+                    origensPorResp[tipo]['__TOTAL__'][p] = (origensPorResp[tipo]['__TOTAL__'][p] || 0) + q;
+                });
+            });
+        });
+
+        // Se a base travada está valendo, a diferença entra como uma linha própria na origem do
+        // TOTAL: assim o modal fecha com o número da célula em vez de contar uma história diferente.
+        if (usarBaseTravada) {
+            const somaReal = nomes.reduce((a, n) => a + porResp[n].base, 0);
+            const fora = baseTravada - somaReal;
+            if (fora > 0) origensPorResp.base['__TOTAL__']['__FORA__'] = fora;
+        }
+
+        // Monta uma célula de número que abre a origem ao ser clicada
+        const celulaOrigem = (valor, nome, tipo, extraClasse, fora) => {
+            const classes = ['text-end', 'fw-bold'].concat(extraClasse ? [extraClasse] : []);
+            if (valor > 0) classes.push('celula-origem');
+            const atributos = valor > 0
+                ? ` data-nome="${escHtml(nome)}" data-tipo="${tipo}" onclick="abrirOrigem(this)" title="Ver de onde vêm estes boletos"`
+                : '';
+            // quando a base travada é maior que o que ainda está na planilha, a diferença fica à vista
+            const nota = fora ? `<br><span class="fw-normal" style="font-size:.72rem; color:#FFD0DA;">${fora > 0 ? '+' : ''}${f(fora)} já saíram da planilha</span>` : '';
+            return `<td class="${classes.join(' ')}"${atributos}>${f(valor)}${nota}</td>`;
+        };
+
+        // Base, "até o fim de ..." e "fica p/ ..." são clicáveis e abrem a origem daquele recorte
+        let html = `<thead class="table-light"><tr>
+            <th>Colaborador</th>
+            <th class="text-end" title="Clique no número para ver a origem (Winker, Webware, etc.)">Base</th>
+            <th class="text-end" title="Clique no número para ver a origem (Winker, Webware, etc.)">Até o fim de ${escHtml(nomeMesAtual)}</th>
+            <th class="text-end" title="Clique no número para ver a origem (Winker, Webware, etc.)">Fica p/ ${escHtml(nomeMesSeguinte)}</th>
+            <th style="min-width:140px;">% no mês</th>
+            <th class="text-end" title="Sem média de emissão ou sem vencimento válido">Sem média</th>
+        </tr></thead><tbody>`;
+
+        nomes.forEach(n => {
+            const r = porResp[n];
+            const pct = r.base > 0 ? (r.antecipado / r.base * 100) : 0;
+            t.base += r.base; t.antecipado += r.antecipado; t.seguinte += r.seguinte; t.semMedia += r.semMedia;
+            html += `<tr>
+                <td class="fw-bold">👤 ${escHtml(n)}</td>
+                ${celulaOrigem(r.base, n, 'base')}
+                ${celulaOrigem(r.antecipado, n, 'ant', 'text-success')}
+                ${celulaOrigem(r.seguinte, n, 'seg')}
+                <td><div class="d-flex align-items-center gap-2"><div class="progress flex-grow-1" style="height:6px;"><div class="progress-bar" style="width:${pct.toFixed(1)}%"></div></div><span class="small text-muted" style="min-width:42px;">${pct.toFixed(1).replace('.', ',')}%</span></div></td>
+                <td class="text-end text-muted">${r.semMedia > 0 ? f(r.semMedia) : '-'}</td>
+            </tr>`;
+        });
+
+        const pctT = t.base > 0 ? (t.antecipado / t.base * 100) : 0;
+        const baseMostrada = usarBaseTravada ? baseTravada : t.base;
+        const foraDaPlanilha = usarBaseTravada ? baseTravada - t.base : 0;
+        html += `</tbody><tfoot class="table-dark"><tr>
+            <td class="fw-bold">TOTAL</td>
+            ${celulaOrigem(baseMostrada, '__TOTAL__', 'base', '', foraDaPlanilha)}
+            ${celulaOrigem(t.antecipado, '__TOTAL__', 'ant')}
+            ${celulaOrigem(t.seguinte, '__TOTAL__', 'seg')}
+            <td class="fw-bold">${pctT.toFixed(1).replace('.', ',')}%</td>
+            <td class="text-end fw-bold">${t.semMedia > 0 ? f(t.semMedia) : '-'}</td>
+        </tr></tfoot>`;
+
+        document.getElementById('tabelaCapacidade').innerHTML = nomes.length ? html : '<tr><td class="text-center text-muted p-3">Nenhum dado para os filtros selecionados.</td></tr>';
+    }
+
     function renderizarEstruturaMatriz(dadosBrutos) {
         try {
             let matriz = {}; let totalColuna = {}; let totalLinha = {};
             let totalLinhaMesAtual = {}; let totalLinhaMesSeguinte = {};
             let totalGeral = 0; let totalGeralMesAtual = 0; let totalGeralMesSeguinte = 0;
+            let porResp = {}; let semMediaTotal = 0;
 
             for (let i = 1; i <= 31; i++) {
                 matriz[i] = {}; totalColuna[i] = 0; totalLinha[i] = 0;
@@ -350,24 +536,42 @@
                     let emi = parseInt(String(item.emissao).substring(0, 2), 10);
                     let ven = parseInt(String(item.vencimento).substring(0, 2), 10);
                     let qtd = parseInt(item.qtd, 10);
+                    let resp = item.responsavel || 'Não Atribuído';
+                    let portal = String(item.portal || 'DIVERSOS').toUpperCase();
+                    if (!porResp[resp]) porResp[resp] = { base: 0, antecipado: 0, seguinte: 0, semMedia: 0,
+                                                          origemBase: {}, origemAnt: {}, origemSeg: {} };
+                    porResp[resp].base += qtd;
+                    porResp[resp].origemBase[portal] = (porResp[resp].origemBase[portal] || 0) + qtd;
                     
                     if (!isNaN(emi) && emi >= 1 && emi <= 31 && !isNaN(ven) && ven >= 1 && ven <= 31) {
                         matriz[emi][ven].total += qtd;
-                        let resp = item.responsavel || 'Não Atribuído';
                         matriz[emi][ven].detalhe[resp] = (matriz[emi][ven].detalhe[resp] || 0) + qtd;
                         
                         totalLinha[emi] += qtd; totalColuna[ven] += qtd; totalGeral += qtd;
 
                         if (emi > ven) {
                             totalLinhaMesAtual[emi] += qtd; totalGeralMesAtual += qtd;
+                            porResp[resp].antecipado += qtd;
+                            porResp[resp].origemAnt[portal] = (porResp[resp].origemAnt[portal] || 0) + qtd;
                         } else {
                             totalLinhaMesSeguinte[emi] += qtd; totalGeralMesSeguinte += qtd;
+                            porResp[resp].seguinte += qtd;
+                            porResp[resp].origemSeg[portal] = (porResp[resp].origemSeg[portal] || 0) + qtd;
                         }
+                    } else {
+                        // Sem média de emissão (ou sem vencimento): não cabe na grade, mas entra na base
+                        porResp[resp].semMedia += qtd; semMediaTotal += qtd;
                     }
                 });
             }
 
             document.getElementById('lblTotalGeralMatriz').innerText = totalGeral.toLocaleString('pt-BR');
+            const baseTravadaTopo = Number(resumoServidor.base_congelada || 0);
+            const mostrarTravada = modoAtual === 'REAL' && modoVisaoGlobal === 'todos' && baseTravadaTopo > 0;
+            const partes = [];
+            if (semMediaTotal > 0) partes.push(`+ ${semMediaTotal.toLocaleString('pt-BR')} sem média de emissão (fora da grade)`);
+            if (mostrarTravada) partes.push(`🔒 Base travada do mês: ${baseTravadaTopo.toLocaleString('pt-BR')}`);
+            document.getElementById('lblForaGrade').innerHTML = partes.join(' · ');
 
             // 🎯 LÓGICA DE PORCENTAGEM (Adicionada aqui)
             let pctAntecipado = totalGeral > 0 ? ((totalGeralMesAtual / totalGeral) * 100).toFixed(1).replace('.', ',') : 0;
@@ -380,9 +584,9 @@
 
             let html = `<thead><tr><th class="col-emissao" style="z-index: 13;">Vencimento →<br>Emissão ↓</th>`;
             for (let d = 1; d <= 31; d++) html += `<th>${d}</th>`;
-            html += `<th class="divisor-coluna" style="background-color: #0f172a !important; min-width: 60px;">${nomeMesAtual}</th>`;
-            html += `<th style="background-color: #0f172a !important; min-width: 70px;">${nomeMesSeguinte}</th>`;
-            html += '<th class="total-corner" style="min-width: 80px;">TOTAL GERAL</th></tr></thead><tbody>';
+            html += `<th class="divisor-coluna" style="background-color: var(--deep) !important; min-width: 60px;">${nomeMesAtual}</th>`;
+            html += `<th style="background-color: var(--deep) !important; min-width: 70px;">${nomeMesSeguinte}</th>`;
+            html += '<th class="total-corner" style="min-width: 80px; background-color: var(--ink) !important;">TOTAL GERAL</th></tr></thead><tbody>';
 
             for (let emi = 1; emi <= 31; emi++) {
                 html += `<tr><th class="col-emissao">${emi}</th>`;
@@ -404,8 +608,8 @@
                     }
                 }
                 
-                html += `<td class="divisor-coluna total-linha" style="background-color: #334155 !important;">${totalLinhaMesAtual[emi] > 0 ? totalLinhaMesAtual[emi] : ''}</td>`;
-                html += `<td class="total-linha" style="background-color: #334155 !important;">${totalLinhaMesSeguinte[emi] > 0 ? totalLinhaMesSeguinte[emi] : ''}</td>`;
+                html += `<td class="divisor-coluna total-linha" style="background-color: #7A0A2E !important;">${totalLinhaMesAtual[emi] > 0 ? totalLinhaMesAtual[emi] : ''}</td>`;
+                html += `<td class="total-linha" style="background-color: #7A0A2E !important;">${totalLinhaMesSeguinte[emi] > 0 ? totalLinhaMesSeguinte[emi] : ''}</td>`;
                 html += `<td class="total-linha">${totalLinha[emi] > 0 ? totalLinha[emi] : ''}</td></tr>`;
             }
 
@@ -413,14 +617,15 @@
             html += '<tr><td class="total-col col-emissao">TOTAL</td>';
             for (let ven = 1; ven <= 31; ven++) html += `<td class="total-col">${totalColuna[ven] > 0 ? totalColuna[ven] : ''}</td>`;
             html += `<td class="divisor-coluna total-col text-info" style="font-size: 0.90rem;">
-                        ${totalGeralMesAtual > 0 ? totalGeralMesAtual + '<br><span style="font-size: 0.70rem; color: #a5f3fc;">' + pctAntecipado + '%</span>' : ''}
+                        ${totalGeralMesAtual > 0 ? totalGeralMesAtual + '<br><span style="font-size: 0.70rem; color: #FFD0DA;">' + pctAntecipado + '%</span>' : ''}
                      </td>`;
             html += `<td class="total-col text-info" style="font-size: 0.90rem;">
-                        ${totalGeralMesSeguinte > 0 ? totalGeralMesSeguinte + '<br><span style="font-size: 0.70rem; color: #a5f3fc;">' + pctSeguinte + '%</span>' : ''}
+                        ${totalGeralMesSeguinte > 0 ? totalGeralMesSeguinte + '<br><span style="font-size: 0.70rem; color: #FFD0DA;">' + pctSeguinte + '%</span>' : ''}
                      </td>`;
             html += `<td class="total-corner text-warning" style="font-size: 0.95rem;">${totalGeral}</td></tr></tbody>`;
             
             document.getElementById('tabelaMatriz').innerHTML = html;
+            renderizarCapacidade(porResp, semMediaTotal);
         } catch (err) {
             console.error(err);
             document.getElementById('tabelaMatriz').innerHTML = `<tr><td class="text-danger p-4 text-center">Erro ao renderizar a matriz.</td></tr>`;

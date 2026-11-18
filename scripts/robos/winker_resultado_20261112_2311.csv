@@ -1,0 +1,662 @@
+﻿data_hora;imovel;empreendimento_site;divisao_bloco_site;unidade_site;status;vencimento;arquivo;marcado_no_sistema;mensagem
+12/11/2026 23:12:12;250116;-COND. PRAÇA SÃO PAULO MIXED;NÃO É NECESSÁRIO;TORRE B RESIDENCIAL - 002909;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:12:34;254020;95 CARAMURU;NÃO É NECESSÁRIO;BLOCO 0 - 000033;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:12:54;182402;ABSOLUTE;ABSOLUTE;000103;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:13:11;245771;ABSOLUTE;ABSOLUTE;000508;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:13:28;39316;ABSOLUTE;ABSOLUTE;001203;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:13:43;59478;ABSOLUTE;ABSOLUTE;000208;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:14:05;62851;ACAPULCO I E II;ACAPULCO II;000052;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:14:22;212997;ACTUAL MORUMBI;NÃO É NECESSÁRIO;B - 000133;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:14:37;286809;ALICE;Principal;AP.072;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:14:56;262912;ALICE (Vila Matilde);;ALICE - 000012;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:15:20;235421;ALLEGRO JARDIM AVELINO;BLOCO 04;000005;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:15:39;294076;ANA MARIA;NÃO É NECESSÁRIO;ANA MARIA - 000094;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:15:59;225620;ANA PAULA;NÃO É NECESSÁRIO;0 - 0053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:16:16;185229;ANAJAS;Principal;023;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+12/11/2026 23:16:32;212277;ANAJAS;Principal;032;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+12/11/2026 23:16:51;109821;ANCHIETA (BELA VISTA);NÃO É NECESSÁRIO;ANCHIETA - 000082;SEM BOLETO;;;-;Todos os 4 boletos listados estão Pagos
+12/11/2026 23:17:10;130424;ANDREA;NÃO É NECESSÁRIO;ANDREA - 000102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:17:30;181293;ANDREZZA;NÃO É NECESSÁRIO;EDIFÍCIO ANDREZZA - 000131;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:17:52;178069;ANÁLIA FRANCO RESIDENCE;ANÁLIA FRANCO RES.;000082;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:18:13;34380;ANÁLIA FRANCO RESIDENCE;ANÁLIA FRANCO RES.;000153;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:18:32;189366;APÊ PINHEIROS;NÃO É NECESSÁRIO;BLOCO RESIDENCIAL - 000092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:18:52;155583;ARAGUAIA;ARAGUAIA;000093;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:19:13;266396;ARAGUAIA;ARAGUAIA;000086;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:19:28;312351;ARCH HOME VILA MARIANA;NÃO É NECESSÁRIO;RESIDENCIAL - 001105;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:19:47;224845;ARGEL;NÃO É NECESSÁRIO;ARGEL - 000153;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:20:07;182248;AROEIRA (RUA DR NETO DE ARAUJO);NÃO É NECESSÁRIO;AROEIRA - 000122;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:20:29;267238;ARQ VILA MARIANA - RESIDENCIAL;BLOCO A;000314;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (30/11/2026); nenhum do mês 12/2026 (base: 08/12/2026)"
+12/11/2026 23:20:54;287076;ARQ VILA MARIANA - RESIDENCIAL;BLOCO A;000211;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:21:14;308659;ARQ VILA MARIANA - RESIDENCIAL;BLOCO A;000219;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (30/11/2026); nenhum do mês 12/2026 (base: 08/12/2026)"
+12/11/2026 23:21:34;204302;ASTURIAS TROPICAL;ASTURIAS;000112;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+12/11/2026 23:21:52;296322;ASTURIAS TROPICAL;ASTURIAS;000315;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+12/11/2026 23:22:10;38299;ASTURIAS TROPICAL;ASTURIAS;000715;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+12/11/2026 23:22:34;139250;ATLANTA;ATLANTA;000112;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:22:55;265281;ATLANTA OFFICE CENTER;NÃO É NECESSÁRIO;ATLANTA - 0112;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:23:12;177270;ATRIA BROOKLIN;;Principal - 013;SEM BOLETO;;;-;Todos os 2 boletos listados estão Pagos
+12/11/2026 23:23:30;140789;ATTUALITA;NÃO É NECESSÁRIO;ATTUALITA - 000241;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:25:05;125911;ATUA HIPÓDROMO;BLOCO B;000056;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:26:37;175887;ATUA HIPÓDROMO;BLOCO B;000151;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:27:01;160678;AUTENTICO MOOCA;AUTENTICO MOOCA;000051;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:27:24;180104;AUTENTICO MOOCA;AUTENTICO MOOCA;000054;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:27:41;202690;AUTENTICO MOOCA;AUTENTICO MOOCA;000033;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:28:04;42;AVIGLIANA (MOOCA);AVIGLIANA;000211;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:28:29;113179;Accanto;Edifício Accanto;00-031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:28:48;160648;Accanto;Edifício Accanto;00-041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:29:11;232292;Aracaju;NÃO É NECESSÁRIO;Aracaju - 000012;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:29:18;315922;Araucárias (Lauzane Paulista);NÃO É NECESSÁRIO;BLOCO 7 - 000002;EMPREENDIMENTO NÃO ENCONTRADO;;;-;'Araucárias (Lauzane Paulista)' não está na lista do escolherPortal
+12/11/2026 23:29:38;142903;Arizona Gardens;Gardens;A-014;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:29:58;171019;Arizona Gardens;Gardens;B-081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:30:20;44052;BARAO DE ALFENAS;NÃO É NECESSÁRIO;BARAO - 000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:30:42;170689;BARÃO DE COCAIS;NÃO É NECESSÁRIO;BLOCO 0 - 000051;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:31:01;184632;BELVEDERE;BELVEDERE;000114;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:31:23;271017;BERMUDAS;NÃO É NECESSÁRIO;BERMUDAS - 00063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:31:45;206406;BIOGRAFIA VILA MARIANA;BLOCO 0;000057;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:32:04;280489;BIOGRAFIA VILA MARIANA;BLOCO 0;000028;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:32:23;203287;BONANZA;NÃO É NECESSÁRIO;140 - 000096;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:32:40;180491;BOSQUE DA ESTAÇÃO;Principal;000041;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:33:00;222232;BOULEVARD BOIS DE BOULOGNE;NÃO É NECESSÁRIO;BOULOGNE - 000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:33:22;287872;BOULEVARD DOS CRISTAIS;474;0065;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:33:42;303200;BOULEVARD PEREZ;BOULEVARD PEREZ;000144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:34:04;252439;BRESSER III;Bloco B;000092;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:34:27;255960;BRESSER III;Bloco A;000063;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:34:44;258736;BRUNA;NÃO É NECESSÁRIO;BRUNA - 000181;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:35:04;285273;Blueline São Judas;NÃO É NECESSÁRIO;Blueline - 000208;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:35:23;27651;C. E. RIO VOUGA;NÃO É NECESSÁRIO;RIO VOUGA - 023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:35:39;152302;CANCUN;NÃO É NECESSÁRIO;Principal - 00071;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:36:02;130416;CARMEL;COND. EDIF. CARMEL;000171;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:36:20;239044;CARMEL;COND. EDIF. CARMEL;000175;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:36:42;28674;CARPE DIEM;NÃO É NECESSÁRIO;A-VIVRE e B-ENJOY - 1A0143;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:38:14;21835;CASTELLAMARE DI STABIA;CASTELLAMARE;000082;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:38:34;233889;CENTRAL TOWERS PAULISTA;BUSINESS TOWER;001003;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:38:51;234003;CENTRAL TOWERS PAULISTA;BUSINESS TOWER;001005;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:39:10;234216;CENTRAL TOWERS PAULISTA;BUSINESS TOWER;001103;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:39:30;143511;CHARME E VIDA WALED;CHARME E VIDA;094;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:39:48;166264;CHARME E VIDA WALED;CHARME E VIDA;052;SEM BOLETO;;;-;Todos os 10 boletos listados estão Pagos
+12/11/2026 23:40:16;290035;CLEMENTE DE FARIA;NÃO É NECESSÁRIO;CLEMENTE DE FARIA - 001512;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:40:39;24854;CLUB IBIRAPUERA;Principal;BLOCO II - VARANDA DAS FLORES - 0043;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:40:57;203220;CLUB STATION PENHA;NÃO É NECESSÁRIO;CLUB STATION PENHA - 000166;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:41:18;239122;COLORADO GARDENS;VAIL;000101;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:41:38;252694;COLORADO GARDENS;VAIL;000082;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:41:56;299941;COMERCIAL BIMBO;NÃO É NECESSÁRIO;BIMBO - 031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:42:15;37516;COND.EDIF.CARLOS BOTELHO II;Principal;012;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:42:33;143391;COND.EDIF.COGERAL;Cogeral;000082;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:42:49;236932;COND.EDIF.COGERAL;Cogeral;000910;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:43:07;298512;COND.EDIF.COGERAL;Cogeral;000193;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:43:21;118771;COND.EDIF.GUADELUPE;NÃO É NECESSÁRIO;Principal - 032;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:43:37;17753;COND.EDIF.HIGIENOPOLIS OFFICE CENTER;Principal;133;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:43:52;177086;COND.EDIF.HIGIENOPOLIS OFFICE CENTER (HIGIENOPOLIS);Principal;071;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:44:09;57854;COND.EDIF.HIGIENÓPOLIS MEDICAL CENTER;Principal;001413;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:44:24;69617;COND.EDIF.HIGIENÓPOLIS MEDICAL CENTER;Principal;001414;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:44:39;242395;COND.EDIF.INHAMBU;NÃO É NECESSÁRIO;Principal - 142;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:44:57;164979;COND.EDIF.JACATUBA;NÃO É NECESSÁRIO;Principal - 081;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:45:18;18443;COND.EDIF.LANBRINS;NÃO É NECESSÁRIO;Principal - 000041;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 01/12/2026)"
+12/11/2026 23:45:36;79292;COND.EDIF.MARAJO;NÃO É NECESSÁRIO;Principal - 204-C;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:45:53;241667;COND.EDIF.MARIA LAETITIA;NÃO É NECESSÁRIO;Principal - 31;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:46:10;13502;COND.EDIF.PÓRTICO OFFICES;NÃO É NECESSÁRIO;TORRE SUL - C0073;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:46:29;167594;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;034;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:46:47;167598;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;092;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:47:04;175317;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;074;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:47:21;37484;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;021;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:47:41;37488;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;052;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:47:57;37491;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;061;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:48:13;37493;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;083;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:48:29;37528;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;043;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:48:44;37529;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;101;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:48:58;37705;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;111;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:49:13;37716;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;073;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:49:29;37719;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;082;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:49:44;37731;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;051;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:49:59;37753;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;011;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:50:14;37754;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;024;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:50:32;37755;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;033;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:50:47;37756;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;042;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:51:02;37757;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;104;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:51:18;37758;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;064;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:51:33;37760;COND.EDIF.RIO D'OURO (VILA MARIANA);Principal;091;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:51:48;210265;COND.EDIF.SAINT GERMAIN (SANTA CECÍLIA);NÃO É NECESSÁRIO;Principal - 047;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:52:02;118418;COND.EDIF.SOLAR DO SUMARE I;NÃO É NECESSÁRIO;Principal - 101;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:52:18;15406;COND.EDIF.SPATIUM;Principal;000114;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:52:34;165648;COND.EDIF.SPATIUM;Principal;000113;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:52:48;259702;COND.EDIF.STELLA;NÃO É NECESSÁRIO;Principal - AP 01;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:53:02;253525;COND.RESIDENCIAL SAN FRANCESCO;Principal;093;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:53:18;253528;COND.RESIDENCIAL SAN FRANCESCO;Principal;103;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:53:36;253530;COND.RESIDENCIAL SAN FRANCESCO;Principal;053;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+12/11/2026 23:54:01;13281;CONJ . VILA PAULICEIA -BL II;VILA PAULICEI BL II;000034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:54:22;149875;CONJ . VILA PAULICEIA -BL II;VILA PAULICEI BL II;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:54:40;70891;CONJ . VILA PAULICEIA -BL II;VILA PAULICEI BL II;000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:55:03;140724;CONJ. COM. PERDIZES TOWER;NÃO É NECESSÁRIO;0 - 0056;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:55:25;17531;CONJ. ILHAS GREGAS;EDIFÍCIO MIKONOS;000012;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:55:47;54610;CONJ. ILHAS GREGAS;EDIFÍCIO MIKONOS;000013;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:56:07;54788;CONJ. ILHAS GREGAS;EDIFÍCIO SANTORINO;000074;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:56:28;80421;CONJ. ILHAS GREGAS;EDIFÍCIO SANTORINO;000141;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:56:49;31473;CONJ. PQ. THOMAZ SARAIVA ll;FIRENZE;000061;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+12/11/2026 23:57:06;168172;CONJ. VILA PAULICEIA;NÃO É NECESSÁRIO;VILA PAULICEIA I - 002301;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:57:22;15483;CONJ.CASSANDOCA QD. 4;NÃO É NECESSÁRIO;Principal - B28/31;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+12/11/2026 23:57:44;286235;CONJ.MARIA BUCALEM HADDAD;A-01;000022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:58:07;26102;CONJ.SERRA ALTA;BLOCO A - SERRA DE BRAGANCA;0013A;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:58:27;33137;CONJ.SERRA ALTA;BLOCO A - SERRA DE BRAGANCA;0022A;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:58:47;64841;CONJ.SERRA ALTA;BLOCO C - SERRA DE BOTUCATU;0042C;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:59:10;290967;CONJUNTO BARONESA DE ARARY;NÃO É NECESSÁRIO;CAPRI - 001913;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:59:30;220912;CONJUNTO CHEREM;NÃO É NECESSÁRIO;155 - S00121;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+12/11/2026 23:59:46;184226;CONJUNTO COML. E DO PARAISO;FRANCA;010031;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:00:01;184787;CONJUNTO COML. E DO PARAISO;LOJAS;LJ01;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:00:17;262332;CONJUNTO COML. E DO PARAISO;LORENA;04CJ01;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:00:32;262333;CONJUNTO COML. E DO PARAISO;ITU;02CJ04;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:00:54;148735;CONJUNTO MEDITERRÂNEO;NÃO É NECESSÁRIO;Tarragona - 111;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:01:21;118920;CONJUNTO MILANI;B;000063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:01:46;140704;CONJUNTO MILANI;A;000104;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:02:07;17638;CONJUNTO MILANI;A;000071;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:02:28;232465;CONJUNTO MILANI;C;000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:02:51;248764;CONJUNTO MILANI;A;000161;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:03:11;263810;CONJUNTO MILANI;A;000154;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:03:32;62214;CONJUNTO MILANI;C;000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:03:54;10068;CONJUNTO SARDEGNA E SALERNO;SARDEGNA;000037;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 00:04:14;20375;CONJUNTO SARDEGNA E SALERNO;SARDEGNA;000036;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 00:04:34;22208;CONJUNTO SARDEGNA E SALERNO;SARDEGNA;000086;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 00:04:54;232375;CONJUNTO SARDEGNA E SALERNO;SARDEGNA;000026;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 00:05:17;185101;CONJUNTO TATUAPÉ;Tulipa;034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:05:38;262189;CONJUNTO TATUAPÉ;Cravo;022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:05:57;265190;CONJUNTO TATUAPÉ;Begônia;035;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:06:19;167580;CORONET;CORONET;000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:06:37;19976;CORONET;CORONET;000148;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:06:59;237195;CRISTALE;NÃO É NECESSÁRIO;CONDOMÍNIO CRISTALE - 000041;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:07:18;111249;CRUZ DE MALTA (TUCURUVI);NÃO É NECESSÁRIO;TORRE I - 000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:07:38;192242;Central Offices Paulista;NÃO É NECESSÁRIO;Principal - 0084;SEM BOLETO;;;-;Todos os 7 boletos listados estão Pagos
+13/11/2026 00:07:58;181296;Centro Jardim Prudente;Jd. Prudente;2-32;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 25/12/2026)"
+13/11/2026 00:08:16;228542;Centro Jardim Prudente;Jd. Prudente;1-23;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 25/12/2026)"
+13/11/2026 00:08:42;181671;Clos De La Roche;La Roche;114;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:09:04;183133;Clos De La Roche;La Roche;116;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:09:22;250825;Clos De La Roche;La Roche;092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:09:44;303621;Clos De La Roche;La Roche;125;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:10:04;67512;Clos De La Roche;La Roche;115;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:10:25;206692;Conjunto Pop;NÃO É NECESSÁRIO;Pop - D064;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:10:45;283633;Core Pinheiros - Residencial;NÃO É NECESSÁRIO;Setor Residencial - 000516;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:11:19;187289;DALLAS;NÃO É NECESSÁRIO;DALLAS - 0073;ERRO;;;-;O link do boleto não devolveu um PDF válido
+13/11/2026 00:11:42;171001;DANTE E BEATRIZ;NÃO É NECESSÁRIO;DANTE E BEATRIZ - 000083;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:12:27;288882;DAS MAGNÓLIAS;NÃO É NECESSÁRIO;MAGNÓLIAS - 000124;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:13:10;306921;DEBORAH;NÃO É NECESSÁRIO;DEBORAH - 000043;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:13:52;20630;DENVER;NÃO É NECESSÁRIO;DENVER - 000023;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:14:36;288465;DI MARANELLO;NÃO É NECESSÁRIO;DI MARANELLO - 000184;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:15:24;57892;DIVERSITA;NÃO É NECESSÁRIO;00708 - 000101;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:16:08;118225;DOM JOÃO CARLOS;NÃO É NECESSÁRIO;DOM JOÃO CARLOS - 000115;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:16:52;131978;DOMO HOME;NÃO É NECESSÁRIO;ATREO - 00201;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 00:17:18;180666;DONA RACHEL;NÃO É NECESSÁRIO;RACHEL - 000112;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:17:41;207352;DOSSO DEL LIRO;RUA APUCARANA, 116 BLOCO D;000074;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:18:05;299742;DREAM VIEW SKY FIT CASA ORATÓRIO - RESID;DREW VIEW GERAL;000610;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:18:25;308939;DREAM VIEW SKY FIT CASA ORATÓRIO - RESID;DREW VIEW GERAL;001608;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:18:47;158463;DUAS MARIAS;DUAS MARIAS;000077;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:19:07;273367;DUAS MARIAS;DUAS MARIAS;000052;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:19:27;299633;DUQUE DE GUIMARAES;NÃO É NECESSÁRIO;Principal - AP.061;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:19:47;245385;Di Mauro;NÃO É NECESSÁRIO;APTO - 216;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:20:08;119889;Duplex Home Pinheiros;Duplex H. Pinheiros;000312;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:20:32;42928;Duplex Home Pinheiros;Duplex H. Pinheiros;001710;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:20:55;145646;EDWARD ELGAR (Vila Pompeia);NÃO É NECESSÁRIO;EDIFICIO EDWARD ELGA - 000052;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:21:14;150288;EMBAUBA;NÃO É NECESSÁRIO;EMBAUBA - 000092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:21:40;199254;EMÍLIO HUESPE;EMILIO HUESPE;000081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:22:05;64292;ESCRITORIOS EUROPA;NÃO É NECESSÁRIO;VISTA EUROPA - 000054;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:22:27;11878;ESCRITORIOS MOOCA;MOOCA;001414;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:22:49;10386;ESPRESSO 267;ESPRESSO 267;000073;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:23:11;4628;ESPRESSO 267;ESPRESSO 267;000093;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:23:36;302532;ESSENTIAL PERDIZES FLATS E STUDIOS;NÃO É NECESSÁRIO;STUDIOS - 0028;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:23:57;119273;EXCLUSIVE;EXCLUSIVE;000012;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/08/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 00:24:18;119746;EXCLUSIVE;EXCLUSIVE;000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:24:38;285187;EXCLUSIVE;EXCLUSIVE;000176;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:25:00;225996;EXT CAMPO BELO;B;000144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:25:22;226004;EXT CAMPO BELO;B;000163;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:25:42;226005;EXT CAMPO BELO;A;000142;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:26:02;226208;EXT CAMPO BELO;A;000113;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:26:23;228278;EXT CAMPO BELO;A;000143;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:26:46;228453;EXT CAMPO BELO;A;000144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:27:06;228585;EXT CAMPO BELO;A;000162;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:27:29;228596;EXT CAMPO BELO;B;000193;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:27:50;70024;Empresarial Santa Inês;NÃO É NECESSÁRIO;01 - 095;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:28:10;197425;FAMILY SANTANA;NÃO É NECESSÁRIO;CANTAREIRA C - 000254;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:28:28;18681;FERNANDA E PAULA;NÃO É NECESSÁRIO;Paula - 054;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:28:50;293049;FIFTH AVENUE;FIFTH AVENUE;000144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:29:11;37533;FIFTH AVENUE;FIFTH AVENUE;000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:29:29;112244;FIRENZE (PERDIZES);NÃO É NECESSÁRIO;Principal - AP.021;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:29:51;21477;FLAVIA (Bela Vista);00014;000044;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:30:11;233397;FLAVIA REGINA (MOEMA);Principal;000123;SEM BOLETO;;;-;Todos os 7 boletos listados estão Pagos
+13/11/2026 00:30:38;75552;FLEMING (BELA VISTA);NÃO É NECESSÁRIO;FLEMING - 000093;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:31:03;289201;FLOW BARRA FUNDA I;NÃO É NECESSÁRIO;BLOCO 0 - 000421;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:31:27;239075;FOREST HILLS;NÃO É NECESSÁRIO;BLOCO 0 - 000111;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:31:39;286575;GALERIA FAMILY CLUB;NÃO É NECESSÁRIO;A - 000163;EMPREENDIMENTO NÃO ENCONTRADO;;;-;'GALERIA FAMILY CLUB' não está na lista do escolherPortal
+13/11/2026 00:32:01;239500;GALLERIA MOOCA;NÃO É NECESSÁRIO;GALLERIA MOOCA - 000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:32:22;58260;GOIAZ;NÃO É NECESSÁRIO;GOIAZ - 0061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:32:43;275442;GRAN DIALOGO TORRE 2 E 3 RESID;NÃO É NECESSÁRIO;TORRE 2 - 0117;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:33:05;295133;GRAN DIALOGO VILA MATILDE - STUDIOS;GRAN DIALOGO VILA MATILDE - STUDIOS;001109;SEM BOLETO;;;-;Todos os 3 boletos listados estão Pagos
+13/11/2026 00:33:22;304251;GRAN DIALOGO VILA MATILDE - STUDIOS;GRAN DIALOGO VILA MATILDE - STUDIOS;001310;SEM BOLETO;;;-;Todos os 3 boletos listados estão Pagos
+13/11/2026 00:33:42;223930;GRAND SPACE PARQUE ACLIMAÇÃO;NÃO É NECESSÁRIO;BLOCO 0 - 000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:34:06;291002;GREEN VILLAGE II (Vl Mariana);GREEN VILLAGE II;0073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:34:26;304778;HAUS MITRE RESERVA VILA MARIANA - STUDIO;NÃO É NECESSÁRIO;RESIDENCIAL - 001107;SEM BOLETO;;;-;Todos os 1 boletos listados estão Pagos
+13/11/2026 00:34:33;305021;HAUS MITRE VILA CLEMENTINO- STUDIO;NÃO É NECESSÁRIO;HAUS MITRE SUBCOND 2 - 000629;EMPREENDIMENTO NÃO ENCONTRADO;;;-;'HAUS MITRE VILA CLEMENTINO- STUDIO' não está na lista do escolherPortal
+13/11/2026 00:34:39;180651;HELBOR LOFT EVOLUTION II;BLOCO 0;001001;EMPREENDIMENTO NÃO ENCONTRADO;;;-;'HELBOR LOFT EVOLUTION II' não está na lista do escolherPortal
+13/11/2026 00:35:03;192719;HELBOR TREND PACAEMBU;HELBOR TREND PACAEMBU;000241;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:35:31;20354;HICATU (Vila Mariana);NÃO É NECESSÁRIO;HICATU - 002509;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+13/11/2026 00:35:49;59115;Haddock Lobo I e II;NÃO É NECESSÁRIO;Haddock Lobo I - 000001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:36:08;307409;I9 SAPIENZA;NÃO É NECESSÁRIO;I9 SAPIENZA - 000074;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:36:29;172159;I9 VILA NOVA;01;114;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:36:49;117561;IBITIRAMA FAMILY CLUB (VILA PRUDENTE);UP DECK;000122;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (16/09/2026); nenhum do mês 12/2026 (base: 07/12/2026)"
+13/11/2026 00:37:09;295363;IBITIRAMA FAMILY CLUB (VILA PRUDENTE);UP DECK;000162;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:37:26;7074;IBITIRAMA FAMILY CLUB (VILA PRUDENTE);SOLARIUM;000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:37:48;18886;ICARAI;NÃO É NECESSÁRIO;Icaraí - 000013;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:38:13;296618;IDEALE MOOCA;SOGNO;000044;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:38:34;70549;IDEALE MOOCA (MOOCA);EMOZIONE;000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:38:52;63140;IL GUARANY;NÃO É NECESSÁRIO;1 - 1150;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:39:08;280536;IL TERRAZZO HELBOR;Principal;000122;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:39:28;31462;ILE DE FRANCE;NÃO É NECESSÁRIO;ILE DE FRANCE - 184;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:39:53;124849;ILHAS D'ITÁLIA;SARDENHA;123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:40:15;130420;ILHAS D'ITÁLIA;CAPRI;054;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:40:34;134930;ILHAS D'ITÁLIA;CAPRI;161;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:40:53;136531;ILHAS D'ITÁLIA;CAPRI;034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:41:12;139970;ILHAS D'ITÁLIA;CAPRI;051;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:41:34;146618;ILHAS D'ITÁLIA;SARDENHA;053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:41:54;153433;ILHAS D'ITÁLIA;SARDENHA;144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:42:14;171421;ILHAS D'ITÁLIA;CAPRI;063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:42:33;256425;ILHAS D'ITÁLIA;SICÍLIA;141;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:42:55;43664;ILHAS D'ITÁLIA;SICÍLIA;143;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:43:17;70518;ILHAS D'ITÁLIA;SICÍLIA;071;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:43:41;8392;IMAGINARE (TATUAPE);IMAGINARE;000214;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (14/11/2026); nenhum do mês 12/2026 (base: 14/12/2026)"
+13/11/2026 00:44:08;266814;IMBITUBA;NÃO É NECESSÁRIO;IMBITUBA - 00605;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:49:16;162939;IN SAO PAULO VILLA LOBOS;1;000046;ERRO;;;-;ReadTimeoutError: HTTPConnectionPool(host='localhost', port=60892): Read timed out. (read timeout=120)
+13/11/2026 00:49:41;165664;IN SAO PAULO VILLA LOBOS;2;000158;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:50:03;271374;IN SAO PAULO VILLA LOBOS;2;000166;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:50:25;275063;IN SAO PAULO VILLA LOBOS;1;000092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:50:47;300959;IN SAO PAULO VILLA LOBOS;2;000163;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:51:12;156582;IN SÃO PAULO LIBERDADE;BLOCO A;000147;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:51:29;174936;IN SÃO PAULO LIBERDADE;BLOCO A;000086;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:51:58;275209;INDEPENDENCE PARK (IPIRANGA);IMPERIAL;000024;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:52:21;158848;INDIANOPOLIS;NÃO É NECESSÁRIO;INDIANÓPOLIS - 000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:52:35;293606;INDIANOPOLIS;NÃO É NECESSÁRIO;INDIANÓPOLIS - 000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:53:00;274918;INFINI (VILA MARIANA);NÃO É NECESSÁRIO;NÃO RESIDENCIAL - 000302;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:53:24;17429;ISOTTA;ISOTTA;000630;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:53:49;260618;IT HOME (BELÉM);NÃO É NECESSÁRIO;001909;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:54:12;240971;IT'S 163;NÃO É NECESSÁRIO;408 - 0045;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:54:34;63599;ITAIPAVA;ITAIPAVA;000024;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:55:07;125821;ITAPEVA MEDICAL CENTER;0;0506;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:55:29;296305;Itamar;NÃO É NECESSÁRIO;Itamar - 000072;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:55:54;161526;JADE;JADE;000152;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:56:16;163550;JADE;JADE;000022;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:56:39;19526;JADE;JADE;000131;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 00:57:12;143334;JARDIM DAS PITANGUEIRAS;A;000032;ERRO;;;-;O link do boleto não devolveu um PDF válido
+13/11/2026 00:57:32;75662;JARDIM ILHA DE CAPRI;NÃO É NECESSÁRIO;JARDIM ILHA DE CAPRI - 000212;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:57:54;75410;JUNTANIA (Vila Buarque);COND. EDIF. JUNTANIA;000013;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:58:16;75422;JUNTANIA (Vila Buarque);COND. EDIF. JUNTANIA;000044;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 00:58:35;175723;JURÉA;NÃO É NECESSÁRIO;JURÉA - 000071;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:59:05;262711;Jau;NÃO É NECESSÁRIO;CJ - 33;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 05/12/2026)"
+13/11/2026 00:59:25;121855;KING SPACE (PLANALTO PAULISTA);NÃO É NECESSÁRIO;KING551 - 000098;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 00:59:45;190082;LA FONTANA;NÃO É NECESSÁRIO;DEL CORSO - 000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:00:09;214674;LA GRAND MAISON;NÃO É NECESSÁRIO;LA GRAND - 000172;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:00:29;185452;LA ROCHELLE (SAUDE);NÃO É NECESSÁRIO;ROCHELLE - 000092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:00:55;263551;LA UNITA COMPANY JARDINS;NÃO É NECESSÁRIO;LA UNITA - 000121;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:01:15;290323;LAUTO;NÃO É NECESSÁRIO;BLOCO 0 - 000102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:01:35;137127;LE CHAMP;BLOCO 0;001307;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:02:00;21379;LEONARDO DA VINCI (Alto da Mooca);LEONARDO DA VINCI;121;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:02:21;26080;LEONARDO DA VINCI (Alto da Mooca);LEONARDO DA VINCI;122;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:02:41;41827;LEONARDO DA VINCI (Alto da Mooca);LEONARDO DA VINCI;073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:03:07;224603;LIBERTY BOULEVARD RESIDENCE (ACLIMAÇÃO);LEONARDO DA VINCI;LIBERTY BOULEVARD - 000036;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:03:25;128447;LIBERTY OFFICES;NÃO É NECESSÁRIO;LIBERTY OFFICES - 000032;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:03:45;180663;LIFE CLUB;C;053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:04:03;70885;LIFE CLUB;B;042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:04:23;70890;LIFE CLUB;C;153;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:04:39;256919;LIMEIRA;Principal;15F;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:04:53;49809;LIMEIRA;Principal;14C;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:05:19;155187;LISSE RESIDENCE (Vila Ema);BLOCO 2;000075;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:05:38;156476;LISSE RESIDENCE (Vila Ema);BLOCO 4;000046;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:06:01;162744;LISSE RESIDENCE (Vila Ema);BLOCO 1;000112;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:06:20;72892;LIV BARRA FUNDA;NÃO É NECESSÁRIO;ALLEGRO - 000102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:06:44;306990;LIVING HEREDITA ALTO DO IPIRANGA;NÃO É NECESSÁRIO;BLOCO B - 0092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:07:07;309399;LIVING ONE;NÃO É NECESSÁRIO;BLOCO A - 000063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:07:33;63081;LOHENGRIN (Liberdade);NÃO É NECESSÁRIO;APTO - 029;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:08:04;258432;LONDON SP (CONSOLAÇÃO);TORRE A;001306;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:08:26;258435;LONDON SP (CONSOLAÇÃO);TORRE A;001305;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:08:45;254596;LUCAS CRANACH E DURER (Casa Verde);NÃO É NECESSÁRIO;CRANACH - L113;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:09:02;39321;LUGANO;NÃO É NECESSÁRIO;LUGANO - 000171;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:09:23;142547;LUME GIORNO - SPAZIO LUME;SPAZIO LUME;000308;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:09:42;179237;LUME GIORNO - SPAZIO LUME;SPAZIO LUME;000601;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:10:01;218367;LUME GIORNO - SPAZIO LUME;SPAZIO LUME;000215;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:10:24;268444;LUME GIORNO - SPAZIO LUME;SPAZIO LUME;000416;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:12:18;217693;LUMIERE VILA MARIANA;LUMIERE VILA MARIANA;000021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:13:52;220867;LUMIERE VILA MARIANA;LUMIERE VILA MARIANA;000081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:14:27;289229;La Bonne Chance;NÃO É NECESSÁRIO;La Bonne Chance - 111;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:14:49;66186;MACHADO DE ASSIS (VILA MARIANA);NÃO É NECESSÁRIO;MACHADO DE ASSIS - 000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:15:15;269570;MALAGA (BELA VISTA);NÃO É NECESSÁRIO;MALAGA - 000014;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:15:34;59872;MANHATTAN;Edificio Manhattan;000101;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:16:00;268272;MANHATTAN (ITAIM BIBI);MANHATTAN;00021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:16:29;181804;MARAJÓ;Edificio Marajo;000031;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:16:55;128719;MARBELLA;Edificio Marbella;000085;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:17:21;112165;MARIA CANDIDA;MARIA CANDIDA;012;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:17:40;188456;MARIA CANDIDA;MARIA CANDIDA;032;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:18:07;17425;MARIA STUARDA (LIBERDADE);MARIA STUARDA;000046;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:18:24;17426;MARIA STUARDA (LIBERDADE);MARIA STUARDA;000105;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:18:42;17427;MARIA STUARDA (LIBERDADE);MARIA STUARDA;000144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:20:22;194179;MARINA;MARINA;000043;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:21:55;301994;MARINA;MARINA;000092;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:22:16;17741;MARQUES DE VALENCA (ALTO DA MOOCA);BLOCO A;000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:22:38;55077;MARQUES DE VALENCA (ALTO DA MOOCA);BLOCO A;000081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:23:00;71210;MARQUES DE VALENCA (ALTO DA MOOCA);BLOCO B;000083;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:23:22;277497;MARQUEZ ALTO DO IPIRANGA STUDIOS;STUDIO;000026;SEM BOLETO;;;-;Todos os 1 boletos listados estão Pagos
+13/11/2026 01:23:44;297915;MARQUEZ ALTO DO IPIRANGA STUDIOS;STUDIO;000051;SEM BOLETO;;;-;Todos os 1 boletos listados estão Pagos
+13/11/2026 01:24:07;275692;MATEUS GROU;NÃO É NECESSÁRIO;EDIFICIO MATEUS GROU - 000072;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:24:38;174995;MAXIM'S PERDIZES;BLOCO 1;000114;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:25:00;231877;MAXIM'S PERDIZES;BLOCO 2;000112;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:25:21;289756;MERIT SANTA CRUZ STUDIO NR E RESID;NÃO É NECESSÁRIO;STUDIO RESIDENCIAL - 1406;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+13/11/2026 01:25:40;314004;METROCASA LAPA;NÃO É NECESSÁRIO;METROCASA LAPA - 001412;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:25:59;299575;METROPOLITAN;NÃO É NECESSÁRIO;METROPOLITAN - 000034;SEM BOLETO;;;-;Todos os 10 boletos listados estão Pagos
+13/11/2026 01:27:36;138537;METROPOLITAN VILA PRUDENTE;METROPOLITAN;000101;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:27:55;4672;MIAMI II;NÃO É NECESSÁRIO;MIAMI - 000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:28:19;14534;MIAMI PLAZA (Jardim Paulista);MIAMI PLAZA;000510;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:28:37;38681;MIAMI PLAZA (Jardim Paulista);MIAMI PLAZA;001701;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:29:04;57080;MIAMI PLAZA (Jardim Paulista);MIAMI PLAZA;001302;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:29:26;281997;MISSOURI;NÃO É NECESSÁRIO;MISSOURI - 162;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:29:45;200108;MIXER HOME;BLOCO 0;000011;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 01:30:04;303699;MIXER HOME;BLOCO 0;000092;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 01:30:30;143766;MOEMA HYDE PARK (Indianópolis);MOEMA HYDE PARK;000155;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:30:53;158045;MOEMA HYDE PARK (Indianópolis);MOEMA HYDE PARK;000084;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:31:16;192500;MONT SAINT MICHEL;NÃO É NECESSÁRIO;MONT SAINT MICHEL - 000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:31:43;12304;MONTBRISON;NÃO É NECESSÁRIO;MONTBRISON - 000081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:32:09;233642;MONTE BIANCO (VILA OLIMPIA);NÃO É NECESSÁRIO;BIANCO - 000022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:32:29;134375;MONTE CARLO;NÃO É NECESSÁRIO;MONTE CARLO - 000162;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:32:50;296540;MONTE OLIMPO;NÃO É NECESSÁRIO;MONTE OLIMPO - 0211;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:33:09;159820;MONTE SERRAT B I;NÃO É NECESSÁRIO;MONTE SERRAT B I - 000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:33:26;45041;MONTE TABOR (BROOKLIN);Principal;000111;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (20/11/2026); nenhum do mês 12/2026 (base: 05/12/2026)"
+13/11/2026 01:33:51;247583;MONTEREY;NÃO É NECESSÁRIO;MONTEREY - 000042;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (25/11/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 01:34:13;3619;MONTRACHET;EDIFÍCIO MONTRACHET;000122;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:34:34;237267;MONTREAL;NÃO É NECESSÁRIO;EDIFICIO MONTREAL - 000023;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:35:01;299767;MOOCA TERRAZA;NÃO É NECESSÁRIO;EDIF. MOOCA TERRAZA - 000134;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:35:24;295565;MORADA EDUARDO PRADO;NÃO É NECESSÁRIO;DIPLOMATA - 000094;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:35:33;232476;MORADAS S. ROMERO E COELHO LISBOA;MORADA SILVIO ROMERO;AP 11;UNIDADE NÃO ENCONTRADA;;;-;Unidade 'AP 11' não existe no site
+13/11/2026 01:35:56;58345;MORADAS S. ROMERO E COELHO LISBOA;MORADA SILVIO ROMERO;A1-62;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:36:21;188006;MORAR E VIVER - JARDIM DA SAUDE;NÃO É NECESSÁRIO;MORAR VI - 000014;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:36:42;234018;MOSQUETEIRO;NÃO É NECESSÁRIO;MOSQUETEIRO - 000013;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:37:13;215494;MOVVA SP;MOVVA SP;001110;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (31/07/2026); nenhum do mês 12/2026 (base: 01/12/2026)"
+13/11/2026 01:37:37;156795;Maranello;Maranello;03-174;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:37:56;233083;Maranello;Maranello;01-072;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:38:17;55245;Move;NÃO É NECESSÁRIO;Move - 034;SEM BOLETO;;;-;Todos os 4 boletos listados estão Pagos
+13/11/2026 01:38:37;151270;MÔNACO;Principal;0026I;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:38:55;154485;MÔNACO;Principal;0016I;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:39:13;164659;MÔNACO;Principal;0022I;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:39:30;266738;NEAR OFFICES ACLIMACAO;NÃO É NECESSÁRIO;Principal - 0076;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:39:52;285020;NEO BROOKLIN;NÃO É NECESSÁRIO;BLOCO 0 - 000202;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:40:12;304907;NETWARE FLEX OFFICES;Edificio Net-Beta;000603;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:41:47;205153;NEW ORLEANS GARDENS (ACLIMAÇÃO);Principal;A102;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:43:19;215505;NEW ORLEANS GARDENS (ACLIMAÇÃO);Principal;C132;SEM BOLETO;;;-;Todos os 7 boletos listados estão Pagos
+13/11/2026 01:43:39;80374;NEW YORK NEW YORK RESIDENCE;NÃO É NECESSÁRIO;NEW YORK NEW YORK - 000016;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:44:05;271861;NEX ONE VILA MADALENA;NÃO É NECESSÁRIO;RESIDENCIAL - 001710;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:44:25;275957;NEXT ACLIMACAO;NÃO É NECESSÁRIO;BLOCO 0 - 000223;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:44:54;129759;NOVA MOOCA (MOOCA);VALENCA;0144;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:45:15;131087;NOVA MOOCA (MOOCA);MARQUES;0021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:45:35;141466;NOVA MOOCA (MOOCA);VALENCA;0101;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:46:00;281230;NOVAVILLA;NOVAVILLA;000203;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:46:22;192553;NSA SRA DE FÁTIMA E NSA SRA DE LORETO;NÃO É NECESSÁRIO;LORETO - 000082;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 01:46:45;255617;Nove De Julho;NÃO É NECESSÁRIO;0 - 000022;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:47:05;240191;OLGA;NÃO É NECESSÁRIO;OLGA - 000114;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:47:38;258527;OLHAR AUGUSTA;OLHAR AUGUSTA;001901;SEM BOLETO;;;-;Todos os 1 boletos listados estão Pagos
+13/11/2026 01:48:12;258593;OLHAR AUGUSTA (Consolação);OLHAR AUGUSTA;001402;SEM BOLETO;;;-;Todos os 1 boletos listados estão Pagos
+13/11/2026 01:48:33;142930;ONIX;NÃO É NECESSÁRIO;ONIX - 154;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:48:54;6075;PALAZZO NOBILE;NÃO É NECESSÁRIO;VENEZA - 000161;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 01:49:15;109372;PALAZZO SAN MATEUS;NÃO É NECESSÁRIO;01 - 00144;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:49:37;263854;PALAZZO VENETO (VILA MONUMENTO);NÃO É NECESSÁRIO;PALAZZO VENETO - 000102;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (20/11/2026); nenhum do mês 12/2026 (base: 20/12/2026)"
+13/11/2026 01:50:02;285622;PANORAMICO DIALOGO V.PRUDENTE T2 APTS;TORRE 2 APARTAMENTOS;1309;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:50:27;286755;PANORAMICO DIALOGO V.PRUDENTE T2 APTS;TORRE 2 APARTAMENTOS;2005;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:50:48;289824;PANORAMICO DIALOGO V.PRUDENTE T2 APTS;TORRE 2 APARTAMENTOS;2605;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:51:09;300224;PANORAMICO DIALOGO V.PRUDENTE T2 APTS;TORRE 2 APARTAMENTOS;2405;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:51:33;203451;PARADISO;RESIDENCIAL PARADISO;000064;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:51:56;253480;PARADISO;RESIDENCIAL PARADISO;000053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:52:19;51426;PARADISO;RESIDENCIAL PARADISO;000163;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:52:39;255318;PARATY;NÃO É NECESSÁRIO;Principal - 0021;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:53:08;67333;PARAÍSO (Paraíso);PARAÍSO;000194;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:53:25;147987;PARKSIDE IBIRAPUERA (VL MARIANA);NÃO É NECESSÁRIO;BLOCO 0 - 000064;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:53:51;207351;PARQUE DOS PASSAROS;NÃO É NECESSÁRIO;BEM-TE-VI - 000154;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:54:14;111005;PARQUE TAQUARI (MOOCA);JEQUITIBÁ;000113;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:54:36;135411;PARQUE TAQUARI (MOOCA);JATOBÁ;000102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:55:00;244218;PARQUE TAQUARI (MOOCA);JEQUITIBÁ;000142;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:55:21;250544;PARQUE TAQUARI (MOOCA);JACARANDÁ;000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:55:41;270455;PARQUE TAQUARI (MOOCA);JATOBÁ;000136;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:56:02;59858;PARQUE TAQUARI (MOOCA);JACARANDÁ;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:56:22;69593;PARQUE TAQUARI (MOOCA);MANACÁ;000063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:56:44;17435;PARSIFAL (Liberdade);APTO;045;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:57:02;304374;PARSIFAL (Liberdade);APTO;083;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 01:57:18;63143;PARSIFAL (Liberdade);APTO;085;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (03/07/2026, 03/06/2026); nenhum do mês 12/2026 (base: 10/12/2026)"
+13/11/2026 01:57:43;266667;PAULICÉIA / SÃO CARLOS DO PINHAL;BLOCO 0;P02001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:58:09;288785;PAULISTA PLAZA THE OFFICE;NÃO É NECESSÁRIO;PAULISTA PLAZA - 001110;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:58:32;139906;PAÇO DE PINHEIROS (PINHEIROS);PAÇO DE PINHEIROS;000045;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:58:53;64212;PAÇO DE PINHEIROS (PINHEIROS);PAÇO DE PINHEIROS;000016;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:59:17;32718;PEDRAS PRECIOSAS;NÃO É NECESSÁRIO;TURMALINA - 000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 01:59:41;215853;PEDROSTIVAL;NÃO É NECESSÁRIO;PEDRO - 0011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:00:08;221922;PETRUS;;501 - 0046;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:00:33;18285;PHILADELPHIA GARDENS (TATUAPE);RIVERSIDE;000113;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:00:54;24817;PHILADELPHIA GARDENS (TATUAPE);SOMERDALE;000145;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:01:15;44337;PHILADELPHIA GARDENS (TATUAPE);RIVERSIDE;000155;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:01:36;63396;PIAZZA DI SPAGNA;NÃO É NECESSÁRIO;PIAZZA DI SPAGNA - 000021;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:01:58;33033;PIAZZA NAVONA;NÃO É NECESSÁRIO;PIAZZA NAVONA - 000122;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:02:13;198822;PIAZZA VENEZIA (VILA GOMES CARDIM);PIAZZA VENEZIA;000181;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:02:33;22097;PIAZZA VENEZIA (VILA GOMES CARDIM);PIAZZA VENEZIA;000022;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:02:49;37891;PIAZZA VENEZIA (VILA GOMES CARDIM);PIAZZA VENEZIA;000123;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:03:11;46989;PLUMAGEM (CAMBUCI);PLUMAGEM;T00007;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:03:30;46992;PLUMAGEM (CAMBUCI);PLUMAGEM;T00008;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:03:51;46994;PLUMAGEM (CAMBUCI);PLUMAGEM;000044;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:04:11;294261;POLARIS;NÃO É NECESSÁRIO;Principal - 111;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:04:37;297660;PORT D'ANTIBES;BLOCO;000058;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:05:00;5350;PORT D'ANTIBES;BLOCO;000137;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:05:25;253732;PORTAL BARRA FUNDA VL PACAEMBU;NÃO É NECESSÁRIO;BLOCO A - 000902;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:05:50;264754;PORTALE DELLA MOOCA (ALTO DA MOOCA);RAVENA;000153;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:06:11;31937;PORTALE DELLA MOOCA (ALTO DA MOOCA);SIENA;000244;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:06:31;8939;PORTALE DELLA MOOCA (ALTO DA MOOCA);RAVENA;000013;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:06:51;25768;PORTO BELO;NÃO É NECESSÁRIO;Principal - 000081;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:07:13;130572;POTENJI (SAÚDE);POTENJI;000053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:07:32;160352;POTENJI (SAÚDE);POTENJI;000122;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:08:00;308652;PQ DIALOGO SALAS COMERCIAIS;NÃO É NECESSÁRIO;TORRE 5 SALAS COMERCIAIS - 0203;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:08:25;18169;PQ IGUARÉ;I;000037;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:08:46;186273;PQ IGUARÉ;III;000118;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:09:04;35194;PRACTICAL OFFICE ITAIM;NÃO É NECESSÁRIO;PRACTICAL - 000053;SEM BOLETO;;;-;Todos os 12 boletos listados estão Pagos
+13/11/2026 02:09:22;241127;PRAÇA IBITIRAMA (VILA PRUDENTE);NÃO É NECESSÁRIO;PRAÇA DA LUA - 000102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:09:43;222730;PRAÇA MOOCA;CEREJEIRA;001106;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:10:08;187187;PRAÇA PAMPLONA (Jardim Paulista);PAMPLONA;001208;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:10:36;192188;PRAÇA PAMPLONA (Jardim Paulista);PAMPLONA;001207;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:10:56;220294;PRAÇA PAMPLONA (Jardim Paulista);PAMPLONA;001210;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:11:22;258365;PRAÇA PAMPLONA (Jardim Paulista);PAMPLONA;001209;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:12:57;206264;PRAÇA PIRATININGA;B;001410;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:14:33;246703;PRAÇA PIRATININGA;B;000001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:14:53;244538;PRIDE IPIRANGA (Vila Dom Pedro I);NÃO É NECESSÁRIO;PRIDE IPIRANGA - 000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:15:19;140505;PRIMUS;BLOCO 0;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:15:37;187297;PRINCESA LEOPOLDINA (ITAIM BIBI);BLOCO 0;00006B;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:16:01;200219;PRINCESA LEOPOLDINA (ITAIM BIBI);BLOCO 0;00001C;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:16:20;133052;Parque Penha de França;Penha de França;6-0131;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:16:40;164263;Parque Penha de França;Penha de França;2-0031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:16:58;79899;Platano;NÃO É NECESSÁRIO;PLATANO - 000053;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:17:15;125989;Portal do Tatuapé;Tatuapé;03-124;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:17:37;279191;QUADDRA BUTANTÃ;BLOCO 1;001408;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:17:55;280575;QUADDRA BUTANTÃ;BLOCO 2;001510;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:18:14;199601;QUALITY HOUSE SACOMÃ;NÃO É NECESSÁRIO;RESIDENCIAL - 000207;SEM BOLETO;;;-;Todos os 4 boletos listados estão Pagos
+13/11/2026 02:18:38;240209;REGENCY PLAZA;0;A00111;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:18:59;69526;RESERVA DAS ACACIAS;NÃO É NECESSÁRIO;TORRE 1 - 000045;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:19:20;211388;RESERVA TROPICAL CONDOMINIUM CLUB (TUCURUVI);NÃO É NECESSÁRIO;BLOCO 3 - 000053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:19:46;300295;RETRATO BY DIALOGO RESIDENCIAL;TORRE 1 RESIDENCIAL;0215;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:20:09;275940;RIO NEGRO (Vila Gomes Cardim);RIO NEGRO;014;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:20:30;304193;RIO PRETO;RIO;000082;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:20:50;7404;RIO PRETO;RIO;000061;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:21:10;147988;RITZ;NÃO É NECESSÁRIO;RITZ - 000063;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:21:32;270307;RIVOLI / TIVOLI;NÃO É NECESSÁRIO;RIVOLI / TIVOLI - T00035;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:21:52;296027;RUI;NÃO É NECESSÁRIO;RUI - 000073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:22:08;256920;Radiante;NÃO É NECESSÁRIO;BLOCO B - 000024;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:22:27;245733;Rodrigues Alves (Campo Belo);NÃO É NECESSÁRIO;Principal - 22;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:22:45;126079;S PADOVA E VERONA;Principal;A0011;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:23:00;185807;S PADOVA E VERONA;Principal;B0033;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:23:20;227354;S PADOVA E VERONA;Principal;B0032;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:23:36;188470;SAINT GOTHARD (PERDIZES);NÃO É NECESSÁRIO;Principal - 0061;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:23:55;19933;SAINT JOSEPH (BELÉM);NÃO É NECESSÁRIO;BLOCO 0 - 000043;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:24:22;242764;SALVADOR SCARPELLI (Moóca);SALVADOR SCARPELLI;073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:24:40;239142;SAMAMBAIA;NÃO É NECESSÁRIO;0 - 00063;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:25:01;60594;SAMEDI;RESIDENCIAL SAMEDI;000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:25:18;37242;SAN GEORGES (VILA OLIMPIA);NÃO É NECESSÁRIO;01 - 00162;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:25:39;269746;SAN MARINO;NÃO É NECESSÁRIO;MARINO - 00102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:25:58;18613;SANTA INES;NÃO É NECESSÁRIO;Principal - 0121;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:26:21;241710;SANTANA'S GARDEN;NÃO É NECESSÁRIO;SANTANA'S GARDEN - 000031;SEM BOLETO;;;-;Todos os 10 boletos listados estão Pagos
+13/11/2026 02:26:34;67432;SANTO ANSELMO (São Paulo);NÃO É NECESSÁRIO;Principal - 0063;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:26:54;263147;SCORPIOS;NÃO É NECESSÁRIO;SCORPIOS - 000061;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (18/11/2026); nenhum do mês 12/2026 (base: 03/12/2026)"
+13/11/2026 02:27:14;176733;SESQUICENTENÁRIO (SANTA CECÍLIA);NÃO É NECESSÁRIO;1158 - 000065;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:27:34;193968;SEVILHA;SEVILHA;000034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:27:58;49444;SEVILHA;SEVILHA;000115;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:28:19;53385;SEVILHA;SEVILHA;000153;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:28:39;158638;SIERRA BLANCA;NÃO É NECESSÁRIO;Principal - 000081;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:28:59;41907;SILVIA HELENA;NÃO É NECESSÁRIO;SILVIA HELENA - 000082;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:29:23;154611;SOLAR DOS FIDALGOS;NÃO É NECESSÁRIO;SOLAR DOS FIDALGOS - 102;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:29:45;145572;SOLAR DOS GIRASSOIS;BLOCO B;000112;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:30:06;40795;SOLAR DOS GIRASSOIS;BLOCO A;000091;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:30:33;42243;SOLAR DOS GIRASSOIS;BLOCO B;000113;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:30:58;43101;SOLAR DOS GIRASSOIS;BLOCO B;000013;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:31:23;44787;SOLAR DOS GIRASSOIS;BLOCO B;000052;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:31:48;46684;SOLAR DOS GIRASSOIS;BLOCO B;000131;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:32:16;49306;SOLAR DOS GIRASSOIS;BLOCO B;000053;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:32:37;77505;SOLAR DOS GIRASSOIS;BLOCO A;000111;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:34:18;22401;SPAZIO UNO;SPAZIO UNO;000074;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:35:53;52344;SPAZIO UNO;SPAZIO UNO;000151;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:36:16;150166;SPECIAL HOME TATUAPE (TATUAPÉ);MAXIMUM;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:36:38;305248;STRAUSS;STRAUSS;000133;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:36:59;34222;STYLE VIVRE (Vila Regente Feijó);STYLE VIVRE;000042;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:37:16;5880;SUELY;NÃO É NECESSÁRIO;SUELY - 000112;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (10/11/2026); nenhum do mês 12/2026 (base: 08/12/2026)"
+13/11/2026 02:37:38;217108;SUMAREZINHO;NÃO É NECESSÁRIO;SUMAREZINHO - 082;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:38:00;159355;SUPERIA PARAISO;SUPERIA PARAISO;000915;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:38:22;154484;SUPERIA PINHEIROS;NÃO É NECESSÁRIO;SUPERIA PINHEIROS - 000307;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:38:41;186777;SUSILENE;BLOCO 0;000051;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:38:58;260414;SUSILENE;BLOCO 0;000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:40:31;20741;SWEET DREAMS;SWEET DREAMS;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:42:08;20745;SWEET DREAMS;SWEET DREAMS;000062;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:42:25;73455;SÃO BENTO;SBTO;42;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:42:47;183362;SÃO CARLOS;NÃO É NECESSÁRIO;CARLOS - 000105;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:43:02;129832;SÃO JOSÉ;NÃO É NECESSÁRIO;Principal - 31;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 02:43:18;213961;TAHITI;NÃO É NECESSÁRIO;EDIF. TAHITI - 000083;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:43:43;74405;TAPAJÓS;CARMIÃ;000064;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:44:04;298433;TEG VILA CARRÃO;NÃO É NECESSÁRIO;BLOCO 1 - E00301;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:44:28;15195;TEQUEST POINT TWO;NÃO É NECESSÁRIO;TEQUEST - 000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:44:47;303886;THE CLASSIC TOWER;THE CLASSIC TOWER;000906;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:45:05;228134;THE CLASSIC TOWER (Vila Mariana);THE CLASSIC TOWER;000903;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:45:28;129297;THE GARDENS SUMMER;THE GARDENS SUMMER;000803;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:45:52;129396;THE GARDENS SUMMER;THE GARDENS SUMMER;002006;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:46:14;129768;THE GARDENS SUMMER;THE GARDENS SUMMER;000306;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:46:37;139884;THE GARDENS SUMMER;THE GARDENS SUMMER;001204;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 02:46:56;75229;THE OFFICE FREI CANECA;BLOCO 0;000808;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:47:18;114448;THE POINT;POINT;00143;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:47:39;231626;THE TRIUMPH;NÃO É NECESSÁRIO;THE TRIUMPH - 000409;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:48:02;74858;THEO;THEO;000011;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:48:23;242444;TOUCH STUDIO JARDIM;NÃO É NECESSÁRIO;TOUCH - 000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:48:43;145064;TRISTANO (Aclimação);TRISTANO;000065;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:49:02;33557;TRISTANO (Aclimação);TRISTANO;000073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:49:23;219765;TUTTI MOOCA;BLOCO A;001809;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:49:42;238373;TUTTI MOOCA;BLOCO A;000806;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:50:02;301026;TUTTI MOOCA;BLOCO A;001707;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:50:33;171329;UNIK (VILA MORAES);NÃO É NECESSÁRIO;TORRE A - 000048;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:50:55;257402;UNIQUE DUPLEX HOUSE (VILA MARIANA);UNIQUE DUPLEX HOUSE;001004;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:51:16;290995;UNIQUE DUPLEX HOUSE (VILA MARIANA);UNIQUE DUPLEX HOUSE;000807;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:51:40;301209;URBAN BARRA FUNDA 2;BLOCO 1;000503;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:51:57;307606;URBAN BARRA FUNDA 2;BLOCO 1;000001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:52:22;212515;URBAN HOME TATUAPE;428;0075;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:52:42;299246;URBAN RESORT;NÃO É NECESSÁRIO;TORRE 1 - 001701;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:53:02;240012;URUPES;NÃO É NECESSÁRIO;NOVE DE JULHO - 001207;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:53:23;230263;VAN DYCK;NÃO É NECESSÁRIO;85 - 000093;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:54:59;52470;VANCOUVER;.;000408;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (20/11/2026); nenhum do mês 12/2026 (base: 20/12/2026)"
+13/11/2026 02:56:37;78364;VANCOUVER;.;000407;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (20/11/2026); nenhum do mês 12/2026 (base: 20/12/2026)"
+13/11/2026 02:56:54;216113;VENEZA;Principal;062;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:57:11;9595;VENEZA;Principal;012;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 02:57:37;118755;VENEZA (VILA GUILHERME);BLOCO 1;000111;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:57:58;119489;VENEZA (VILA GUILHERME);BLOCO 2;000151;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:58:23;1324;VENEZA (VILA GUILHERME);BLOCO 1;000051;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:58:43;20581;VENEZA E FLORENÇA;NÃO É NECESSÁRIO;VENEZA - V00071;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 02:59:02;58891;VERA LUCIA;NÃO É NECESSÁRIO;Principal - 0006;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (11/11/2026); nenhum do mês 12/2026 (base: 11/12/2026)"
+13/11/2026 02:59:18;147113;VERLAINE;NÃO É NECESSÁRIO;VERLAINE - 000012;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (12/11/2026); nenhum do mês 12/2026 (base: 12/12/2026)"
+13/11/2026 02:59:44;125687;VERONA TROPICAL (Vila Dom Pedro I);NÃO É NECESSÁRIO;VERONA TROPICAL - 000078;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:00:04;140543;VIA NAPOLI (PQ. DA MOOCA);VIA NAPOLI;000172;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:00:23;52841;VIA NAPOLI (PQ. DA MOOCA);VIA NAPOLI;000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:00:42;74012;VICTORIA;NÃO É NECESSÁRIO;Principal - 000012;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:01:02;302650;VILA NOVA MARIANA CONDOMINIUM;NÃO É NECESSÁRIO;BLOCO B - 000212;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:01:21;180975;VILA RICA;NÃO É NECESSÁRIO;VILA RICA - 000181;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:01:43;199093;VILAR DO PRADO;NÃO É NECESSÁRIO;VILAR DO PRADO - 000112;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:02:10;293332;VILLA BORGHESE;VILLA BORGHESE;0143;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:02:30;52178;VILLA BORGHESE;VILLA BORGHESE;0083;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:02:52;279020;VILLA DI FIRENZE (BRÁS);EDIF. LEONARDO DA VINCI;000054;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:03:12;66641;VILLA DI FIRENZE (BRÁS);EDIF. LEONARDO DA VINCI;000113;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:03:33;136153;VILLA MADRID;EDIFÍCIO COSTA DEL SOL;000106;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:03:53;19736;VILLA MADRID;EDIFÍCIO COSTA DEL SOL;000075;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:04:15;19752;VILLA MADRID;EDIFÍCIO COSTA DEL SOL;000046;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:04:38;19869;VILLA MADRID;EDIFÍCIO COSTA DEL SOL;000085;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:04:58;44782;VILLA MADRID;EDIFÍCIO GUADALAJARA;000015;SEM BOLETO;;;-;Nenhum boleto listado após o filtro
+13/11/2026 03:05:17;280834;VILLA NACIONAL;NÃO É NECESSÁRIO;VILLA NACIONAL - 000122;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:05:39;288880;VILLA SARDENHA;NÃO É NECESSÁRIO;RESIDENCIAL - 000036;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:06:08;197313;VILLA SÃO PAULO FAMILLY CLUB;PAULISTA II;000123;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:06:29;217587;VILLA SÃO PAULO FAMILLY CLUB;PAULISTA I;000081;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:06:55;285481;VILLAGE SAINT MICHEL (BOSQUE DA SAUDE);NÃO É NECESSÁRIO;SAINT MICHEL - 000053;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:07:14;270446;VILLAGGIO DI MILANO;NÃO É NECESSÁRIO;VILLAGGIO DI MILANO - 104;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:07:34;297821;VILLAGGIO PARADISO;PORTOFINO;000162;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:07:53;38065;VILLAGGIO PARADISO;PORTOFINO;000175;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:08:15;38066;VILLAGGIO PARADISO;PORTOFINO;000174;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:08:36;38069;VILLAGGIO PARADISO;SANREMO;000175;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:08:54;38468;VILLAGGIO PARADISO;PORTOFINO;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:09:12;51736;VILLAGIO DI FIRENZE (SANTANA);VILLAGIO DI FIRENZE;000074;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:09:31;41255;VILLAGIO SAN MARINO (MOOCA);NÃO É NECESSÁRIO;VILLAGIO SAN MARINO - 222;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:09:47;182891;VINCITÁ;NÃO É NECESSÁRIO;0 - 000148;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (16/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:10:07;189047;VIOLETA;NÃO É NECESSÁRIO;VIOLETA - 000011;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:10:28;264948;VISTA BELA;VISTA BELA;000083;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:10:48;3732;VISTA BELA;VISTA BELA;000158;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:11:10;271595;VISTA JABAQUARA;BLOCO 02;000002;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:11:33;271600;VISTA JABAQUARA;BLOCO 02;000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:11:52;271610;VISTA JABAQUARA;BLOCO 02;000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:12:13;271614;VISTA JABAQUARA;BLOCO 03;000023;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:12:33;271616;VISTA JABAQUARA;BLOCO 04;000003;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:12:53;271618;VISTA JABAQUARA;BLOCO 04;000021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:13:15;271620;VISTA JABAQUARA;BLOCO 06;000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:13:39;271627;VISTA JABAQUARA;BLOCO 07;000002;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:13:58;271630;VISTA JABAQUARA;BLOCO 07;000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:14:18;271632;VISTA JABAQUARA;BLOCO 07;000041;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:14:40;271635;VISTA JABAQUARA;BLOCO 04;000024;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:14:58;271637;VISTA JABAQUARA;BLOCO 07;000024;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:15:19;271643;VISTA JABAQUARA;BLOCO 08;000024;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:15:42;271645;VISTA JABAQUARA;BLOCO 08;000003;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:16:02;271647;VISTA JABAQUARA;BLOCO 05;000021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:16:22;271658;VISTA JABAQUARA;BLOCO 06;000001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:16:43;271662;VISTA JABAQUARA;BLOCO 06;000022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:17:03;271672;VISTA JABAQUARA;BLOCO 08;000031;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:17:21;271689;VISTA JABAQUARA;BLOCO 01;000022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:17:41;271701;VISTA JABAQUARA;BLOCO 01;000034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:18:02;271704;VISTA JABAQUARA;BLOCO 01;000023;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:18:22;271717;VISTA JABAQUARA;BLOCO 08;000042;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:18:43;271720;VISTA JABAQUARA;BLOCO 09;000021;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:19:03;271721;VISTA JABAQUARA;BLOCO 09;000043;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:19:23;271723;VISTA JABAQUARA;BLOCO 10;000022;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:19:42;271724;VISTA JABAQUARA;BLOCO 10;000044;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:20:01;271602;VISTA JABAQUARA (Vila do Encontro);BLOCO 02;000024;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:20:24;271656;VISTA JABAQUARA (Vila do Encontro);BLOCO 05;000043;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:20:44;271700;VISTA JABAQUARA (Vila do Encontro);BLOCO 01;000001;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:21:06;271918;VISTA JABAQUARA (Vila do Encontro);BLOCO 06;000034;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:21:26;271927;VISTA JABAQUARA (Vila do Encontro);BLOCO 09;000032;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:21:48;271928;VISTA JABAQUARA (Vila do Encontro);BLOCO 10;000033;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:22:07;271929;VISTA JABAQUARA (Vila do Encontro);BLOCO 05;000004;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:22:27;272018;VISTA JABAQUARA (Vila do Encontro);BLOCO 09;000004;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:23:07;244993;VITORIA MARIA;VITORIA MARIA;000013;BAIXADO;10/12/2026;244993.pdf;SIM;
+13/11/2026 03:23:27;205021;VITÓRIA;VITÓRIA;000188;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:23:45;224289;VITÓRIA;VITÓRIA;000058;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:24:13;256368;VIVA BENX MOOCA;TORRE 1;000710;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:24:31;280993;VIVA BENX MOOCA;TORRE 1;000108;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:24:51;290156;VIVA BENX MOOCA;TORRE 2;000401;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:25:31;285132;VIVAZ ESTACAO BELEM;TORRE 1;1907;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:25:52;180127;VIVIAN;NÃO É NECESSÁRIO;VIVIAN - 000142;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:26:13;16381;VIZCAYA;NÃO É NECESSÁRIO;VIZCAYA - 000012;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:26:33;292423;VS TOWNHOUSE;NÃO É NECESSÁRIO;APTO - 23;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (20/11/2026, 20/11/2026); nenhum do mês 12/2026 (base: 20/12/2026)"
+13/11/2026 03:26:53;18633;Vila Real GIRASSOL;NÃO É NECESSÁRIO;Vila Real - 0073;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:27:13;135039;WALL STREET;NÃO É NECESSÁRIO;STREET - CJ113;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:27:35;283547;WONDER BY PRAÇAS DA CIDADE;NÃO É NECESSÁRIO;RESIDENCIAL - 000318;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:27:55;302277;YBY - SETOR RESIDENCIAL;NÃO É NECESSÁRIO;RESIDENCIAL - A00704;SEM BOLETO;;;-;Todos os 5 boletos listados estão Pagos
+13/11/2026 03:28:21;219798;YOU FARIA LIMA COND.;YOU FARIA LIMA COND.;000801;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:28:45;155228;YOU METROPOLITAN (Tatuapé);CJ;000603;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:29:05;155229;YOU METROPOLITAN (Tatuapé);CJ;000602;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:29:24;155691;YOU METROPOLITAN (Tatuapé);CJ;000724;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:29:45;157014;YOU METROPOLITAN (Tatuapé);CJ;001324;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:30:07;158201;YOU METROPOLITAN (Tatuapé);CJ;001319;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:30:27;184769;YOU METROPOLITAN (Tatuapé);CJ;001210;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:30:47;184882;YOU METROPOLITAN (Tatuapé);CJ;001209;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:31:06;192074;YOU METROPOLITAN (Tatuapé);CJ;000406;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:31:25;256311;YOU METROPOLITAN (Tatuapé);CJ;001121;SEM BOLETO DO MÊS;;;-;"Boletos em aberto (15/11/2026); nenhum do mês 12/2026 (base: 15/12/2026)"
+13/11/2026 03:31:49;181383;YOU OFFICES IBITIRAMA;YOU IBITIRAMA;000609;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:32:08;181388;YOU OFFICES IBITIRAMA;YOU IBITIRAMA;000610;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos
+13/11/2026 03:32:29;205504;YOU OFFICES IBITIRAMA;YOU IBITIRAMA;001107;SEM BOLETO;;;-;Todos os 6 boletos listados estão Pagos

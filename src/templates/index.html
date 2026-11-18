@@ -3,239 +3,8 @@
 {% block title %}Painel de Gestão Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    /* 1. FORÇA A PÁGINA A USAR A TELA TODA (Reduz o scroll lateral) */
-    .container {
-        max-width: 98% !important;
-        width: 98% !important;
-    }
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 
-    .filter-card { background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 6px 16px rgba(15,23,42,0.05); margin-bottom: 25px; border: 1px solid #e5e7eb; }
-    
-    /* 2. AJUSTE DO STATUS (Mais largo e com espaço para a setinha) */
-    .select-status { 
-        font-weight: 600; 
-        font-size: 0.65rem; 
-        padding: 4px 16px 4px 6px; /* Dá um respiro na direita para a seta */
-        border-radius: 6px; 
-        cursor: pointer; 
-        width: 135px; /* Aumentado para caber o texto inteiro */
-        max-width: 135px; 
-        text-align: center; 
-        text-overflow: ellipsis; 
-        white-space: nowrap; 
-        overflow: hidden; 
-        transition: all 0.15s; 
-    }
-    
-    /* Botão em Branco (Padrão) */
-    .status-branco { background-color: #ffffff; color: #64748b; border: 1px solid #cbd5e1; }
-    
-    /* Verde (Coletado) - Mesma cor da bg-planilha-verde */
-    .status-coletado { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; font-weight: bold; }
-    
-    /* Amarelo (Solicitado e Não Emitido) - Mesma cor da bg-planilha-amarelo */
-    .status-solicitado { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; font-weight: bold; }
-    .status-nao-emitido { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; font-weight: bold; }
-    
-    /* Laranja (Pago) - Mesma cor da bg-planilha-laranja */
-    .status-pago { background-color: #ffedd5; color: #c2410c; border: 1px solid #fdba74; font-weight: bold; }
-    
-    /* Azul (Cheque/Doc) - Mesma cor da bg-planilha-azul */
-    .status-cheque { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; font-weight: bold; }
-    
-    /* Roxo (Automação) - Mesma cor da bg-planilha-roxo */
-    .status-robo { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-weight: bold; }
-    
-    /* Vermelho (Erros) - Mesma cor da bg-planilha-vermelho */
-    .status-erro { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: bold; }
-    .linha-erro { background-color: #fff1f2 !important; transition: background-color 0.3s ease;}
-    .linha-erro td { border-bottom: 1px solid #fecaca !important; }
-
-    .status-robo { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-weight: bold; }
-
-    /* TABELA SUPER COMPACTA E INTELIGENTE */
-    .table-container { border: 1px solid #e5e7eb; border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 20px rgba(15,23,42,0.04); position: relative; transition: all 0.3s ease; }
-    .table-wrapper { max-height: 65vh; min-height: 380px; overflow-y: auto; overflow-x: auto; }
-    .table thead th { background-color: #1f2937; color: #f9fafb; font-weight: 600; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 4px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #374151; white-space: nowrap; vertical-align: middle; text-align: center; }
-    .table tbody td { font-size: 0.68rem; color: #334155; padding: 6px 4px; vertical-align: middle; }
-    .table tbody tr:hover { filter: brightness(0.98); }
-    
-    /* MENUS SUSPENSOS DE FILTRO */
-    .icone-filtro-btn { background: transparent; border: none; font-size: 0.85rem; color: #64748b; margin-left: 6px; margin-top: 0; transition: all 0.2s; padding: 0; }
-    .icone-filtro-btn:hover { color: #0ea5e9; transform: scale(1.1); }
-    .icone-filtro-btn.ativo { background-color: #0ea5e9; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: bold; margin-left: 6px; margin-top: 0; box-shadow: 0 2px 4px rgba(14,165,233,0.3); }
-    .dropdown-menu-filtro { min-width: 220px; font-size: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .dropdown-item-filtro { padding: 6px 10px; border-radius: 6px; cursor: pointer; color: #334155; font-weight: 500; transition: background 0.1s; }
-    .dropdown-item-filtro:hover { background-color: #f1f5f9; color: #0ea5e9; }
-
-    /* EFEITOS DA TABELA MAXIMIZADA E AJUSTE DA EMISSÃO */
-    .select-emissao { 
-        background-color: transparent; 
-        border: 1px solid transparent; 
-        color: #0f172a; 
-        font-weight: 700; 
-        font-size: 0.75rem; 
-        cursor: pointer; 
-        width: 55px; /* Aumentado para caber o número sem conflito */
-        text-align: center; 
-        box-shadow: none !important; 
-        transition: all 0.2s ease; 
-        padding: 2px 12px 2px 4px; /* O 12px aqui evita que o número suma embaixo da setinha */
-    }
-    .select-emissao:hover, .select-emissao:focus { background-color: #f1f5f9; border: 1px solid #cbd5e1; outline: none; }
-    .table-container.maximizada { position: fixed; top: 2%; left: 2%; width: 96%; height: 96%; z-index: 1050; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); border-radius: 12px; margin: 0; }
-    .table-container.maximizada .table-wrapper { max-height: 100%; flex-grow: 1; }
-    .fundo-desfocado { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(4px); z-index: 1040; }
-    body.travado { overflow: hidden; }
-    
-    .btn-maximizar { font-size: 0.75rem; font-weight: bold; border-radius: 6px; padding: 4px 12px; }
-    .btn-fechar-maximizada { display: none; position: absolute; top: -10px; right: -10px; z-index: 1060; background-color: #ef4444; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); align-items: center; justify-content: center; transition: background-color 0.2s; }
-    .btn-fechar-maximizada:hover { background-color: #dc2626; transform: scale(1.1); }
-
-    .btn-lello { background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.85rem; border: none; padding: 10px 24px; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(37,99,235,0.16); }
-    .btn-lello:hover { background-color: #1d4ed8; color: #ffffff; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(37,99,235,0.2); }
-    
-    .imovel-link { color: #1f2937; text-decoration: none; font-weight: 700; cursor: pointer; transition: color 0.2s ease; background-color: #f8fafc; padding: 4px 8px; border-radius: 4px; white-space: nowrap; border: 1px solid #e5e7eb;}
-    .imovel-link:hover { color: #111827; text-decoration: underline; background-color: #f1f5f9; }
-    
-    .detalhe-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; height: 100%; }
-    .detalhe-label { font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .detalhe-valor { font-size: 0.95rem; color: #0f172a; font-weight: 600; }
-
-    /* ESTILOS DA MATRIZ EMISSÃO X VENCIMENTO */
-    #tabelaMatriz { font-size: 0.72rem; }
-    #tabelaMatriz th { background-color: #0f172a; color: white; border: 1px solid #1e293b; text-align: center; vertical-align: middle; padding: 4px; position: sticky; top: 0; z-index: 2; }
-    #tabelaMatriz th.col-emissao { position: sticky; left: 0; z-index: 3; background-color: #0f172a; white-space: nowrap; }
-    #tabelaMatriz td { border: 1px solid #cbd5e1; text-align: center; vertical-align: middle; padding: 4px; cursor: help; transition: background-color 0.2s; }
-    #tabelaMatriz td:hover { background-color: #f1f5f9; font-weight: bold; transform: scale(1.1); }
-    #tabelaMatriz td.celula-vazia { color: transparent; pointer-events: none; }
-    #tabelaMatriz td.total-col { background-color: #0f172a; color: white; font-weight: bold; }
-    #tabelaMatriz th.total-corner { background-color: #1e293b; position: sticky; right: 0; z-index: 4; }
-    #tabelaMatriz td.total-linha { background-color: #0f172a; color: white; font-weight: bold; position: sticky; right: 0; }
-
-    /* =========================================
-       ESTILO PLANILHA: BORDAS E CORES DE LINHA 
-       ========================================= */
-    
-    /* Força as bordas parecendo grade do Excel */
-    #tabelaImoveisCob th, 
-    #tabelaImoveisCob td {
-        border: 1px solid #cbd5e1 !important; 
-    }
-
-   /* Cores de fundo aplicadas diretamente nas células da linha inteira */
-    .bg-planilha-verde td { background-color: #dcfce7 !important; border-color: #bbf7d0 !important; }
-    .bg-planilha-amarelo td { background-color: #fef9c3 !important; border-color: #fef08a !important; }
-    .bg-planilha-laranja td { background-color: #ffedd5 !important; border-color: #fed7aa !important; }
-    .bg-planilha-azul td { background-color: #e0f2fe !important; border-color: #bae6fd !important; }
-    
-    /* AS DUAS CORES NOVAS */
-    .bg-planilha-roxo td { background-color: #f3e8ff !important; border-color: #d8b4fe !important; }
-    .bg-planilha-vermelho td { background-color: #fee2e2 !important; border-color: #fca5a5 !important; }
-
-    /* Mantém o efeito de hover sutil nas linhas pintadas */
-    #tabelaImoveisCob tbody tr:hover td {
-        filter: brightness(0.96);
-    }
-
-    .main-wrapper {
-        max-width: 98% !important; /* Estica para usar o monitor todo com uma bordinha */
-        width: 100% !important;
-        padding: 20px 10px !important;
-    }
-
-    .container {
-        max-width: 100% !important;
-        width: 100% !important;
-        padding: 0 !important;
-    }
-
-    /* 2. REMOVE A LARGURA FIXA E ADEQUA A TABELA (Adeus scroll horizontal de vez!) */
-    #tabelaImoveisCob {
-        width: 100%;
-        min-width: 100% !important; /* Tira os 1550px que forçavam a barra a aparecer */
-    }
-
-    /* 3. ESPAÇAMENTOS E FONTES (Mantém legível mas encaixa tudo) */
-    .table thead th { 
-        background-color: #1f2937; 
-        color: #f9fafb; 
-        font-weight: 600; 
-        font-size: 0.60rem; 
-        text-transform: uppercase; 
-        letter-spacing: 0.5px; 
-        padding: 8px 4px !important; 
-        position: sticky; 
-        top: 0; 
-        z-index: 10; 
-        border-bottom: 1px solid #374151; 
-        white-space: nowrap; 
-        vertical-align: middle; 
-        text-align: center; 
-    }
-    
-    .table tbody td { 
-        font-size: 0.68rem; 
-        color: #334155; 
-        padding: 6px 4px !important; 
-        vertical-align: middle; 
-    }
-
-    /* 4. TRAVA INTELIGENTE DAS OBSERVAÇÕES (Usa porcentagem do monitor em vez de px) */
-    .table tbody td[title] {
-        max-width: 12vw !important; /* Segura os textos grandes para não estourar a tela */
-    }
-    
-    /* 5. TAMANHO DO BOTÃO DE STATUS */
-    .select-status { 
-        font-weight: 600; 
-        font-size: 0.65rem; 
-        padding: 4px 10px 4px 6px; 
-        border-radius: 6px; 
-        cursor: pointer; 
-        width: 125px; 
-        max-width: 125px; 
-        text-align: center; 
-        text-overflow: ellipsis; 
-        white-space: nowrap; 
-        overflow: hidden; 
-        transition: all 0.15s; 
-    }
-
-    /* Efeito para expandir a coluna de acesso ao clicar */
-.cell-acesso {
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: text;
-    transition: background-color 0.2s;
-}
-
-.cell-acesso:hover {
-    background-color: #f1f5f9;
-}
-
-/* Essa é a classe que vai fazer a mágica de quebrar a linha e mostrar tudo */
-.cell-acesso.expandida {
-    white-space: normal !important;
-    word-break: break-word;
-    background-color: #f8fafc;
-    color: #0ea5e9 !important;
-    box-shadow: inset 0 0 0 1px #bae6fd;
-}
-
-/* =========================================
-       🚀 OTIMIZAÇÃO EXTREMA (RENDERIZAÇÃO PREGUIÇOSA)
-       Garante que o navegador não congele ao desenhar 6.000 linhas
-       ========================================= */
-    #tabelaImoveisCob tbody tr {
-        content-visibility: auto;
-        contain-intrinsic-size: 55px; /* Diz ao navegador a altura média da linha oculta */
-    }
-    
-</style>
 {% endblock %}
 
 {% block content %}
@@ -245,10 +14,11 @@
             <span class="text-muted small">Acompanhe pendências, status e ações de cobrança em uma visão consolidada.</span>
         </div>
         <div class="d-flex gap-2">
-    <button type="button" class="btn btn-success shadow-sm fw-bold" onclick="exportarParaExcel()" style="background-color: #10b981; border-color: #10b981;">Exportar XLSX</button>
-    
-    <a href="/relatorio_avancado" class="btn btn-dark shadow-sm fw-bold" style="background-color: #1e293b;">Dashboard mensal</a>
-    
+    <button type="button" class="btn btn-neutro" onclick="exportarParaExcel()">Exportar XLSX</button>
+
+    <a href="/relatorio_avancado" class="btn btn-neutro">Dashboard mensal</a>
+
+    {% if not mes_historico %}<button type="button" class="btn btn-neutro" onclick="abrirModalSolicitarLogins()" title="Pede às administradoras o login e a senha dos imóveis pendentes que ainda não têm acesso cadastrado">🔑 Solicitar logins</button>{% endif %}
     <button type="button" class="btn btn-lello shadow-sm" onclick="abrirModalDisparoEmail(event)">Executar Disparos</button>
 </div>
     </div>
@@ -302,8 +72,52 @@
                 <p class="mb-0 text-muted" style="font-size: 0.85rem;">Somente você vê aqui os boletos com potencial de emissão no dia.</p>
             </div>
         </div>
+
+        {% if resumo_topo %}
+        <div class="col-md-8">
+            <div class="filter-card h-100">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="numero-topo" title="Boletos {% if resumo_topo.minha %}da sua carteira{% else %}da operação{% endif %} que estão na planilha deste mês.">
+                        <div class="detalhe-label">{% if resumo_topo.minha %}Minha carteira{% else %}Base do mês{% endif %}</div>
+                        <div class="detalhe-valor" id="numTotal">{{ "{:,}".format(resumo_topo.total).replace(',', '.') }}</div>
+                        <div class="numero-nota">boletos no mês</div>
+                    </div>
+                    <div class="numero-topo" title="Ainda na planilha, sem status final. É o que falta fazer.">
+                        <div class="detalhe-label">Pendentes</div>
+                        <div class="detalhe-valor" id="numPendentes" style="color: var(--accent);">{{ "{:,}".format(resumo_topo.pendentes).replace(',', '.') }}</div>
+                        <div class="numero-nota">ainda para resolver</div>
+                    </div>
+                    <div class="numero-topo" title="Boletos da planilha com status final (Pago, Coletado, Pago na 275, Pago na ADM), tenha sido você, um colega ou um robô.">
+                        <div class="detalhe-label">Já resolvidos</div>
+                        <div class="detalhe-valor" id="numResolvidos">{{ "{:,}".format(resumo_topo.resolvidos).replace(',', '.') }}</div>
+                        <div class="numero-nota"><span id="numPct">{{ "%.1f"|format(resumo_topo.pct)|replace('.', ',') }}</span>% da carteira</div>
+                    </div>
+                    <div class="numero-topo" title="Boletos que você registrou como coletados hoje. Conta o seu trabalho do dia, não o estado da carteira.">
+                        <div class="detalhe-label">Coletei hoje</div>
+                        <div class="detalhe-valor" id="numColeteiHoje">{{ "{:,}".format(resumo_topo.coletei_hoje).replace(',', '.') }}</div>
+                        <div class="numero-nota">no seu nome, hoje</div>
+                    </div>
+                </div>
+                <div class="barra-topo mt-3" role="img" aria-label="{{ resumo_topo.pct }}% da carteira resolvida">
+                    <span id="barraTopoPreenchida" style="width: {{ resumo_topo.pct }}%;"></span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    
+
+    <!-- ====================================================================
+         🤖 FAIXA DO ROBÔ — sempre visível, não precisa fechar nada.
+         Falha de robô é boleto não coletado: tem que estar na cara de quem
+         trabalha, não esperar alguém lembrar de abrir o Raio-X.
+         ==================================================================== -->
+    <a href="/raio_x_rpa" id="faixaRaioX" class="faixa-robo" style="display: none;">
+        <span class="icone-robo">🤖</span>
+        <span class="texto-robo" id="faixaRaioXTexto"></span>
+        <span class="detalhe-robo" id="faixaRaioXDetalhe"></span>
+        <span class="seta-robo">ver no Raio-X →</span>
+    </a>
+
    <div class="filter-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold text-dark m-0">Filtros e pesquisa</h5>
@@ -366,31 +180,48 @@
 </div>
                 
                 <div class="col-md-3 d-flex gap-2">
-                    <input type="hidden" name="filtrar" value="1"> <button type="submit" class="btn btn-dark px-4 fw-bold shadow-sm w-100" style="background-color: #1e293b;" onclick="ativarLoading()">Filtrar Base</button>
+                    <input type="hidden" name="filtrar" value="1"> <button type="submit" class="btn btn-dark px-4 fw-bold shadow-sm w-100" onclick="ativarLoading()">Filtrar Base</button>
                     {% if filtro_resp or filtro_per or request.args.get('busca') %}
                     <a href="/?limpar=1" class="btn btn-outline-danger fw-bold shadow-sm" onclick="ativarLoading()">Limpar</a>
                     {% endif %}
                 </div>
             </form>
-            {% if filtro_automatico %}
-            <div class="alert alert-info border-0 mt-3 mb-0" style="background-color: #e0f2fe; color: #0369a1; border-left: 4px solid #0ea5e9;">
-                <small class="fw-bold">Filtro automático aplicado:</small> Exibindo imóveis de <strong>{{ usuario_atual | title }}</strong> nos dias <strong>01 a 04</strong> para acelerar o carregamento. <a href="/" style="color: #0369a1; text-decoration: underline;" onclick="ativarLoading()">Clique aqui</a> para ver todos.
+            {% if rapido %}
+            <div class="alert border-0 mt-3 mb-0 py-2" style="background-color: var(--accent-soft); color: var(--accent-detail); border-left: 4px solid var(--accent);">
+                <small><strong>Atalho ligado.</strong> Enquanto ele estiver marcado, os filtros de dia e de status ficam de lado. Clique no atalho de novo para voltar ao normal.</small>
+            </div>
+            {% endif %}
+            {% if filtro_automatico and not rapido %}
+            <div class="alert alert-info border-0 mt-3 mb-0" style="background-color: var(--info-bg); color: var(--info-text); border-left: 4px solid var(--accent);">
+                <small class="fw-bold">Filtro automático aplicado:</small> Exibindo imóveis de <strong>{{ usuario_atual | title }}</strong> nos dias <strong>01 a 04</strong> para acelerar o carregamento. <a href="/" style="color: var(--info-text); text-decoration: underline;" onclick="ativarLoading()">Clique aqui</a> para ver todos.
             </div>
             {% endif %}
         </div>
     </div>
 
-<style>
-    #overlayProcessando { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem; }
-    #overlayProcessando.ativo { display: flex; }
-    #overlayProcessando .overlay-card { background: #ffffff; border-radius: 16px; padding: 2rem 2.25rem; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); }
-</style>
-<div id="overlayProcessando" role="alertdialog" aria-modal="true" aria-live="assertive" aria-labelledby="overlayProcessandoTitulo">
-    <div class="overlay-card">
-        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
-        <h5 id="overlayProcessandoTitulo" class="fw-bold mb-1">Processando...</h5>
-        <p id="overlayProcessandoDetalhe" class="text-muted mb-3"></p>
-        <p class="small text-secondary mb-0">Não feche nem atualize esta página. Tempo decorrido: <b id="overlayProcessandoTempo">0s</b></p>
+
+<div id="painelJobsDisparo" aria-live="polite"></div>
+
+<div class="modal fade" id="modalSolicitarLogins" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white" style="background-color: var(--deep);">
+                <h6 class="modal-title fw-bold">🔑 Solicitar login e senha às administradoras</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <p class="small mb-3" style="color: var(--muted);">Envia <b>um e-mail por administradora</b> pedindo o login e a senha do portal dos imóveis que ainda estão pendentes e <b>não têm acesso cadastrado</b>. O status dos imóveis não muda; cada pedido fica registrado no prontuário e a mesma administradora só é cobrada de novo depois de alguns dias.</p>
+                <div class="mb-3" style="max-width: 320px;">
+                    <label class="form-label small fw-bold mb-1" for="selCarteiraLogins">Carteira</label>
+                    <select id="selCarteiraLogins" class="form-select form-select-sm" onchange="carregarResumoLogins()"></select>
+                </div>
+                <div id="resumoLogins"></div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" id="btnConfirmarLogins" style="background-color: var(--accent); border: none;" disabled onclick="confirmarSolicitarLogins()">Solicitar agora</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -400,14 +231,14 @@
     <div class="modal fade" id="modalDisparoColaborador" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-                <div class="modal-header text-white" style="background-color: #0f172a;">
+                <div class="modal-header text-white" style="background-color: var(--deep);">
                     <h6 class="modal-title fw-bold" id="tituloModalDisparoColaborador">Disparar e-mails</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 bg-light" id="corpoModalDisparoColaborador"></div>
                 <div class="modal-footer bg-light border-0">
                     <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary fw-bold px-4" id="btnConfirmarDisparoColaborador" style="background-color: #0ea5e9; border: none;" onclick="confirmarDisparoColaborador()">Disparar agora</button>
+                    <button type="button" class="btn btn-primary fw-bold px-4" id="btnConfirmarDisparoColaborador" style="background-color: var(--accent); border: none;" onclick="confirmarDisparoColaborador()">Disparar agora</button>
                 </div>
             </div>
         </div>
@@ -415,32 +246,250 @@
 
 <script>
     // ==========================================
-    // TELA DE PROCESSAMENTO (bloqueia cliques duplos)
+    // DISPAROS EM SEGUNDO PLANO
+    // O envio roda no servidor: aqui só se acompanha o andamento. Dá para fechar/minimizar o painel,
+    // trocar de página ou recarregar — o disparo continua e o painel reaparece sozinho.
     // ==========================================
-    let processandoAgora = false;
-    let timerOverlayProcessando = null;
+    const PODE_DISPARAR_TODAS = {{ 'true' if pode_disparar_todas else 'false' }};
+    const POLL_JOBS_MS = 1500;
+    const TIPOS_JOB = { EMISSAO: { icone: '✉️', titulo: 'E-mails de cobrança', unidade: 'e-mail(s)' }, LOGIN: { icone: '🔑', titulo: 'Solicitação de login e senha', unidade: 'imóvel(is)' } };
+    const jobsAcompanhados = {};      // id -> { job, meu, minimizado, cancelando, falhasRede, aviso, msgAcao }
+    let timerPollingJobs = null;
 
-    function avisarAntesDeSair(e) { e.preventDefault(); e.returnValue = ''; }
-
-    function mostrarOverlayProcessando(titulo, detalhe) {
-        processandoAgora = true;
-        document.getElementById('overlayProcessandoTitulo').innerText = titulo;
-        document.getElementById('overlayProcessandoDetalhe').innerText = detalhe || '';
-        const tempo = document.getElementById('overlayProcessandoTempo');
-        tempo.innerText = '0s';
-        const inicio = Date.now();
-        clearInterval(timerOverlayProcessando);
-        timerOverlayProcessando = setInterval(() => { tempo.innerText = Math.floor((Date.now() - inicio) / 1000) + 's'; }, 1000);
-        document.getElementById('overlayProcessando').classList.add('ativo');
-        window.addEventListener('beforeunload', avisarAntesDeSair);
+    function chaveDisparoHoje() { return 'disparo_realizado_' + new Date().toISOString().slice(0, 10); }
+    function lembrarDisparoHoje(sim) {
+        try { if (sim) localStorage.setItem(chaveDisparoHoje(), 'true'); else localStorage.removeItem(chaveDisparoHoje()); } catch (e) { /* sem storage: segue sem lembrar */ }
     }
 
-    function esconderOverlayProcessando() {
-        processandoAgora = false;
-        clearInterval(timerOverlayProcessando);
-        document.getElementById('overlayProcessando').classList.remove('ativo');
-        window.removeEventListener('beforeunload', avisarAntesDeSair);
+    function adotarJob(job, meuPedido) {
+        if (!job) return;
+        const ant = jobsAcompanhados[job.id];
+        const meu = (String(job.usuario || '').toLowerCase() === String(OPERADOR_ATUAL || '').toLowerCase()) || !!meuPedido;
+        jobsAcompanhados[job.id] = { job: job, meu: ant ? ant.meu : meu, minimizado: ant ? ant.minimizado : false, cancelando: ant ? ant.cancelando : false, falhasRede: 0, aviso: '', msgAcao: '' };
+        desenharPainelJobs();
+        if (job.em_andamento) { iniciarPollingJobs(); setTimeout(atualizarJobs, 600); }   // 1ª atualização rápida: o painel não fica "preparando" à toa
     }
+
+    // Pede ao servidor para começar (responde na hora) e passa a acompanhar. Lança erro se a requisição falhar.
+    async function iniciarJobDisparo(corpo) {
+        const r = await fetch('/api/sistema/disparos/iniciar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+        if (!r.ok || r.redirected) throw new Error(r.redirected || r.status === 401 ? 'Sua sessão expirou. Entre novamente.' : 'O servidor respondeu com erro (' + r.status + ').');
+        const d = await r.json();
+        if (d.sucesso && d.job) {
+            adotarJob(d.job, false);
+            if (d.ja_rodando) jobsAcompanhados[d.job.id].msgAcao = 'Esse disparo já estava em andamento — você está acompanhando o mesmo.';
+            desenharPainelJobs();
+        }
+        return d;
+    }
+
+    function iniciarPollingJobs() {
+        if (!timerPollingJobs) timerPollingJobs = setInterval(atualizarJobs, POLL_JOBS_MS);
+    }
+
+    async function atualizarJobs() {
+        const ids = Object.keys(jobsAcompanhados).filter(id => jobsAcompanhados[id].job.em_andamento);
+        if (!ids.length) { clearInterval(timerPollingJobs); timerPollingJobs = null; return; }
+        await Promise.all(ids.map(async id => {
+            const est = jobsAcompanhados[id];
+            if (!est) return;
+            try {
+                const r = await fetch('/api/sistema/disparos/status?id=' + id, { cache: 'no-store' });
+                if (r.status === 404) { est.job = Object.assign({}, est.job, { status: 'erro', em_andamento: false, msg: 'Esse disparo não foi encontrado no servidor.' }); aoTerminarJob(est); return; }
+                if (r.redirected || r.status === 401) { est.aviso = 'Sua sessão expirou. Entre de novo no sistema — o disparo continua rodando no servidor.'; return; }
+                if (!r.ok) throw new Error('Status ' + r.status);
+                const d = await r.json();
+                est.falhasRede = 0; est.aviso = '';
+                const eraAndamento = est.job.em_andamento;
+                est.job = d.job;
+                if (eraAndamento && !d.job.em_andamento) aoTerminarJob(est);
+            } catch (e) {
+                est.falhasRede = (est.falhasRede || 0) + 1;
+                if (est.falhasRede >= 3) est.aviso = 'Sem conexão com o servidor. O disparo continua rodando lá; tentando reconectar…';
+            }
+        }));
+        desenharPainelJobs();
+    }
+
+    function aoTerminarJob(est) {
+        est.minimizado = false;            // mostra o resultado
+        est.cancelando = false;
+        // Se não deu certo, o aviso de "autorizar disparos" volta a aparecer na próxima visita
+        if (est.job.tipo === 'EMISSAO' && est.job.status !== 'concluido') lembrarDisparoHoje(false);
+    }
+
+    function corpoDoJob(j) {
+        if (j.tipo === 'LOGIN') return j.alvo ? { tipo: 'LOGIN', responsavel: j.alvo } : { tipo: 'LOGIN', todas: true };
+        return j.alvo ? { tipo: 'EMISSAO', responsavel: j.alvo } : { tipo: 'EMISSAO' };
+    }
+
+    async function tentarNovamenteJob(id) {
+        const est = jobsAcompanhados[id];
+        if (!est) return;
+        try {
+            const d = await iniciarJobDisparo(corpoDoJob(est.job));
+            if (d.sucesso) { delete jobsAcompanhados[id]; if (d.job && d.job.tipo === 'EMISSAO') lembrarDisparoHoje(true); desenharPainelJobs(); }
+            else { est.msgAcao = d.msg || 'Não foi possível iniciar de novo.'; desenharPainelJobs(); }
+        } catch (e) { est.msgAcao = e.message; desenharPainelJobs(); }
+    }
+
+    async function pararJob(id) {
+        const est = jobsAcompanhados[id];
+        if (!est || est.cancelando) return;
+        if (!confirm('Parar este disparo agora?\n\nOs e-mails que já saíram ficam registrados; o restante não será enviado.')) return;
+        est.cancelando = true; est.msgAcao = '';
+        desenharPainelJobs();
+        try {
+            const r = await fetch('/api/sistema/disparos/cancelar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(id) }) });
+            const d = await r.json();
+            if (!d.sucesso) { est.cancelando = false; est.msgAcao = d.msg || 'Não foi possível parar.'; }
+        } catch (e) { est.cancelando = false; est.msgAcao = 'Não foi possível pedir a parada. Tente de novo.'; }
+        desenharPainelJobs();
+    }
+
+    function minimizarJob(id) { const e = jobsAcompanhados[id]; if (e) { e.minimizado = true; desenharPainelJobs(); } }
+    function expandirJob(id) { const e = jobsAcompanhados[id]; if (e) { e.minimizado = false; desenharPainelJobs(); } }
+    function fecharJob(id) { delete jobsAcompanhados[id]; desenharPainelJobs(); }
+
+    function classeDoJob(j) {
+        if (j.em_andamento) return '';
+        if (j.status === 'erro' || j.status === 'interrompido') return 'erro';
+        if (j.status === 'cancelado' || (j.falhas || 0) > 0 || (j.resultado && j.resultado.erro_smtp)) return 'aviso';
+        return 'ok';
+    }
+
+    function textoAndamentoJob(est) {
+        const j = est.job, un = (TIPOS_JOB[j.tipo] || TIPOS_JOB.EMISSAO).unidade;
+        if (est.cancelando) return 'Interrompendo… aguarde o envio em curso terminar.';
+        if (!j.total) return 'Preparando a lista de envios…';
+        const partes = [(j.enviados || 0) + ' enviado(s)'];
+        if (j.sem_email) partes.push(j.sem_email + ' sem e-mail');
+        if (j.falhas) partes.push(j.falhas + ' falha(s)');
+        return (j.processados || 0) + ' de ' + j.total + ' ' + un + ' · ' + partes.join(', ');
+    }
+
+    function linhasResultadoJob(j) {
+        const r = j.resultado || {};
+        const L = [];
+        if (j.status === 'erro') { L.push('❌ ' + (j.msg || 'O disparo falhou.')); L.push('Você pode tentar novamente.'); return L; }
+        if (j.status === 'interrompido') { L.push('⚠️ ' + (j.msg || 'O disparo foi interrompido.')); return L; }
+        if (j.status === 'cancelado') L.push('⏹️ Disparo interrompido por você. O que já saiu ficou registrado.');
+        if (j.tipo === 'LOGIN') {
+            const env = r.qtd_enviados || 0, ja = r.qtd_ja_disparados || 0, sem = r.qtd_sem_email || 0, fal = r.qtd_falhas || 0;
+            if (j.status === 'concluido') {
+                if (env > 0) L.push('✔️ ' + env + ' pedido(s) de login/senha enviado(s) em ' + (r.qtd_emails || 0) + ' e-mail(s), para ' + (r.administradoras || 0) + ' administradora(s).');
+                else if (!r.qtd_encontrados) L.push('Nenhum imóvel sem login/senha nessa carteira.');
+                else L.push('Nada novo a enviar agora.');
+            } else if (env > 0) L.push('• ' + env + ' pedido(s) já enviado(s) antes de parar.');
+            if (ja > 0) L.push('• ' + ja + ' já aguardam retorno (pedido feito nos últimos dias)');
+            if (sem > 0) L.push('• ' + sem + ' sem e-mail cadastrado na administradora');
+            if (fal > 0) L.push('• ' + fal + ' falharam no envio (Gmail)');
+        } else if (j.status === 'cancelado') {
+            L.push('• ' + (r.qtd_enviados || 0) + ' e-mail(s) enviado(s) antes de parar.');
+        } else {
+            textoResultadoDisparo(r).split('\n').forEach(t => { if (t.trim()) L.push(t); });
+        }
+        if (j.status === 'concluido' && j.msg) L.push('⚠️ ' + j.msg);
+        return L;
+    }
+
+    function montarElementoJob(id, est, forma) {
+        const j = est.job, tipo = TIPOS_JOB[j.tipo] || TIPOS_JOB.EMISSAO;
+        const el = document.createElement(est.minimizado ? 'button' : 'div');
+        el.dataset.id = id; el.dataset.forma = forma;
+        if (est.minimizado) {
+            el.type = 'button'; el.className = 'job-chip';
+            el.title = 'Abrir o andamento do disparo';
+            el.onclick = () => expandirJob(id);
+            el.innerHTML = '<span class="chip-ico"></span><span class="chip-texto"></span>';
+            return el;
+        }
+        const podeAgir = est.meu || PODE_DISPARAR_TODAS;
+        el.className = 'job-card';
+        const nomeUsuario = j.usuario ? String(j.usuario).charAt(0).toUpperCase() + String(j.usuario).slice(1) : '';
+        const alvo = escaparHtml(j.alvo ? j.alvo : (j.tipo === 'LOGIN' ? 'Todas as carteiras' : 'Carteira de ' + nomeUsuario));
+        const feitoPorOutro = j.alvo ? semAcento(j.alvo) !== semAcento(j.usuario) : j.tipo === 'LOGIN';
+        const quem = (nomeUsuario && feitoPorOutro) ? ' · por ' + escaparHtml(nomeUsuario) : '';
+        let acoes = '';
+        if (j.em_andamento) {
+            if (podeAgir) acoes += '<button type="button" class="btn btn-sm btn-outline-danger fw-bold" data-acao="parar"' + (est.cancelando ? ' disabled' : '') + '>⏹ Parar disparo</button>';
+        } else {
+            if ((j.status === 'erro' || j.status === 'interrompido') && podeAgir) acoes += '<button type="button" class="btn btn-sm btn-primary fw-bold" data-acao="repetir" style="background-color:var(--accent);border:none;">Tentar novamente</button>';
+            if (j.tipo === 'EMISSAO' && (j.enviados || 0) > 0) acoes += '<button type="button" class="btn btn-sm btn-outline-primary fw-bold" data-acao="recarregar">Atualizar lista</button>';
+            acoes += '<button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-acao="fechar">Fechar</button>';
+        }
+        el.innerHTML =
+            '<div class="job-topo">' +
+              '<span class="job-icone">' + tipo.icone + '</span>' +
+              '<div class="job-titulo"><b>' + tipo.titulo + '</b><small>' + alvo + quem + '</small></div>' +
+              '<button type="button" class="job-x" data-acao="' + (j.em_andamento ? 'minimizar' : 'fechar') + '" title="' + (j.em_andamento ? 'Fechar esta janela (o disparo continua)' : 'Fechar') + '" aria-label="Fechar">×</button>' +
+            '</div>' +
+            (j.em_andamento ? '<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated job-barra" style="width:0%;background-color:var(--accent);"></div></div><div class="job-texto"></div><div class="job-nota">Pode fechar esta janela: o envio continua no servidor.</div>' : '<div class="job-resultado"></div>') +
+            '<div class="job-aviso" style="display:none;"></div>' +
+            (acoes ? '<div class="job-acoes">' + acoes + '</div>' : '');
+        el.addEventListener('click', ev => {
+            const alvoBtn = ev.target.closest('[data-acao]');
+            if (!alvoBtn) return;
+            const a = alvoBtn.dataset.acao;
+            if (a === 'parar') pararJob(id);
+            else if (a === 'minimizar') minimizarJob(id);
+            else if (a === 'fechar') fecharJob(id);
+            else if (a === 'repetir') tentarNovamenteJob(id);
+            else if (a === 'recarregar') window.location.reload();
+        });
+        return el;
+    }
+
+    // Atualiza só o que muda (barra, textos) sem recriar os botões: o clique não se perde no meio de uma atualização.
+    function atualizarElementoJob(el, est) {
+        const j = est.job, tipo = TIPOS_JOB[j.tipo] || TIPOS_JOB.EMISSAO, cls = classeDoJob(j);
+        if (est.minimizado) {
+            el.className = 'job-chip ' + cls;
+            el.querySelector('.chip-ico').innerHTML = j.em_andamento ? '<span class="spinner-border" role="status"></span>' : (cls === 'erro' ? '❌' : cls === 'aviso' ? '⚠️' : '✔️');
+            el.querySelector('.chip-texto').textContent = j.em_andamento
+                ? tipo.titulo + ' · ' + (j.total ? j.percentual + '%' : 'preparando…')
+                : tipo.titulo + ' · ' + (j.status === 'concluido' ? 'concluído' : j.status === 'cancelado' ? 'interrompido' : 'com problema') + ' — ver';
+            return;
+        }
+        el.className = 'job-card ' + cls;
+        const barra = el.querySelector('.job-barra');
+        if (barra) barra.style.width = Math.max(j.total ? j.percentual : 0, j.total ? 3 : 0) + '%';
+        const texto = el.querySelector('.job-texto');
+        if (texto) texto.textContent = textoAndamentoJob(est);
+        const res = el.querySelector('.job-resultado');
+        if (res && !res.dataset.pronto) { res.innerHTML = linhasResultadoJob(j).map(t => '<div>' + escaparHtml(t) + '</div>').join(''); res.dataset.pronto = '1'; }
+        const av = el.querySelector('.job-aviso');
+        const msg = est.aviso || est.msgAcao || '';
+        av.style.display = msg ? 'block' : 'none';
+        av.textContent = msg;
+        const btnParar = el.querySelector('[data-acao="parar"]');
+        if (btnParar) btnParar.disabled = !!est.cancelando;
+    }
+
+    function desenharPainelJobs() {
+        const raiz = document.getElementById('painelJobsDisparo');
+        if (!raiz) return;
+        Array.from(raiz.children).forEach(el => { if (!jobsAcompanhados[el.dataset.id]) el.remove(); });
+        Object.keys(jobsAcompanhados).forEach(id => {
+            const est = jobsAcompanhados[id], j = est.job;
+            const forma = [est.minimizado ? 'chip' : 'card', j.status, (est.meu || PODE_DISPARAR_TODAS) ? 'p' : 'x'].join('|');
+            let el = raiz.querySelector('[data-id="' + id + '"]');
+            if (!el || el.dataset.forma !== forma) {
+                const novo = montarElementoJob(id, est, forma);
+                if (el) el.replaceWith(novo); else raiz.appendChild(novo);
+                el = novo;
+            }
+            atualizarElementoJob(el, est);
+        });
+    }
+
+    // Ao abrir/recarregar a página: retoma o painel dos disparos que ainda estão rodando
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/sistema/disparos/ativos', { cache: 'no-store' })
+            .then(r => (r.ok && !r.redirected) ? r.json() : null)
+            .then(d => { if (d && d.sucesso) d.jobs.forEach(j => adotarJob(j, j.meu)); })
+            .catch(() => {});
+    });
 
     // ==========================================
     // DISPARO DE E-MAILS: texto do resultado (usado aqui e na autorização do RPA)
@@ -509,7 +558,7 @@
             if (x.ja_disparados > 0) notas.push(`${x.ja_disparados} já disparado(s) hoje`);
             if (x.sem_email > 0) notas.push(`${x.sem_email} sem e-mail na administradora`);
             const botao = x.enviaveis > 0
-                ? `<button type="button" class="btn btn-sm btn-primary fw-bold" style="background-color: #0ea5e9; border: none;" onclick="abrirDisparoColaborador(this.dataset.nome)" data-nome="${nome}">✉️ Disparar ${x.enviaveis} e-mail(s)</button>`
+                ? `<button type="button" class="btn btn-sm btn-primary fw-bold" style="background-color: var(--accent); border: none;" onclick="abrirDisparoColaborador(this.dataset.nome)" data-nome="${nome}">✉️ Disparar ${x.enviaveis} e-mail(s)</button>`
                 : `<button type="button" class="btn btn-sm btn-outline-secondary fw-bold" disabled>Nada a disparar</button>`;
             return `
             <div class="col-md-4">
@@ -549,32 +598,114 @@
     }
 
     async function confirmarDisparoColaborador() {
-        if (processandoAgora || !alvoDisparoAtual) return;
+        if (!alvoDisparoAtual) return;
         const nome = alvoDisparoAtual;
-        const x = resumoDisparoPorNome[nome];
-        document.getElementById('btnConfirmarDisparoColaborador').disabled = true;
-        if (modalDisparoColab) modalDisparoColab.hide();
-
-        mostrarOverlayProcessando(`Disparando e-mails de ${nome}...`, `${x ? x.enviaveis : ''} e-mail(s) estão sendo enviados um a um às administradoras.`);
+        const btn = document.getElementById('btnConfirmarDisparoColaborador');
+        if (btn.disabled) return;
+        btn.disabled = true; btn.innerText = 'Iniciando…';
         try {
-            const r = await fetch('/api/sistema/enviar_disparos_hoje', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ responsavel: nome })
-            });
-            if (!r.ok) throw new Error('Status ' + r.status);
-            const d = await r.json();
-            esconderOverlayProcessando();
-            if (d.sucesso) {
-                alert(textoResultadoDisparo(d));
-                window.location.reload();
-            } else {
-                alert('❌ ' + (d.msg || 'Falha ao executar os disparos.'));
-            }
+            const d = await iniciarJobDisparo({ tipo: 'EMISSAO', responsavel: nome });
+            if (!d.sucesso) throw new Error(d.msg || 'Não foi possível iniciar o disparo.');
+            if (modalDisparoColab) modalDisparoColab.hide();      // o envio segue em segundo plano; o painel mostra o andamento
         } catch (e) {
-            console.error(e);
-            esconderOverlayProcessando();
-            alert('⚠️ Falha de conexão ou tempo de resposta excedido.\n\nParte dos e-mails pode ter sido enviada. Atualize a página para ver o que ainda está pendente antes de tentar de novo.');
+            const corpo = document.getElementById('corpoModalDisparoColaborador');
+            corpo.insertAdjacentHTML('beforeend', '<div class="alert alert-danger small mt-3 mb-0">⚠️ ' + escaparHtml(e.message) + ' Nada foi enviado.</div>');
+        } finally {
+            btn.disabled = false; btn.innerText = 'Disparar agora';
+        }
+    }
+
+    // ==========================================
+    // 🔑 SOLICITAR LOGIN E SENHA ÀS ADMINISTRADORAS
+    // ==========================================
+    const NOMES_CARTEIRAS = {{ (responsaveis | map(attribute='colaborador') | list) | tojson }};
+    let modalSolicitarLoginsObj = null;
+    let resumoLoginsAtual = null;
+    let seqResumoLogins = 0;
+
+    function abrirModalSolicitarLogins() {
+        const sel = document.getElementById('selCarteiraLogins');
+        const meu = NOMES_CARTEIRAS.find(n => semAcento(n) === semAcento(OPERADOR_ATUAL));
+        const opcoes = PODE_DISPARAR_TODAS ? NOMES_CARTEIRAS.slice() : [meu || OPERADOR_ATUAL];
+        let html = opcoes.map(n => '<option value="' + escaparHtml(n) + '">' + escaparHtml(n) + (semAcento(n) === semAcento(OPERADOR_ATUAL) ? ' (você)' : '') + '</option>').join('');
+        if (PODE_DISPARAR_TODAS) html += '<option value="__todas__">Todas as carteiras</option>';
+        sel.innerHTML = html;
+        sel.value = meu || (PODE_DISPARAR_TODAS ? '__todas__' : opcoes[0]);
+        sel.disabled = !PODE_DISPARAR_TODAS;
+        modalSolicitarLoginsObj = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalSolicitarLogins'));
+        modalSolicitarLoginsObj.show();
+        carregarResumoLogins();
+    }
+
+    function consultaCarteiraLogins() {
+        const v = document.getElementById('selCarteiraLogins').value;
+        return v === '__todas__' ? { todas: true, qs: 'todas=1' } : { responsavel: v, qs: 'responsavel=' + encodeURIComponent(v) };
+    }
+
+    async function carregarResumoLogins() {
+        const seq = ++seqResumoLogins;
+        const box = document.getElementById('resumoLogins');
+        const btn = document.getElementById('btnConfirmarLogins');
+        btn.disabled = true; btn.innerText = 'Solicitar agora'; resumoLoginsAtual = null;
+        box.innerHTML = '<div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2" role="status"></div>Levantando os imóveis sem login e senha…</div>';
+        try {
+            const r = await fetch('/api/sistema/solicitacao_acessos/resumo?' + consultaCarteiraLogins().qs, { cache: 'no-store' });
+            if (!r.ok || r.redirected) throw new Error(r.redirected ? 'Sua sessão expirou. Entre novamente.' : 'O servidor respondeu com erro (' + r.status + ').');
+            const d = await r.json();
+            if (seq !== seqResumoLogins) return;
+            if (!d.sucesso) { box.innerHTML = '<div class="alert alert-warning small mb-0">' + escaparHtml(d.msg || 'Não foi possível levantar os dados.') + '</div>'; return; }
+            resumoLoginsAtual = d;
+            desenharResumoLogins(d);
+        } catch (e) {
+            if (seq === seqResumoLogins) box.innerHTML = '<div class="alert alert-danger small mb-0">⚠️ ' + escaparHtml(e.message) + '</div>';
+        }
+    }
+
+    function desenharResumoLogins(d) {
+        const box = document.getElementById('resumoLogins');
+        const btn = document.getElementById('btnConfirmarLogins');
+        const todas = !!consultaCarteiraLogins().todas;
+        const card = (rot, val, cor, dica) => '<div class="col-6 col-md-3"><div class="detalhe-box" title="' + escaparHtml(dica) + '"><div class="detalhe-label">' + rot + '</div><div class="detalhe-valor" style="color:' + cor + ';">' + val + '</div></div></div>';
+        let html = '<div class="row g-2 mb-3">' +
+            card('Sem login/senha', d.total_casos, 'var(--ink)', 'Imóveis ativos e pendentes sem login e/ou senha de portal cadastrados') +
+            card('Serão pedidos', d.enviaveis, 'var(--accent-detail)', 'Imóveis que entram nos e-mails desta solicitação') +
+            card('Aguardando retorno', d.aguardando_retorno, 'var(--warn)', 'Já pedidos nos últimos ' + d.dias_espera + ' dias: não são cobrados de novo agora') +
+            card('Sem e-mail da adm.', d.sem_email, 'var(--danger-text)', 'A administradora não tem e-mail cadastrado: não dá para enviar') +
+            '</div>';
+        if (d.enviaveis > 0) {
+            html += '<p class="mb-2">Serão enviados <b>' + d.emails + ' e-mail(s)</b> para <b>' + d.administradoras_a_enviar + ' administradora(s)</b>, cada um com a lista dos imóveis que precisam de acesso.</p>';
+        } else {
+            html += '<div class="alert alert-info small mb-2">Nada a solicitar agora' + (d.total_casos === 0 ? ': todos os imóveis pendentes dessa carteira já têm login e senha.' : '. Os casos restantes estão aguardando retorno ou as administradoras não têm e-mail cadastrado.') + '</div>';
+        }
+        if (d.sem_email > 0) html += '<p class="small text-muted mb-1">• ' + d.sem_email + ' caso(s) ficam de fora porque a administradora <b>não tem e-mail cadastrado</b> (cadastre em Configurações para incluí-los).</p>';
+        if (d.aguardando_retorno > 0) html += '<p class="small text-muted mb-1">• ' + d.aguardando_retorno + ' caso(s) já foram solicitados há menos de ' + d.dias_espera + ' dias.</p>';
+        if (d.por_administradora && d.por_administradora.length) {
+            const linhas = d.por_administradora.map(g =>
+                '<tr' + (g.enviar === 0 ? ' class="text-muted"' : '') + '><td>' + escaparHtml(g.administradora) + (g.email_ok ? '' : ' <span class="badge bg-danger-subtle text-danger-emphasis">sem e-mail</span>') + '</td>' +
+                (todas ? '<td>' + escaparHtml(g.responsavel) + '</td>' : '') +
+                '<td class="text-center fw-bold">' + g.enviar + '</td><td class="text-center">' + g.aguardando + '</td><td class="text-center">' + g.sem_email + '</td></tr>').join('');
+            html += '<details class="mt-3"><summary class="small fw-bold text-primary" style="cursor:pointer;">Ver por administradora (' + d.total_administradoras + ')</summary>' +
+                '<div class="table-responsive mt-2" style="max-height:260px;overflow:auto;"><table class="table table-sm table-striped small mb-0"><thead><tr><th>Administradora</th>' + (todas ? '<th>Responsável</th>' : '') + '<th class="text-center">Pedir</th><th class="text-center">Aguardando</th><th class="text-center">Sem e-mail</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
+                (d.total_administradoras > d.por_administradora.length ? '<div class="small text-muted mt-1">…e mais ' + (d.total_administradoras - d.por_administradora.length) + ' administradora(s).</div>' : '') + '</details>';
+        }
+        box.innerHTML = html;
+        btn.disabled = d.enviaveis === 0;
+        btn.innerText = d.enviaveis > 0 ? 'Solicitar ' + d.enviaveis + ' imóvel(is) agora' : 'Nada a solicitar';
+    }
+
+    async function confirmarSolicitarLogins() {
+        const btn = document.getElementById('btnConfirmarLogins');
+        if (!resumoLoginsAtual || !resumoLoginsAtual.enviaveis || btn.disabled) return;
+        const q = consultaCarteiraLogins();
+        const corpo = q.todas ? { tipo: 'LOGIN', todas: true } : { tipo: 'LOGIN', responsavel: q.responsavel };
+        btn.disabled = true; btn.innerText = 'Iniciando…';
+        try {
+            const d = await iniciarJobDisparo(corpo);
+            if (!d.sucesso) throw new Error(d.msg || 'Não foi possível iniciar a solicitação.');
+            if (modalSolicitarLoginsObj) modalSolicitarLoginsObj.hide();     // segue em segundo plano; o painel mostra o andamento
+        } catch (e) {
+            document.getElementById('resumoLogins').insertAdjacentHTML('afterbegin', '<div class="alert alert-danger small">⚠️ ' + escaparHtml(e.message) + ' Nada foi enviado.</div>');
+            btn.disabled = false; btn.innerText = 'Tentar novamente';
         }
     }
 </script>
@@ -684,7 +815,7 @@
                             <tr>
                                 <td class="fw-bold text-primary">{{ item.imovel }}</td>
                                 <td class="text-secondary">{{ item.administradora }}</td>
-                                <td class="fw-bold text-warning text-center" style="color: #d97706 !important;">{{ item.media_emissao or 'Hoje' }}</td>
+                                <td class="fw-bold text-warning text-center" style="color: var(--warn) !important;">{{ item.media_emissao or 'Hoje' }}</td>
                                 <td class="text-muted text-center">{{ item.vencimento }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.status_interno or 'Sem Status' }}</span>
@@ -704,6 +835,162 @@
 </div>
 {% endif %}
 
+    {% if not mes_historico %}
+    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 px-1" id="atalhosRapidos">
+        <span class="small text-muted me-1">Ver rápido:</span>
+        {% for chave, rotulo in [('vence_hoje', 'Vence hoje'), ('vencidos', 'Vencidos'), ('sem_login', 'Sem login'), ('nao_emitido', 'Não emitido')] %}
+            {% if rapido == chave %}
+                <a href="{{ url_for('index') }}" class="atalho ativo" title="Clique para tirar este atalho">{{ rotulo }} ✕</a>
+            {% else %}
+                <a href="{{ url_for('index', rapido=chave) }}" class="atalho">{{ rotulo }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if rapido == 'inconsistencia' %}
+            <a href="{{ url_for('index') }}" class="atalho atalho-inc ativo" title="Clique para tirar este atalho">⚠️ Inconsistência (<span id="chipIncN">{{ inc_total }}</span>) ✕</a>
+        {% else %}
+            <a href="{{ url_for('index', rapido='inconsistencia') }}" class="atalho atalho-inc" title="Devoluções do Bradesco pendentes na planilha Inc. Bradesco">⚠️ Inconsistência (<span id="chipIncN">{{ inc_total }}</span>)</a>
+        {% endif %}
+        {% if rapido == 'erro_robo' %}
+            <a href="{{ url_for('index') }}" class="atalho atalho-robo ativo" title="Clique para tirar este atalho">🤖⚠️ Robô errou (<span id="chipRoboN">{{ erro_robo_total }}</span>) ✕</a>
+        {% else %}
+            <a href="{{ url_for('index', rapido='erro_robo') }}" class="atalho atalho-robo" title="Boletos tirados de COLETADO porque o robô coletou errado">🤖⚠️ Robô errou (<span id="chipRoboN">{{ erro_robo_total }}</span>)</a>
+        {% endif %}
+        {% if rapido %}<span class="small text-muted ms-1">atalho ligado — os filtros de dia e status ficam de lado</span>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if not mes_historico and auto_ativo and (auto_ocultos or auto_com_erro or ver_ocultos) %}
+    <div id="faixaAutomacaoOculta" class="d-flex align-items-center gap-2 flex-wrap mb-2 px-3 py-2"
+         style="background:var(--sunk); border:1px solid var(--line); border-left:4px solid var(--muted); border-radius:8px; font-size:.82rem; color:var(--ink);">
+        {% if ver_ocultos %}
+            <span>🤖 Mostrando também os casos de automação <strong>({{ auto_portais_txt }})</strong> que ficam ocultos
+                {% if auto_ocultos %}— <strong>{{ auto_ocultos }}</strong> neste filtro{% endif %}.</span>
+            <a href="{{ url_for('index', ocultos=0, rapido=(rapido or None)) }}" class="atalho" onclick="ativarLoading()">Esconder de novo</a>
+        {% else %}
+            <span>🤖 <strong>{{ auto_ocultos }}</strong> caso{{ '' if auto_ocultos == 1 else 's' }} de automação
+                <strong>({{ auto_portais_txt }})</strong> {{ 'está oculto' if auto_ocultos == 1 else 'estão ocultos' }} para ninguém atrapalhar o robô.
+                Aparecem {{ auto_dias }} dias antes do vencimento ou se o robô falhar.</span>
+            <a href="{{ url_for('index', ocultos=1, rapido=(rapido or None)) }}" class="atalho" onclick="ativarLoading()">Ver ocultos</a>
+        {% endif %}
+        {% if auto_com_erro %}
+            <span style="color:var(--warn-text);">⚠️ <strong>{{ auto_com_erro }}</strong> com erro do robô {{ 'já está' if auto_com_erro == 1 else 'já estão' }} na lista (aviso na coluna Observações).</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+    {% if rapido == 'erro_robo' and not mes_historico %}
+    <div id="painelErroRobo" class="mb-3" style="background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--warn); border-radius:var(--radius-md); overflow:hidden;">
+        <div class="d-flex align-items-center gap-3 flex-wrap px-3 py-3" style="background:var(--warn-bg); border-bottom:1px solid var(--line);">
+            <div class="me-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="font-size:1.15rem; line-height:1;">🤖⚠️</span>
+                    <strong style="color:var(--warn-text); font-size:1.05rem;">Robô coletou errado</strong>
+                    <span class="badge rounded-pill" style="background:var(--warn); color:#fff; font-size:.74rem;"><span id="roboContador">{{ erro_robo_painel|length }}</span> em aberto</span>
+                </div>
+                <div class="small text-muted mt-1">Casos em que alguém tirou um boleto de COLETADO (SOLICITADO, NÃO EMITIDO ou em branco) confirmando que o robô coletou errado — fica aqui até alguém tratar.</div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <select id="roboFiltroResp" class="form-select" style="width:200px;" onchange="roboFiltrar()">
+                    <option value="">Todos os responsáveis</option>
+                    {% for r in erro_robo_painel|map(attribute='responsavel')|select|unique|sort %}<option value="{{ r|lower }}">{{ r }}</option>{% endfor %}
+                </select>
+                <input id="roboBusca" type="search" class="form-control" style="width:220px;" placeholder="Imóvel, administradora..." oninput="roboFiltrar()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle m-0" id="tabelaRobo">
+                <thead>
+                    <tr><th style="min-width:95px;">Vencimento</th><th style="min-width:160px;">Imóvel</th><th style="min-width:190px;">Administradora</th>
+                        <th style="min-width:110px;">Responsável</th><th style="min-width:150px;">Mudou para</th><th style="min-width:170px;">Quem e quando</th>
+                        <th class="text-end" style="min-width:110px;">Ação</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in erro_robo_painel %}
+                    <tr id="linhaRobo{{ c.id }}" data-resp="{{ (c.responsavel or '')|lower }}"
+                        data-busca="{{ (c.imovel ~ ' ' ~ (c.administradora or '') ~ ' ' ~ (c.empreendimento or '') ~ ' ' ~ (c.sacado or ''))|lower }}">
+                        <td class="text-nowrap fw-bold">{{ c.vencimento or '—' }}</td>
+                        <td><strong>{{ c.imovel }}</strong><div class="small text-muted">{{ c.empreendimento or '' }}</div></td>
+                        <td class="small">{{ c.administradora or '—' }}</td>
+                        <td class="small">{{ c.responsavel or '—' }}</td>
+                        <td><span class="badge border px-1" style="background:var(--warn-bg); color:var(--warn-text);">{{ c.status_novo or 'Status...' }}</span>
+                            {% if c.status_atual and c.status_atual != c.status_novo %}<div class="small text-muted" title="Status de hoje no sistema">hoje: {{ c.status_atual }}</div>{% endif %}</td>
+                        <td class="small">{{ c.usuario or '—' }}<div class="text-muted">{{ c.data_hora[8:10] }}/{{ c.data_hora[5:7] }} {{ c.data_hora[11:16] }}</div></td>
+                        <td class="text-end"><button type="button" class="btn btn-sm btn-neutro" onclick="tratarErroRobo({{ c.id }})">✅ Tratado</button></td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="roboVazio" class="{{ 'd-none' if erro_robo_painel else '' }}"><td colspan="7" class="text-center text-muted py-4">Nenhum caso em aberto. 🎉</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if rapido == 'inconsistencia' and not mes_historico %}
+    <div id="painelInc" class="mb-3" style="background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--danger); border-radius:var(--radius-md); overflow:hidden;">
+        <div class="d-flex align-items-center gap-3 flex-wrap px-3 py-3" style="background:var(--danger-bg); border-bottom:1px solid var(--line);">
+            <div class="me-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="font-size:1.15rem; line-height:1;">⚠️</span>
+                    <strong style="color:var(--danger-text); font-size:1.05rem;">Inconsistências do Bradesco</strong>
+                    <span class="badge rounded-pill" style="background:var(--danger); color:#fff; font-size:.74rem;"><span id="incContador">{{ inc_painel|rejectattr('situacao', 'equalto', 'OK')|list|length }}</span> em aberto</span>
+                </div>
+                <div class="small text-muted mt-1">
+                    Devoluções PENDENTES · vencimento nos últimos {{ inc_dias }} dias ou à frente (qualquer mês){% if ver_ok_inc %} · mostrando também os já <strong>OK</strong> de {{ inc_nomes_meses_trabalho[0] }}/{{ inc_nomes_meses_trabalho[1] }}{% endif %} ·
+                    {% if inc_leitura.quando %}última leitura da planilha: <strong>{{ inc_leitura.quando[8:10] }}/{{ inc_leitura.quando[5:7] }} {{ inc_leitura.quando[11:16] }}</strong>{% else %}a planilha ainda não foi lida{% endif %}
+                </div>
+            </div>
+            <div class="inc-barra d-flex align-items-center gap-2 flex-wrap">
+                {% if ver_ok_inc %}
+                <a href="{{ url_for('index', rapido='inconsistencia') }}" class="atalho ativo" title="Clique para voltar a ver só as pendentes">✓ Também os OK de {{ inc_nomes_meses_trabalho[0] }}/{{ inc_nomes_meses_trabalho[1] }} ✕</a>
+                {% else %}
+                <a href="{{ url_for('index', rapido='inconsistencia', ver_ok=1) }}" class="atalho" title="Também mostra os casos já marcados OK, com vencimento em {{ inc_nomes_meses_trabalho[0] }} ou {{ inc_nomes_meses_trabalho[1] }}">Mostrar também os OK de {{ inc_nomes_meses_trabalho[0] }}/{{ inc_nomes_meses_trabalho[1] }}</a>
+                {% endif %}
+                <select id="incFiltroResp" class="form-select" style="width:200px;" onchange="incFiltrar()">
+                    <option value="">Todos os responsáveis</option>
+                    {% for r in inc_painel|map(attribute='responsavel')|select|unique|sort %}<option value="{{ r|lower }}">{{ r }}</option>{% endfor %}
+                </select>
+                <input id="incBusca" type="search" class="form-control" style="width:220px;" placeholder="Imóvel, referência, adm..." oninput="incFiltrar()">
+                <button type="button" class="btn btn-neutro" onclick="atualizarIncDaPlanilha(this)" title="Lê a planilha Inc. Bradesco no Google agora">↻ Atualizar da planilha</button>
+            </div>
+        </div>
+        {% if inc_leitura.falha %}<div class="px-3 py-2 small" style="background:var(--warn-bg); color:var(--warn-text); border-bottom:1px solid var(--line);">⚠️ {{ inc_leitura.falha }}</div>{% endif %}
+        <div id="incAviso" class="px-3 py-2 small d-none"></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle m-0" id="tabelaInc">
+                <thead>
+                    <tr><th style="min-width:105px;">Vencimento</th><th style="min-width:200px;">Imóvel</th><th style="min-width:110px;">Referência</th><th style="min-width:70px;">Conta</th><th style="min-width:190px;">Administradora</th><th class="text-end" style="min-width:105px;">Valor</th><th style="min-width:170px;">Ocorrência</th><th style="min-width:200px;">Observação na planilha</th><th style="min-width:90px;">Internet</th><th style="min-width:124px;">Ação</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in inc_painel %}
+                    <tr data-ix="{{ loop.index0 }}" data-resp="{{ (c.responsavel or '')|lower }}" data-situacao="{{ c.situacao }}"
+                        class="{{ 'inc-linha-ok' if c.situacao == 'OK' else '' }}"
+                        data-busca="{{ (c.chave ~ ' ' ~ c.referencia ~ ' ' ~ c.doc_pagfor ~ ' ' ~ c.administradora ~ ' ' ~ c.empreendimento ~ ' ' ~ c.sacado)|lower }}">
+                        <td class="text-nowrap fw-bold">{{ c.venc_br }}{% if c.situacao == 'OK' %} <span class="badge" style="background:var(--ok-bg); color:var(--ok-text); font-size:.65rem;">OK</span>{% endif %}</td>
+                        <td>{% if c.chave %}<strong>{{ c.chave }}</strong>{% else %}<span class="text-muted">sem ID</span>{% endif %}
+                            <div class="small text-muted">{{ c.empreendimento }}</div></td>
+                        <td class="small">{{ c.referencia }}<div class="text-muted">{{ c.doc_pagfor }}</div></td>
+                        <td class="small text-nowrap">{{ c.conta or '—' }}</td>
+                        <td class="small">{{ c.administradora or '—' }}<div class="text-muted">{{ c.responsavel or '' }}</div></td>
+                        <td class="text-nowrap text-end fw-semibold inc-valor" data-v="{{ c.valor or 0 }}"></td>
+                        <td><span class="badge border px-1" style="background:{{ 'var(--ok-bg)' if c.situacao == 'OK' else 'var(--danger-bg)' }}; color:{{ 'var(--ok-text)' if c.situacao == 'OK' else 'var(--danger-text)' }};" title="{{ c.descricao }}">{{ c.ocorrencia }}</span>
+                            <div class="small text-muted" style="max-width:170px;">{{ c.descricao }}</div></td>
+                        <td class="inc-obs">{{ c.obs or '—' }}{% if c.aguardando_google %}<div><span class="badge border px-1" style="background:var(--warn-bg); color:var(--warn-text);" title="Salvo no sistema; o envio para o Google será repetido sozinho">aguardando o Google</span></div>{% endif %}</td>
+                        <td class="inc-internet small">{% if c.internet_id %}<span class="badge border px-1" style="background:var(--info-bg); color:var(--info-text);">📨 #{{ c.internet_id }} · {{ c.internet_status }}</span>{% endif %}</td>
+                        <td><div class="inc-acoes">
+                            <button type="button" class="btn btn-sm btn-neutro" onclick="abrirModalInc({{ loop.index0 }})">✍️ Atuar</button>
+                            <button type="button" class="btn btn-sm btn-neutro" onclick="irInternetInc({{ loop.index0 }})"
+                                    {% if c.internet_status in ('PENDENTE', 'PROCESSANDO', 'APROVADO') %}disabled title="Já há um pedido na Internet para este caso"{% else %}title="Abre o módulo Internet já preenchido"{% endif %}>💳 Internet</button>
+                        </div></td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="incVazio" class="{{ 'd-none' if inc_painel else '' }}"><td colspan="10" class="text-center text-muted py-4">Nenhuma devolução pendente no período. 🎉</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-3 py-2 small text-muted" style="border-top:1px solid var(--line);">Ao atuar aqui, a <strong>Situação</strong> e a <strong>Observação</strong> da própria linha são gravadas na planilha. Abaixo, a lista normal mostra só os boletos da <strong>base ativa</strong> que têm devolução pendente (com o selo ⚠️ na coluna do imóvel).</div>
+    </div>
+    {% endif %}
     <div class="d-flex justify-content-between align-items-center mb-2 px-1">
         <div class="d-flex align-items-center gap-2" id="containerAcoesLote" style="display: none;">
             <span class="small fw-bold text-muted">Ações em Lote:</span>
@@ -724,6 +1011,12 @@
      <a href="/matriz_emissao" target="_blank" class="btn btn-sm btn-outline-danger fw-bold border-0 d-flex align-items-center gap-1" style="box-shadow: none; text-decoration: none;">
             📅 Relatório Emissão ↗
       </a>
+
+        <div class="legenda-dif ms-2" id="legendaDificuldade" title="Classificação do caso pela forma de coleta">
+            <span class="item"><span class="dif-dot dif-FACIL"></span>Fácil · automação</span>
+            <span class="item"><span class="dif-dot dif-MEDIO"></span>Médio · tem login</span>
+            <span class="item"><span class="dif-dot dif-DIFICIL"></span>Difícil · sem login/acesso</span>
+        </div>
 
         <div class="d-flex align-items-center gap-3 ms-auto">
             <div class="small fw-bold text-primary" id="contadorSelecionados">0 selecionados</div>
@@ -803,21 +1096,23 @@
 
 
 {% if precisa_confirmar_rpa %}
-<div class="modal fade" id="modalConfirmarRPA" tabindex="-1" data-bs-backdrop="static">
+<div class="modal fade" id="modalConfirmarRPA" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-            <div class="modal-header text-white" style="background-color: #0f172a;">
+            <div class="modal-header text-white" style="background-color: var(--deep);">
                 <h6 class="modal-title fw-bold">🤖 Autorização de Automação</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
            <div class="modal-body p-4 bg-light text-center">
                 <!-- Nome dinâmico com a primeira letra maiúscula e variável correta de contagem -->
                 <p class="mb-3">Bom dia, <b style="text-transform: capitalize;">{{ usuario_atual }}</b>! O sistema identificou <strong>{{ emissao_hoje_count }}</strong> casos previstos para emissão hoje.</p>
                 <p class="text-secondary small fw-bold">Deseja autorizar o RPA a fazer o envio de e-mails individuais para as administradoras agora?</p>
+                <p class="text-muted small mb-0">O envio acontece em segundo plano: você pode fechar esta janela e continuar trabalhando.</p>
+                <div id="avisoErroRPA" class="alert alert-danger small text-start d-none mt-3 mb-0"></div>
             </div>
             <div class="modal-footer bg-light justify-content-center border-0">
                 <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Lembrar depois</button>
-                <button type="button" class="btn btn-primary fw-bold px-4" onclick="autorizarRPA()" style="background-color: #0ea5e9; border: none;">Autorizar Disparos 🚀</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="autorizarRPA()" style="background-color: var(--accent); border: none;">Autorizar Disparos 🚀</button>
             </div>
         </div>
     </div>
@@ -835,57 +1130,43 @@
         }
     });
 
-    function autorizarRPA() {
-    const btn = document.querySelector('#modalConfirmarRPA .btn-primary');
-    if (processandoAgora) return;
-    btn.innerText = "Processando Disparos...";
-    btn.disabled = true;
-    mostrarOverlayProcessando('Disparando seus e-mails...', 'Os e-mails estão sendo enviados um a um às administradoras.');
-    
-    // Grava no navegador que ele já disparou hoje para não exibir o pop-up de novo
-    const dataHoje = new Date().toISOString().slice(0, 10);
-    localStorage.setItem('disparo_realizado_' + dataHoje, 'true');
-    
-    // Chama a rota que você já tinha criada para forçar o envio
-    fetch('/api/sistema/enviar_disparos_hoje', { method: 'POST' })
-    .then(r => {
-        if (!r.ok) throw new Error("Erro de comunicação com o servidor (Status: " + r.status + ")");
-        return r.json();
-    })
-    .then(data => {
-        esconderOverlayProcessando();
-        if(data.sucesso) {
-            alert(textoResultadoDisparo(data));
-            window.location.reload();
-        } else {
-            alert("Falha ao executar os disparos: " + (data.msg || "Erro desconhecido"));
-            btn.innerText = "Tentar Novamente";
-            btn.disabled = false;
+    async function autorizarRPA() {
+        const modalEl = document.getElementById('modalConfirmarRPA');
+        const btn = modalEl.querySelector('.btn-primary');
+        const aviso = document.getElementById('avisoErroRPA');
+        if (btn.disabled) return;
+        btn.disabled = true; btn.innerText = 'Iniciando…';
+        aviso.classList.add('d-none');
+        try {
+            // O servidor só ABRE o disparo e responde na hora; o envio roda em segundo plano e o painel mostra o andamento.
+            const d = await iniciarJobDisparo({ tipo: 'EMISSAO' });
+            if (!d.sucesso) throw new Error(d.msg || 'Não foi possível iniciar o disparo.');
+            lembrarDisparoHoje(true);          // só marca "já disparou hoje" depois que o disparo realmente começou
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        } catch (e) {
+            aviso.textContent = '⚠️ ' + e.message + ' Nada foi enviado — tente de novo ou feche esta janela.';
+            aviso.classList.remove('d-none');
+            btn.disabled = false; btn.innerText = 'Tentar novamente';
         }
-    })
-    .catch(e => {
-        console.error(e);
-        esconderOverlayProcessando();
-        alert("⚠️ Erro Crítico: Falha de conexão ou tempo de resposta excedido ao processar os e-mails.");
-        btn.innerText = "Tentar Novamente";
-        btn.disabled = false;
-    });
-}
-
+    }
 
 </script>
 {% endif %}
        
-    <div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 border rounded shadow-sm" style="background-color: #f8fafc; font-size: 0.80rem;">
+    <div class="d-flex justify-content-between align-items-center mt-2 px-3 py-2 border rounded shadow-sm" style="background-color: var(--bg); font-size: 0.80rem;">
         <div class="text-muted fw-semibold">
-            Mostrando <span id="qtdVisivelPagina" class="text-primary fw-bold mx-1" style="font-size: 0.85rem;">0</span> de <span class="text-dark fw-bold mx-1" style="font-size: 0.85rem;">{{ total_registros }}</span> imóveis localizados
+            Mostrando <span id="qtdVisivelPagina" class="text-primary fw-bold mx-1" style="font-size: 0.85rem;">0</span> de <span id="qtdTotalRegistros" class="text-dark fw-bold mx-1" style="font-size: 0.85rem;">{{ total_registros }}</span> imóveis localizados
         </div>
+        <span id="seloAoVivo" onclick="if (window.mostrarDiagnosticoAoVivo) mostrarDiagnosticoAoVivo();"
+              title="A tabela se atualiza sozinha quando um colega ou um robô muda o status. Clique para ver se está funcionando.">
+            <i class="ponto"></i><span class="texto">ao vivo</span>
+        </span>
             </div> 
 
 <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header text-white" style="background-color: #0f172a; padding: 20px;">
+            <div class="modal-header text-white" style="background-color: var(--deep); padding: 20px;">
                 <h6 class="modal-title fw-bold" id="tituloModalDetalhes">Detalhamento Operacional do Imóvel</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -904,7 +1185,7 @@
                     <div class="col-md-3"><div class="detalhe-box"><div class="detalhe-label">Dt.ComDesc</div><div class="detalhe-valor text-success" id="detDtComDesc" style="font-size: 0.85rem;"></div></div></div>
                     
                     <div class="col-md-12 mt-2">
-                        <div class="card bg-dark text-white border-0 shadow" style="border-radius: 12px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 8px 20px rgba(0,167,225,0.15) !important;">
+                        <div class="card bg-dark text-white border-0 shadow" style="border-radius: 12px; background: var(--deep); box-shadow: 0 8px 20px rgba(92,5,33,0.2) !important;">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
                                     <h6 class="m-0 fw-bold text-info" style="font-size: 0.8rem; letter-spacing: 0.5px;">🔐 Credenciais Secretas do Portal ADM</h6>
@@ -920,6 +1201,21 @@
                                                 Acessar Site ↗️
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 align-items-end mb-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-info m-0" style="font-size: 0.7rem;" for="cred_possui">Possui login e senha?</label>
+                                        <select id="cred_possui" class="form-select form-select-sm bg-black text-white border-secondary shadow-none" style="background-color: rgba(0,0,0,0.4) !important;" onchange="aplicarPossuiLoginIndex()">
+                                            <option value="SIM">Sim, possui login e senha</option>
+                                            <option value="NAO">Não possui login (vai para DIVERSOS)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <span id="cred_possui_aviso" class="small text-warning fw-semibold" style="display: none; font-size: 0.72rem;">
+                                            Ao salvar, o portal vira DIVERSOS, o login/senha são apagados e o imóvel sai dos robôs de site.
+                                        </span>
                                     </div>
                                 </div>
 
@@ -953,14 +1249,14 @@
                 
                 <div class="mb-4">
                     <label class="form-label small fw-bold text-secondary mb-1">Observação do Cadastro Original:</label>
-                    <textarea id="detObservacaoPlanilha" class="form-control form-control-sm bg-light" rows="2" readonly style="resize: none; font-size: 0.85rem; color: #334155; font-weight: 500;"></textarea>
+                    <textarea id="detObservacaoPlanilha" class="form-control form-control-sm bg-light" rows="2" readonly style="resize: none; font-size: 0.85rem; color: var(--ink); font-weight: 500;"></textarea>
                 </div>
                 
-                <div class="p-4 bg-light rounded" style="border: 1px solid #e2e8f0;">
-                    <label class="form-label fw-bold text-dark mb-3"><span style="color: #00a7e1;">|</span> Anotações e Histórico de Acompanhamento</label>
+                <div class="p-4 bg-light rounded" style="border: 1px solid var(--line);">
+                    <label class="form-label fw-bold text-dark mb-3"><span style="color: var(--accent);">|</span> Anotações e Histórico de Acompanhamento</label>
                     <div class="d-flex gap-2 mb-4">
                         <input type="text" id="campoNovaObs" class="form-control" placeholder="Inserir nova anotação interna sobre este caso..." style="border-radius: 6px;">
-                        <button class="btn btn-dark fw-bold text-nowrap px-4" style="background-color: #1e293b; border-radius: 6px;" onclick="salvarNovaObservacao()">Gravar Nota</button>
+                        <button class="btn btn-dark fw-bold text-nowrap px-4" style="background-color: var(--ink); border-radius: 6px;" onclick="salvarNovaObservacao()">Gravar Nota</button>
                     </div>
                     <div id="listaHistorico" class="overflow-auto pe-2" style="max-height: 200px; font-size: 0.85rem; line-height: 1.5;"></div>
                 </div>
@@ -968,11 +1264,12 @@
         </div>
     </div>
 </div>
+</div>   <!-- fecha #modalDetalhes: sem esta linha, todo o resto da página vira filho dele -->
 
 <div class="modal fade" id="modalEmail" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header text-white" style="background-color: #0f172a; padding: 20px;">
+            <div class="modal-header text-white" style="background-color: var(--deep); padding: 20px;">
                 <h6 class="modal-title fw-bold">Processador de Notificações Individuais em Massa</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="btnFecharModalEmail"></button>
             </div>
@@ -996,7 +1293,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="background-color: #f8fafc;">
+            <div class="modal-footer" style="background-color: var(--bg);">
                 <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal" id="btnCancelarEnvio">Cancelar</button>
                 <button type="button" class="btn btn-lello fw-bold px-4" id="btnIniciarDisparos" onclick="processarFilaEmails()">🚀 Iniciar Disparos Agora</button>
             </div>
@@ -1007,7 +1304,7 @@
 <div class="modal fade" id="modalVisualizadorPDF" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; height: 85vh;">
-            <div class="modal-header text-white" style="background-color: #0f172a; padding: 15px 20px;">
+            <div class="modal-header text-white" style="background-color: var(--deep); padding: 15px 20px;">
                 <h6 class="modal-title fw-bold" id="tituloModalPDF">Boleto Digitalizado - Imóvel </h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -1065,6 +1362,80 @@
     </div>
 </div>
 
+<!-- 🔐 Modal: dados de acesso obrigatórios ao marcar COLETADO um caso com erro de login no Raio-X -->
+<div class="modal fade" id="modalAcessoColeta" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white p-3">
+                <div>
+                    <h6 class="modal-title fw-bold m-0">🔐 Dados de acesso obrigatórios para marcar COLETADO</h6>
+                    <small class="text-white-50" id="acessoColetaSubtitulo">Imóvel -</small>
+                </div>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-danger border-0 p-3 mb-3 small">
+                    <div class="fw-bold">Este imóvel está com erro de login no Raio-X RPA.</div>
+                    <div class="mt-1">Para o robô conseguir coletar nos próximos meses, informe <b>login, senha, unidade e bloco</b> como estão no site
+                        — ou marque que <b>não possui mais login</b> (o imóvel passa para DIVERSOS).</div>
+                    <div class="mt-2 text-dark font-monospace" style="font-size: 0.78rem;" id="acessoColetaErro"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary mb-1" for="acesso_possui">Possui login e senha de acesso ao site?</label>
+                    <select id="acesso_possui" class="form-select form-select-sm fw-bold" style="max-width: 360px;">
+                        <option value="SIM">Sim, possui login e senha</option>
+                        <option value="NAO">Não possui mais login (vai para DIVERSOS)</option>
+                    </select>
+                </div>
+
+                <div class="row g-3" id="acessoColetaCampos">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_portal">Portal</label>
+                        <select id="acesso_portal" class="form-select form-select-sm fw-bold">
+                            <option value="WEBWARE">WEBWARE</option>
+                            <option value="WINKER">WINKER</option>
+                            <option value="SUPERLÓGICA">SUPERLÓGICA</option>
+                            <option value="DIVERSOS">DIVERSOS</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_emp">Condomínio (como está no site)</label>
+                        <input type="text" id="acesso_emp" class="form-control form-control-sm fw-bold" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_bloco">Bloco / Divisão <span class="text-danger">*</span></label>
+                        <input type="text" id="acesso_bloco" class="form-control form-control-sm fw-bold" placeholder="Ex.: BLOCO A" autocomplete="off">
+                        <div class="form-check mt-1">
+                            <input class="form-check-input" type="checkbox" id="acesso_sem_bloco">
+                            <label class="form-check-label small text-muted" for="acesso_sem_bloco">Condomínio sem bloco</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_unid">Unidade (como está no site) <span class="text-danger">*</span></label>
+                        <input type="text" id="acesso_unid" class="form-control form-control-sm fw-bold" placeholder="Ex.: 52 ou A/AP/52" autocomplete="off">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_login">Login <span class="text-danger obrig-cred">*</span></label>
+                        <input type="text" id="acesso_login" class="form-control form-control-sm" autocomplete="off">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary" for="acesso_senha">Senha <span class="text-danger obrig-cred">*</span></label>
+                        <input type="text" id="acesso_senha" class="form-control form-control-sm" placeholder="Digite a senha correta" autocomplete="off">
+                    </div>
+                    <div class="col-12 small text-muted" id="acessoCompartilhado" style="display: none;">
+                        Neste portal o robô entra com a conta compartilhada da Lello: login e senha por imóvel não são obrigatórios.
+                    </div>
+                </div>
+                <div id="acessoColetaAviso" class="alert alert-danger small fw-semibold mt-3 mb-0 p-2" style="display: none;"></div>
+            </div>
+            <div class="modal-footer bg-light border-top p-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-3" id="btnCancelarAcessoColeta">Cancelar (não marcar)</button>
+                <button type="button" class="btn btn-sm btn-success fw-bold px-4" id="btnSalvarAcessoColeta">Salvar dados e marcar COLETADO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
@@ -1102,7 +1473,14 @@ function alterarMediaEmissao(idImovel, elementoSelect) {
 // =========================================================
 // INTELIGÊNCIA EXCEL: EXPORTAÇÃO PARA XLSX VERDADEIRO
 // =========================================================
-function exportarParaExcel() {
+async function exportarParaExcel() {
+    // ⚡ A tela agora carrega 100 linhas por vez: para exportar, traz o restante da lista (uma única vez) antes de montar o XLSX
+    try {
+        await garantirTodasLinhas();
+    } catch (err) {
+        alert("⚠️ Não foi possível carregar todos os imóveis para exportar: " + err.message);
+        return;
+    }
     const linhas = document.querySelectorAll('#tabelaImoveisCob tbody tr');
     let dadosExcel = [];
     
@@ -1224,8 +1602,10 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll('.dropdown-menu-filtro').forEach(menu => {
         menu.dataset.bsAutoClose = 'outside';
     });
-    preencherDropdownsCustomizados();
-    
+    // ⚡ Os dropdowns dos filtros de coluna (🔍) NÃO são mais montados aqui: varrer a tabela inteira a cada
+    // carregamento era um dos maiores custos. Agora são montados sob demanda, quando o operador abre um filtro
+    // (ver prepararFiltrosDeColuna, na seção de rolagem infinita).
+
     const modalEmail = document.getElementById('modalEmail');
     if (modalEmail) document.body.appendChild(modalEmail);
     
@@ -1596,80 +1976,78 @@ function fecharDropdownBootstrap(btnElement) {
     }
 }
 
-// 🎯 SOLUÇÃO DA PESQUISA GLOBAL COM ACENTOS
+// 🎯 FILTROS DE COLUNA (🔍) APLICADOS NAS LINHAS JÁ CARREGADAS
+// (a pesquisa por Imóvel / Sacado / Empreendimento agora é feita no servidor — ver executarBusca)
+let existemLinhasOcultas = false;
+
 function filtrarTabelaCompleta() {
-    const tabela = document.getElementById('tabelaImoveisCob');
-    const linhas = tabela.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    // Normaliza o termo da busca global (Imóvel/Sacado/Empreendimento)
-    const buscaGlobal = document.getElementById('campoBuscaImovel').value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    
+    const tbody = document.getElementById('tbodyImoveis');
+    const linhas = tbody.rows;
+    const temFiltroColuna = Object.keys(filtrosAtivos).length > 0;
+    const contadorVisivel = document.getElementById('qtdVisivelPagina');
+
+    // Linhas que NÃO são dado: "nenhum registro" e a sentinela da rolagem infinita
+    const especiais = (document.getElementById('linhaNenhumRegistro') ? 1 : 0) + (document.getElementById('linhaLoadingScroll') ? 1 : 0);
+
+    // ⚡ Caminho rápido: sem filtro de coluna e sem nada escondido, não precisa varrer célula por célula
+    if (!temFiltroColuna && !existemLinhasOcultas) {
+        const total = linhas.length - especiais;
+        document.getElementById('linhaNenhumRegistro').style.display = (total === 0) ? "" : "none";
+        if (contadorVisivel) contadorVisivel.innerText = total;
+        return;
+    }
+
     let linhasVisiveis = 0;
+    let linhasDeDado = 0;
 
     for (let i = 0; i < linhas.length; i++) {
         const linha = linhas[i];
         // 🛑 A sentinela da rolagem infinita NÃO é linha de dado: não pode ser filtrada, escondida nem contada
         if (linha.id === "linhaNenhumRegistro" || linha.id === "linhaLoadingScroll") continue;
-        
+        linhasDeDado++;
+
         let exibir = true;
 
-        if (buscaGlobal) {
-            // Índices baseados no thead: 4 = Nº Imóvel | 6 = Empreendimento | 7 = Sacado
-            const celImovel = linha.getElementsByTagName('td')[4];
-            const celEmp = linha.getElementsByTagName('td')[6];
-            const celSacado = linha.getElementsByTagName('td')[7];
-            
-            // Pega o texto e normaliza, caso a célula exista
-            const txtImovel = celImovel ? (celImovel.textContent || celImovel.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
-            const txtEmp = celEmp ? (celEmp.textContent || celEmp.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
-            const txtSacado = celSacado ? (celSacado.textContent || celSacado.innerText).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
-            
-            // Se o termo pesquisado não estiver em NENHUMA das três colunas, ele oculta a linha
-            if (!txtImovel.includes(buscaGlobal) && !txtEmp.includes(buscaGlobal) && !txtSacado.includes(buscaGlobal)) {
-                exibir = false;
-            }
-        }
+        for (const colIndex in filtrosAtivos) {
+            const termos = filtrosAtivos[colIndex] || [];
+            const celula = linha.getElementsByTagName('td')[colIndex];
 
-        if (exibir) {
-            for (const colIndex in filtrosAtivos) {
-                const termos = filtrosAtivos[colIndex] || [];
-                const celula = linha.getElementsByTagName('td')[colIndex];
-                
-                if (celula) {
-                    let textoCelula = "";
-                    const selectElement = celula.querySelector('select');
-                    
-                    if (selectElement) {
-                        textoCelula = selectElement.options[selectElement.selectedIndex].text.trim();
-                    } else {
-                        textoCelula = (celula.textContent || celula.innerText).trim();
-                    }
-                    
-                    if(textoCelula === "🔗 Link") textoCelula = "Possui Link";
-                    
-                    // 🎯 SEGREDO AQUI: Mapeia o visual da célula para a tag do filtro
-                    if (textoCelula === "" || textoCelula === "-" || textoCelula === "Status...") {
-                        textoCelula = "(Em Branco)";
-                    }
-                    
-                    // Aplica a normalização após o tratamento acima
-                    textoCelula = textoCelula.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                    
-                    if (!termos.includes(textoCelula)) {
-                        exibir = false;
-                        break;
-                    }
+            if (celula) {
+                let textoCelula = "";
+                const selectElement = celula.querySelector('select');
+
+                if (selectElement) {
+                    textoCelula = selectElement.options[selectElement.selectedIndex].text.trim();
+                } else {
+                    textoCelula = (celula.textContent || celula.innerText).trim();
+                }
+
+                if(textoCelula === "🔗 Link") textoCelula = "Possui Link";
+
+                // 🎯 SEGREDO AQUI: Mapeia o visual da célula para a tag do filtro
+                if (textoCelula === "" || textoCelula === "-" || textoCelula === "Status...") {
+                    textoCelula = "(Em Branco)";
+                }
+
+                // Aplica a normalização após o tratamento acima
+                textoCelula = textoCelula.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+                if (!termos.includes(textoCelula)) {
+                    exibir = false;
+                    break;
                 }
             }
         }
 
-        linha.style.display = exibir ? "" : "none";
+        const novoDisplay = exibir ? "" : "none";
+        if (linha.style.display !== novoDisplay) linha.style.display = novoDisplay;
         if (exibir) linhasVisiveis++;
     }
-    
+
+    existemLinhasOcultas = linhasVisiveis < linhasDeDado;
     document.getElementById('linhaNenhumRegistro').style.display = (linhasVisiveis === 0) ? "" : "none";
-    
+
     // Atualiza o contador na tela em tempo real
-    const contadorVisivel = document.getElementById('qtdVisivelPagina');
     if (contadorVisivel) {
         contadorVisivel.innerText = linhasVisiveis;
     }
@@ -1709,6 +2087,25 @@ function acionarTrocaStatus(selectObj, imovelId, statusAnteriorDoBanco) {
     else if (statusEscolhido === 'AUTOMAÇÃO') selectObj.classList.add('status-robo');
     else if (statusEscolhido === 'NÃO EMITIDO') selectObj.classList.add('status-nao-emitido');
     else selectObj.classList.add('status-branco');
+
+    // 🤖⚠️ Este boleto já estava COLETADO e está voltando (SOLICITADO / NÃO EMITIDO / em branco): o robô coletou errado?
+    if (statusAnteriorDoBanco === 'COLETADO' && ['', 'SOLICITADO', 'NÃO EMITIDO'].includes(statusEscolhido)) {
+        if (confirm('Este boleto já estava COLETADO pelo robô.\n\nO robô coletou errado?\n\nOK = sim, registrar no controle de erros do robô (a equipe vai revisar).\nCancelar = não, é só uma correção manual.')) {
+            fetch('/api/robo/marcar_erro_coleta', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: [imovelId], status_novo: statusEscolhido })
+            }).then(r => r.json()).then(d => {
+                const chip = document.getElementById('chipRoboN');
+                if (chip && d && d.inseridos) chip.textContent = (parseInt(chip.textContent || '0') + d.inseridos);
+            }).catch(() => {});
+        }
+    }
+
+    // 🔐 Caso com erro de login no Raio-X: COLETADO só com os dados de acesso (ou "não possui mais login")
+    if (statusEscolhido === "COLETADO" && typeof window.verificarAcessoAntesDeColetar === "function"
+        && !window.verificarAcessoAntesDeColetar(selectObj, imovelId, statusAnteriorDoBanco)) {
+        return;
+    }
 
     // 🎯 GATILHO INTELIGENTE: Pede a data de emissão se estiver vazia ao coletar!
     if (statusEscolhido === "COLETADO") {
@@ -1963,7 +2360,8 @@ function salvarCredenciaisSecretas() {
             login: loginVal,
             senha: senhaVal,
             portal: portalVal,
-            link: linkVal // 🎯 ENVIANDO PARA O BANCO
+            link: linkVal, // 🎯 ENVIANDO PARA O BANCO
+            sem_login: (document.getElementById('cred_possui') || {}).value === 'NAO'
         })
     })
     .then(r => r.json())
@@ -2085,6 +2483,7 @@ function abrirDetalhesImovel(elemento) {
     document.getElementById('cred_senha').value = "";
     document.getElementById('cred_link').value = ""; 
     document.getElementById('cred_portal').value = "DIVERSOS";
+    if (document.getElementById('cred_possui')) { document.getElementById('cred_possui').value = 'SIM'; aplicarPossuiLoginIndex(); }
     
     document.getElementById('listaHistorico').innerHTML = "<p class='text-muted text-center my-3'>Carregando anotações deste vencimento...</p>";
 
@@ -2102,10 +2501,15 @@ function abrirDetalhesImovel(elemento) {
             
             const portalDb = i.portal || "DIVERSOS";
             const selectPortal = document.getElementById('cred_portal');
-            if (Array.from(selectPortal.options).some(opt => opt.value === portalDb)) {
-                selectPortal.value = portalDb;
-            } else {
-                selectPortal.value = "DIVERSOS";
+            if (!Array.from(selectPortal.options).some(opt => opt.value === portalDb)) {
+                // SUPERLÓGICA, CTRL, AUTÔNOMA...: entra na lista para "Atualizar Acesso" não trocar o portal por DIVERSOS
+                selectPortal.appendChild(new Option(portalDb, portalDb));
+            }
+            selectPortal.value = portalDb;
+            const selectPossui = document.getElementById('cred_possui');
+            if (selectPossui) {
+                selectPossui.value = String(i.possui_login || '').toUpperCase() === 'NAO' ? 'NAO' : 'SIM';
+                aplicarPossuiLoginIndex();
             }
 
             document.getElementById('cred_link').value = (i.link_portal && i.link_portal !== "None") ? i.link_portal : "";
@@ -2236,8 +2640,27 @@ function salvarNovaObservacao() {
     }).then(() => { document.getElementById('campoNovaObs').value = ""; carregarHistorico(imovelIdAtual); });
 }
 
-function selecionarTodos(checkboxMaster) { 
-    document.querySelectorAll('.check-imovel').forEach(cb => cb.checked = checkboxMaster.checked); 
+async function selecionarTodos(checkboxMaster) {
+    const marcar = checkboxMaster.checked;
+    // ⚡ A lista é paginada: "selecionar todos" precisa dela completa, senão só as primeiras linhas seriam marcadas
+    // e a ação em lote atingiria menos imóveis do que o operador imagina.
+    if (marcar) {
+        try {
+            await garantirTodasLinhas();
+        } catch (err) {
+            alert("⚠️ Não foi possível carregar todos os imóveis para selecionar: " + err.message);
+            checkboxMaster.checked = false;
+            return;
+        }
+    }
+    // Só marca o que está à vista: linha escondida por filtro de coluna (🔍) NÃO entra na seleção.
+    // Ao desmarcar, limpa tudo (inclusive o que ficou escondido), senão sobrariam marcados invisíveis.
+    document.querySelectorAll('.check-imovel').forEach(cb => {
+        const linha = cb.closest('tr');
+        const escondida = linha && linha.style.display === 'none';
+        cb.checked = marcar ? !escondida : false;
+    });
+    checkboxMaster.dispatchEvent(new Event('change', { bubbles: true })); // atualiza contador e barra de ações em lote
 }
 
 let filaDeEnvio = [];
@@ -2269,7 +2692,15 @@ function abrirModalDisparoEmail(event) {
     const boxFila = document.getElementById('listaFilaEnvio');
     if(boxFila) boxFila.innerHTML = "";
     
+    // 🔒 Caso já resolvido não recebe pedido de boleto: sai da fila (o servidor também barra, por garantia)
+    const STATUS_SEM_SOLICITACAO = ['PAGO', 'PAGO NA ADM', 'PAGO NA 275', 'COLETADO'];
+    const barradosPorStatus = [];
     selecionados.forEach(cb => {
+        const selStatus = cb.closest('tr') ? cb.closest('tr').querySelector('select.select-status') : null;
+        if (selStatus && STATUS_SEM_SOLICITACAO.includes(String(selStatus.value || '').trim().toUpperCase())) {
+            barradosPorStatus.push(cb.getAttribute('data-imovelnum'));
+            return;
+        }
         const item = {
             id: cb.value, imovel: cb.getAttribute('data-imovelnum'), adm: cb.getAttribute('data-adm'), email: cb.getAttribute('data-email'),
             resp: cb.getAttribute('data-resp'), venc: cb.getAttribute('data-venc'), emp: cb.getAttribute('data-emp'),
@@ -2298,7 +2729,7 @@ function abrirModalDisparoEmail(event) {
             }
 
             boxFila.innerHTML += `<div class="p-2 border-bottom" id="item_fila_${item.id}">
-                <span style="color: #00a7e1;">●</span> Imóvel <b>${item.imovel}</b> <span class="text-muted">|</span> ADM: ${item.adm}${coletorHTML}<br>
+                <span style="color: #FF8FA8;">●</span> Imóvel <b>${item.imovel}</b> <span class="text-muted">|</span> ADM: ${item.adm}${coletorHTML}<br>
                 <div class="mt-1">${emailHTML}</div>
                 <input type="email" id="input_email_fila_${item.id}" class="form-control form-control-sm mt-2" placeholder="Digite outro e-mail ou informe um novo e-mail" style="font-size: 0.78rem; max-width: 380px;">
                 <div class="form-check form-check-inline mt-2">
@@ -2308,6 +2739,10 @@ function abrirModalDisparoEmail(event) {
             </div>`;
         }
     });
+    if (barradosPorStatus.length) {
+        alert(`🔒 ${barradosPorStatus.length} caso(s) já PAGO / COLETADO ficaram de fora da fila (não se pede boleto à administradora): imóvel ${barradosPorStatus.slice(0, 10).join(', ')}${barradosPorStatus.length > 10 ? '…' : ''}`);
+        if (filaDeEnvio.length === 0) return;
+    }
     document.getElementById('barraProgressoEmail').style.width = "0%";
     document.getElementById('statusConsoleEnvio').innerHTML = "Fila estruturada com sucesso.<br>Pronto para iniciar a transmissão em lote.";
     document.getElementById('btnIniciarDisparos').disabled = false;
@@ -2330,7 +2765,7 @@ function processarFilaEmails() {
     localStorage.setItem('disparo_realizado_' + dataHoje, 'true');
 
     if (indiceFilaAtual >= filaDeEnvio.length) {
-        document.getElementById('statusConsoleEnvio').innerHTML += "<br><span style='color:#38bdf8;'>✔️ PROCESSO TOTALMENTE CONCLUÍDO.</span>";
+        document.getElementById('statusConsoleEnvio').innerHTML += "<br><span style='color:#FFB3C2;'>✔️ PROCESSO TOTALMENTE CONCLUÍDO.</span>";
         // ... restante da sua função continua igualzinho
         document.getElementById('btnIniciarDisparos').disabled = true;
         return;
@@ -2353,7 +2788,7 @@ function processarFilaEmails() {
         avancarFila(); return;
     }
 
-    consoleBox.innerHTML += `<br><span style="color:#cbd5e1;"> Transmitindo caso Imóvel ${item.imovel} para ${emailDestino}...</span>`;
+    consoleBox.innerHTML += `<br><span style="color:#EBC9D2;"> Transmitindo caso Imóvel ${item.imovel} para ${emailDestino}...</span>`;
     consoleBox.scrollTop = consoleBox.scrollHeight;
 
     const assuntoStr = `Solicitação de Boleto - Envio - Referência de Cobrança`;
@@ -2417,14 +2852,63 @@ function aplicarStatusLote() {
     if (!novoStatus) { alert("⚠️ Selecione qual status deseja aplicar."); return; }
     if(!confirm(`Confirma a alteração do status de ${checkboxes.length} imóveis para "${novoStatus}"?`)) return;
 
+    // 🤖⚠️ Entre os selecionados, quantos já estavam COLETADOS pelo robô e estão voltando?
+    if (['', 'SOLICITADO', 'NÃO EMITIDO'].includes(novoStatus)) {
+        const idsColetados = Array.from(checkboxes).filter(cb => {
+            const sel = cb.closest('tr') ? cb.closest('tr').querySelector('select.select-status') : null;
+            return sel && sel.value === 'COLETADO';
+        }).map(cb => cb.value);
+        if (idsColetados.length && confirm(`${idsColetados.length} desse(s) imóvel(is) já estavam COLETADOS pelo robô.\n\nO robô coletou errado?\n\nOK = sim, registrar no controle de erros do robô.\nCancelar = não, é só uma correção manual.`)) {
+            fetch('/api/robo/marcar_erro_coleta', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: idsColetados, status_novo: novoStatus })
+            }).then(r => r.json()).then(d => {
+                const chip = document.getElementById('chipRoboN');
+                if (chip && d && d.inseridos) chip.textContent = (parseInt(chip.textContent || '0') + d.inseridos);
+            }).catch(() => {});
+        }
+    }
+
     fetch('/api/sistema/atualizar_status_lote', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ ids: Array.from(checkboxes).map(cb => cb.value), status: novoStatus })
     }).then(r => r.json()).then(data => {
-        if(data.sucesso) window.location.reload();
+        if(data.sucesso) {
+            if (data.bloqueados && data.bloqueados.length) alert("⚠️ " + data.msg);
+            window.location.reload();
+        }
         else alert(" Falha ao atualizar lote: " + data.msg);
     });
 }
+
+    // 🤖⚠️ Painel "Robô coletou errado": filtro e botão de tratar
+    function roboFiltrar() {
+        const resp = (document.getElementById('roboFiltroResp') || {}).value || '';
+        const busca = ((document.getElementById('roboBusca') || {}).value || '').toLowerCase();
+        const linhas = document.querySelectorAll('#tabelaRobo tbody tr[data-busca]');
+        let visiveis = 0;
+        linhas.forEach(tr => {
+            const ok = (!resp || tr.dataset.resp === resp) && (!busca || tr.dataset.busca.includes(busca));
+            tr.style.display = ok ? '' : 'none';
+            if (ok) visiveis++;
+        });
+        const vazio = document.getElementById('roboVazio');
+        if (vazio) vazio.classList.toggle('d-none', linhas.length === 0 || visiveis > 0);
+    }
+
+    function tratarErroRobo(id) {
+        if (!confirm('Marcar este caso como tratado?')) return;
+        fetch(`/api/robo/erros/${id}/tratar`, { method: 'POST' })
+            .then(r => r.json()).then(d => {
+                if (!d.sucesso) { alert('⚠️ ' + (d.msg || 'Não foi possível tratar.')); return; }
+                const linha = document.getElementById('linhaRobo' + id);
+                if (linha) linha.remove();
+                const contador = document.getElementById('roboContador');
+                const chip = document.getElementById('chipRoboN');
+                [contador, chip].forEach(el => { if (el) el.textContent = Math.max(0, parseInt(el.textContent || '0') - 1); });
+                roboFiltrar();
+            }).catch(() => alert('⚠️ Erro de conexão ao tratar o caso.'));
+    }
 
 // 🎯 AUTO-PREENCHIMENTO DE URL POR PORTAL (INDEX)
 function atualizarUrlPorPortalIndex() {
@@ -2726,8 +3210,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Função para caçar os Contratos Novos e colocar o Emoji
-    function destacarContratosNovos() {
-        const linhas = document.querySelectorAll("#tabelaImoveisCob tbody tr");
+    function destacarContratosNovos(linhasAlvo) {
+        // ⚡ Rolagem infinita: só processa as linhas que acabaram de chegar (antes varria a tabela inteira a cada página)
+        const linhas = linhasAlvo || document.querySelectorAll("#tabelaImoveisCob tbody tr");
         
         linhas.forEach(linha => {
             if (linha.id === "linhaNenhumRegistro") return;
@@ -2818,20 +3303,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    window.aplicarCorPlanilha = aplicarCorPlanilha;   // usada também pelo atualizador ao vivo
+
     // 1. Pinta a tabela logo que o site abre
     atualizarCoresDaTabela();
 
     // 2. Cria o espião em tempo real
-    const todosSelectsStatus = document.querySelectorAll("select.select-status");
-    todosSelectsStatus.forEach(select => {
-        select.addEventListener("change", function() {
-            const linha = this.closest("tr");
-            const checkbox = linha.querySelector(".check-imovel");
-            const dataVenc = checkbox ? checkbox.getAttribute("data-venc") : null;
-            const statusSelecionado = this.options[this.selectedIndex].text.toUpperCase();
-            
-            aplicarCorPlanilha(linha, statusSelecionado, dataVenc);
-        });
+    // ⚡ UM único listener (delegação de evento) no tbody atende todas as linhas, inclusive as que chegam depois
+    // pela rolagem infinita. Antes era 1 listener por linha (milhares), recriados a cada página.
+    document.getElementById("tbodyImoveis").addEventListener("change", function(e) {
+        const select = e.target;
+        if (!select.matches || !select.matches("select.select-status")) return;
+        const linha = select.closest("tr");
+        const checkbox = linha.querySelector(".check-imovel");
+        const dataVenc = checkbox ? checkbox.getAttribute("data-venc") : null;
+        const statusSelecionado = select.options[select.selectedIndex].text.toUpperCase();
+
+        aplicarCorPlanilha(linha, statusSelecionado, dataVenc);
     });
 
     // 🚀 Usado pela rolagem infinita: cor, selo 🆕 e "espião" de status para as linhas que chegam via AJAX
@@ -2842,13 +3330,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const cb = linha.querySelector(".check-imovel");
             const dataVenc = cb ? cb.getAttribute("data-venc") : null;
             aplicarCorPlanilha(linha, selectStatus.options[selectStatus.selectedIndex].text.toUpperCase(), dataVenc);
-            selectStatus.addEventListener("change", function() {
-                const cb2 = linha.querySelector(".check-imovel");
-                const dv2 = cb2 ? cb2.getAttribute("data-venc") : null;
-                aplicarCorPlanilha(linha, this.options[this.selectedIndex].text.toUpperCase(), dv2);
-            });
         });
-        destacarContratosNovos();
+        destacarContratosNovos(linhasNovas);   // só as linhas novas
     };
 });
 </script>
@@ -2879,7 +3362,7 @@ function toggleFiltros() {
 <div class="modal fade" id="modalMatriz" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content border-0">
-            <div class="modal-header text-white" style="background-color: #0f172a;">
+            <div class="modal-header text-white" style="background-color: var(--deep);">
                 <h5 class="modal-title fw-bold">📅 Matriz de Emissão x Vencimento</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -2934,7 +3417,7 @@ function toggleFiltros() {
     <div class="modal fade" id="modalPago275" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header text-white border-0" style="background-color: #0f172a;">
+            <div class="modal-header text-white border-0" style="background-color: var(--deep);">
                 <h5 class="modal-title fw-bold">🏢 Registrar Pagamento na 275</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelarPago275()"></button>
             </div>
@@ -2961,7 +3444,7 @@ function toggleFiltros() {
 <div class="modal fade" id="modalEmissaoFaltante" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-            <div class="modal-header text-white border-0" style="background-color: #0ea5e9;">
+            <div class="modal-header text-white border-0" style="background-color: var(--accent);">
                 <h6 class="modal-title fw-bold">🎉 Eba! Boleto Coletado!</h6>
                 <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="cancelarColetaEmissao()"></button>
             </div>
@@ -2980,7 +3463,7 @@ function toggleFiltros() {
             </div>
             <div class="modal-footer border-0 bg-light justify-content-center">
                 <button type="button" class="btn btn-outline-secondary btn-sm fw-bold" onclick="cancelarColetaEmissao()">Cancelar</button>
-                <button type="button" class="btn btn-primary btn-sm fw-bold px-4" style="background-color: #0ea5e9; border: none;" onclick="confirmarColetaComEmissao()">Salvar e Concluir</button>
+                <button type="button" class="btn btn-primary btn-sm fw-bold px-4" style="background-color: var(--accent); border: none;" onclick="confirmarColetaComEmissao()">Salvar e Concluir</button>
             </div>
         </div>
     </div>
@@ -3205,6 +3688,12 @@ function acionarTrocaStatus(selectObj, imovelId, statusAnteriorDoBanco) {
 
     // Mágica Visual: Pinta a caixinha na hora!
     aplicarCorStatus(selectObj, statusEscolhido);
+
+    // 🔐 Caso com erro de login no Raio-X: COLETADO só com os dados de acesso (ou "não possui mais login")
+    if (statusEscolhido === "COLETADO" && typeof window.verificarAcessoAntesDeColetar === "function"
+        && !window.verificarAcessoAntesDeColetar(selectObj, imovelId, statusAnteriorDoBanco)) {
+        return;
+    }
 
     // 🎯 GATILHO INTELIGENTE: Pede a data de emissão se estiver vazia ao coletar!
     if (statusEscolhido === "COLETADO") {
@@ -3442,26 +3931,31 @@ function atualizarStatusDireto(id, status, selectElement) {
     });
 }
 
-// =========================================================
-// 🚀 BUSCA INTELIGENTE (COM DELAY) NO BANCO DE DADOS
-// =========================================================
-let timerBusca;
-function aoDigitarBusca() {
-    clearTimeout(timerBusca);
-    timerBusca = setTimeout(() => {
-        ativarLoading();
-        document.getElementById('formFiltros').submit();
-    }, 800); // Aguarda 0.8s para pesquisar direto no banco
-}
+</script>
 
+<!-- ⚡ BLOCO PRÓPRIO (de propósito fora do bloco de script anterior): lista paginada, busca no servidor e carregamento sob demanda.
+     Aquele bloco anterior declara `let selectStatusAberto` / `let statusAntigoMembro` pela 2ª vez (já declarados no bloco de script
+     grande lá de cima) e por isso o navegador descarta o bloco inteiro. Este código ficou separado para funcionar de qualquer jeito. -->
+<script>
 // =========================================================
-// 🚀 ROLAGEM INFINITA (AJAX INFINITE SCROLL) - versão blindada
+// ⚡ LISTA PAGINADA (rápida mesmo com milhares de boletos)
+//   • o servidor entrega 100 linhas por vez (rolagem infinita);
+//   • a busca (Imóvel / Sacado / Empreendimento) é feita no servidor, sem recarregar a página;
+//   • filtros de coluna (🔍), "Selecionar todos" e "Exportar XLSX" precisam da lista completa: ela é
+//     baixada SOB DEMANDA (em blocos), só quando o operador realmente usa um deles.
 // =========================================================
-let paginaAtualScroll = 1;      // última página JÁ carregada
-let totalPaginasScroll = 1;     // vem do servidor (data-total-paginas)
+const POR_PAGINA = 100;
+const POR_BLOCO_TUDO = 500;       // tamanho dos blocos no "carregar tudo"
+let linhasRecebidasServidor = 0;  // quantas linhas o servidor já entregou (ponto de partida do próximo ?inicio=)
+let totalRegistrosServidor = 0;   // total que atende aos filtros do servidor
 let carregandoScroll = false;
 let fimDosDadosScroll = false;
 let observadorScroll = null;
+let idsNaTela = new Set();        // anti-duplicidade (mantido em memória; não reconstruído a cada página)
+let promessaCarregarTudo = null;
+let promessaPrepararFiltros = null;
+let dropdownsColunaProntos = false;
+let geracaoLista = 0;             // muda a cada nova busca: respostas antigas são descartadas
 
 function estadoScroll(estado, msg) {
     const carregando = document.getElementById('scrollCarregando');
@@ -3491,21 +3985,109 @@ function rearmarObservadorScroll() {
     }, 150);
 }
 
+function armarObservadorScroll() {
+    const sentinela = document.getElementById('linhaLoadingScroll');
+    if (!sentinela) return;
+    if (observadorScroll) observadorScroll.disconnect();
+    observadorScroll = new IntersectionObserver((entradas) => {
+        if (entradas.some(e => e.isIntersecting)) carregarMaisLinhas();
+    }, { root: document.querySelector('.table-wrapper'), rootMargin: '300px', threshold: 0 });
+    observadorScroll.observe(sentinela);
+}
+
+// Barrinha flutuante enquanto a lista completa é baixada
+function mostrarBarraCarregando(texto) {
+    let b = document.getElementById('barraCarregandoTudo');
+    if (!b) {
+        b = document.createElement('div');
+        b.id = 'barraCarregandoTudo';
+        b.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:3500;background:var(--deep);color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;gap:10px;align-items:center;';
+        b.innerHTML = '<span class="spinner-border spinner-border-sm"></span><span id="barraCarregandoTudoTxt"></span>';
+        document.body.appendChild(b);
+    }
+    b.style.display = 'flex';
+    document.getElementById('barraCarregandoTudoTxt').innerText = texto;
+}
+function esconderBarraCarregando() {
+    const b = document.getElementById('barraCarregandoTudo');
+    if (b) b.style.display = 'none';
+}
+
+// Monta a URL da lista (mesmos filtros/busca da tela) pedindo só as linhas
+function montarUrlLista(extra, urlBase) {
+    const url = new URL(urlBase || window.location.href);
+    ['pagina', 'inicio', 'por_pagina'].forEach(k => url.searchParams.delete(k));
+    url.searchParams.set('ajax', 'true');
+    Object.keys(extra).forEach(k => url.searchParams.set(k, extra[k]));
+    return url;
+}
+
+async function pedirLinhas(extra, opcoes) {
+    opcoes = opcoes || {};
+    const res = await fetch(montarUrlLista(extra, opcoes.urlBase), {
+        credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: opcoes.signal
+    });
+    if (!res.ok) throw new Error('O servidor respondeu com erro ' + res.status + '.');
+    const html = await res.text();
+
+    // Sessão/login expirado (ou página de erro) volta como HTML completo, não como linhas
+    if (res.redirected || /<(!doctype|html|body)\b/i.test(html)) {
+        throw new Error('Sessão expirada ou resposta inválida. Atualize a página (F5).');
+    }
+
+    const tmp = document.createElement('tbody');
+    tmp.innerHTML = html;
+    return {
+        linhas: Array.from(tmp.children).filter(el => el.tagName === 'TR'),
+        totalRegistros: parseInt(res.headers.get('X-Total-Registros') || '0', 10),
+        totalPaginas: parseInt(res.headers.get('X-Total-Paginas') || '1', 10)
+    };
+}
+
+// Insere na tabela só as linhas que ainda não estão lá. Devolve as realmente novas.
+function anexarLinhas(recebidas) {
+    const sentinela = document.getElementById('linhaLoadingScroll');
+    const novas = recebidas.filter(tr => {
+        const cb = tr.querySelector('.check-imovel');
+        if (!cb) return true;
+        if (idsNaTela.has(cb.value)) return false;
+        idsNaTela.add(cb.value);
+        return true;
+    });
+    if (novas.length === 0) return novas;
+
+    const frag = document.createDocumentFragment();
+    novas.forEach(tr => frag.appendChild(tr));
+    sentinela.parentNode.insertBefore(frag, sentinela);
+
+    if (window.prepararLinhasNovas) window.prepararLinhasNovas(novas);   // cores, selo 🆕
+    return novas;
+}
+
+function atualizarTotalNaTela(total) {
+    totalRegistrosServidor = total;
+    const el = document.getElementById('qtdTotalRegistros');
+    if (el) el.innerText = total;
+}
+
+function chegouAoFim() {
+    return linhasRecebidasServidor >= totalRegistrosServidor;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const sentinela = document.getElementById('linhaLoadingScroll');
     if (!sentinela) return;
 
-    paginaAtualScroll = parseInt(sentinela.dataset.paginaInicial, 10) || 1;
-    totalPaginasScroll = parseInt(sentinela.dataset.totalPaginas, 10) || 1;
+    const paginaInicial = parseInt(sentinela.dataset.paginaInicial, 10) || 1;
+    const totalPaginas = parseInt(sentinela.dataset.totalPaginas, 10) || 1;
+    document.querySelectorAll('#tbodyImoveis .check-imovel').forEach(cb => idsNaTela.add(cb.value));
+    atualizarTotalNaTela(parseInt(document.getElementById('qtdTotalRegistros').innerText, 10) || 0);
+    linhasRecebidasServidor = (paginaInicial - 1) * POR_PAGINA + document.querySelectorAll('#tbodyImoveis .check-imovel').length;
 
-    // Só 1 página (ou filtros ativos = tudo já veio): não há nada a carregar
-    if (paginaAtualScroll >= totalPaginasScroll) { finalizarScroll(); return; }
+    // Só 1 página: não há nada a carregar
+    if (paginaInicial >= totalPaginas || chegouAoFim()) { finalizarScroll(); return; }
 
-    observadorScroll = new IntersectionObserver((entradas) => {
-        if (entradas.some(e => e.isIntersecting)) carregarMaisLinhas();
-    }, { root: document.querySelector('.table-wrapper'), rootMargin: '300px', threshold: 0 });
-
-    observadorScroll.observe(sentinela);
+    armarObservadorScroll();
 });
 
 async function carregarMaisLinhas() {
@@ -3515,48 +4097,19 @@ async function carregarMaisLinhas() {
 
     carregandoScroll = true;
     estadoScroll('carregando');
-    const proximaPagina = paginaAtualScroll + 1;   // só "confirma" a página depois que der certo
+    const minhaGeracao = geracaoLista;
 
     try {
-        let url = new URL(window.location.href);
-        url.searchParams.set('pagina', proximaPagina);
-        url.searchParams.set('ajax', 'true');
+        const r = await pedirLinhas({ inicio: linhasRecebidasServidor, por_pagina: POR_PAGINA });
+        if (minhaGeracao !== geracaoLista) { carregandoScroll = false; return; }   // chegou depois de uma nova busca: descarta
 
-        const res = await fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-        if (!res.ok) throw new Error('O servidor respondeu com erro ' + res.status + '.');
-        const html = await res.text();
+        linhasRecebidasServidor += r.linhas.length;
+        atualizarTotalNaTela(r.totalRegistros);
+        anexarLinhas(r.linhas);
+        filtrarTabelaCompleta();                // reaplica filtros de coluna (se houver) + contador
+        dropdownsColunaProntos = false;         // as opções dos filtros de coluna precisam considerar as novas linhas
 
-        // Sessão/login expirado (ou página de erro) volta como HTML completo, não como linhas
-        if (res.redirected || /<(!doctype|html|body)\b/i.test(html)) {
-            throw new Error('Sessão expirada ou resposta inválida. Atualize a página (F5).');
-        }
-
-        const tmp = document.createElement('tbody');
-        tmp.innerHTML = html;
-        const recebidas = Array.from(tmp.children).filter(el => el.tagName === 'TR');
-
-        // Anti-duplicidade: ignora linhas cujo ID já está na tabela
-        const jaNaTela = new Set(Array.from(document.querySelectorAll('#tbodyImoveis .check-imovel')).map(cb => cb.value));
-        const novas = recebidas.filter(tr => {
-            const cb = tr.querySelector('.check-imovel');
-            return !cb || !jaNaTela.has(cb.value);
-        });
-
-        paginaAtualScroll = proximaPagina;
-
-        if (novas.length === 0) {
-            finalizarScroll();
-        } else {
-            novas.forEach(tr => sentinela.parentNode.insertBefore(tr, sentinela));
-
-            if (window.prepararLinhasNovas) window.prepararLinhasNovas(novas);   // cores, selo 🆕, espião de status
-            if (typeof filtrarTabelaCompleta === 'function') filtrarTabelaCompleta(); // reaplica busca/filtros + contador
-            if (typeof preencherDropdownsCustomizados === 'function' && !document.querySelector('.dropdown-menu-filtro.show')) {
-                preencherDropdownsCustomizados();                                     // novos valores nos filtros de coluna
-            }
-
-            if (paginaAtualScroll >= totalPaginasScroll) finalizarScroll();
-        }
+        if (r.linhas.length === 0 || chegouAoFim()) finalizarScroll();
     } catch (err) {
         console.error("Erro no Infinite Scroll:", err);
         estadoScroll('erro', err.message);
@@ -3568,8 +4121,386 @@ async function carregarMaisLinhas() {
     rearmarObservadorScroll();
 }
 
+// 📥 Baixa o RESTANTE da lista (em blocos de 500). Usado por: filtros de coluna, Selecionar todos e Exportar XLSX.
+function garantirTodasLinhas() {
+    if (fimDosDadosScroll) return Promise.resolve();
+    if (promessaCarregarTudo) return promessaCarregarTudo;
+
+    promessaCarregarTudo = (async () => {
+        const minhaGeracao = geracaoLista;
+        try {
+            while (!fimDosDadosScroll && minhaGeracao === geracaoLista) {
+                // se a rolagem infinita estiver no meio de uma página, espera ela terminar
+                while (carregandoScroll) await new Promise(ok => setTimeout(ok, 40));
+                if (fimDosDadosScroll || minhaGeracao !== geracaoLista) break;
+
+                carregandoScroll = true;
+                try {
+                    mostrarBarraCarregando('Carregando todos os imóveis… ' + linhasRecebidasServidor.toLocaleString('pt-BR') + ' de ' + totalRegistrosServidor.toLocaleString('pt-BR'));
+                    const r = await pedirLinhas({ inicio: linhasRecebidasServidor, por_pagina: POR_BLOCO_TUDO });
+                    if (minhaGeracao !== geracaoLista) break;
+                    linhasRecebidasServidor += r.linhas.length;
+                    atualizarTotalNaTela(r.totalRegistros);
+                    anexarLinhas(r.linhas);
+                    filtrarTabelaCompleta();   // mantém o contador "Mostrando X de Y" andando durante o download
+                    if (r.linhas.length === 0 || chegouAoFim()) finalizarScroll();
+                } finally {
+                    carregandoScroll = false;
+                }
+            }
+            dropdownsColunaProntos = false;
+            filtrarTabelaCompleta();
+        } finally {
+            esconderBarraCarregando();
+            promessaCarregarTudo = null;
+        }
+    })();
+    return promessaCarregarTudo;
+}
+
+// 🔍 Filtros de coluna: montados sob demanda, na 1ª vez que o operador abre qualquer um deles
+function prepararFiltrosDeColuna() {
+    if (dropdownsColunaProntos) return Promise.resolve();
+    if (promessaPrepararFiltros) return promessaPrepararFiltros;
+
+    promessaPrepararFiltros = (async () => {
+        const containers = document.querySelectorAll('[id^="opcoes-col-"]');
+        containers.forEach(c => { c.innerHTML = '<div class="small text-muted p-2">Carregando opções…</div>'; });
+        try {
+            await garantirTodasLinhas();
+            preencherDropdownsCustomizados();
+            dropdownsColunaProntos = true;
+        } catch (err) {
+            containers.forEach(c => { c.innerHTML = '<div class="small text-danger p-2">Não foi possível carregar as opções. Feche e abra o filtro novamente.</div>'; });
+            console.error('Erro ao preparar filtros de coluna:', err);
+        } finally {
+            promessaPrepararFiltros = null;
+        }
+    })();
+    return promessaPrepararFiltros;
+}
+
+document.addEventListener('show.bs.dropdown', function(e) {
+    const botao = e.target;
+    if (botao && botao.classList && botao.classList.contains('icone-filtro-btn')) prepararFiltrosDeColuna();
+});
+
+// =========================================================
+// 🚀 BUSCA NO SERVIDOR (Imóvel / Sacado / Empreendimento) — sem recarregar a página
+// =========================================================
+let timerBusca;
+let abortBusca = null;
+
+function aoDigitarBusca() {
+    clearTimeout(timerBusca);
+    timerBusca = setTimeout(executarBusca, 400);   // aguarda o operador parar de digitar
+}
+
+function marcarBuscando(ligado) {
+    const wrapper = document.querySelector('.table-wrapper');
+    if (wrapper) wrapper.style.opacity = ligado ? '0.45' : '';
+}
+
+async function executarBusca() {
+    const termo = document.getElementById('campoBuscaImovel').value.trim();
+    const urlTela = new URL(window.location.href);
+    if ((urlTela.searchParams.get('busca') || '') === termo) return;   // nada mudou (ex.: tecla de seta)
+
+    // URL "real" da tela, já com a nova busca (sem parâmetros técnicos de paginação)
+    ['pagina', 'inicio', 'por_pagina', 'ajax'].forEach(k => urlTela.searchParams.delete(k));
+    if (termo) urlTela.searchParams.set('busca', termo); else urlTela.searchParams.delete('busca');
+
+    geracaoLista++;
+    const minhaGeracao = geracaoLista;
+    if (abortBusca) abortBusca.abort();
+    abortBusca = new AbortController();
+    marcarBuscando(true);
+
+    try {
+        const r = await pedirLinhas({ inicio: 0, por_pagina: POR_PAGINA }, { urlBase: urlTela, signal: abortBusca.signal });
+        if (minhaGeracao !== geracaoLista) return;
+
+        // --- troca o conteúdo da tabela ---
+        const tbody = document.getElementById('tbodyImoveis');
+        const wrapperTabela = document.querySelector('.table-wrapper');
+        if (wrapperTabela) wrapperTabela.scrollTop = 0;   // resultado novo começa no topo (senão a rolagem infinita já puxaria a página 2)
+        Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+            if (tr.id !== 'linhaNenhumRegistro' && tr.id !== 'linhaLoadingScroll') tr.remove();
+        });
+        idsNaTela = new Set();
+        linhasRecebidasServidor = 0;
+        carregandoScroll = false;
+        fimDosDadosScroll = false;
+        promessaCarregarTudo = null;
+
+        // filtros de coluna valem para o conjunto anterior: recomeçam do zero (como no recarregamento antigo)
+        Object.keys(filtrosAtivos).forEach(k => delete filtrosAtivos[k]);
+        document.querySelectorAll('.icone-filtro-btn').forEach(b => { b.innerHTML = '🔍'; b.classList.remove('ativo'); });
+        dropdownsColunaProntos = false;
+        existemLinhasOcultas = false;
+        const master = document.getElementById('checkTodos');
+        if (master) master.checked = false;
+
+        atualizarTotalNaTela(r.totalRegistros);
+        linhasRecebidasServidor = r.linhas.length;
+        anexarLinhas(r.linhas);
+        filtrarTabelaCompleta();
+        // zera o contador de selecionados e esconde a barra de ações em lote (as linhas marcadas saíram da tela)
+        const contadorSel = document.getElementById('contadorSelecionados');
+        if (contadorSel) contadorSel.innerText = "0 imóvel(is) selecionado(s)";
+        const menuLote = document.getElementById('containerAcoesLote');
+        if (menuLote) menuLote.style.display = 'none';
+
+        const sentinela = document.getElementById('linhaLoadingScroll');
+        if (chegouAoFim() || r.linhas.length === 0) {
+            finalizarScroll();
+        } else {
+            sentinela.style.display = '';
+            estadoScroll('carregando');
+            armarObservadorScroll();
+        }
+
+        window.history.replaceState(null, '', urlTela.pathname + urlTela.search + urlTela.hash);
+    } catch (err) {
+        if (err.name === 'AbortError') return;     // foi substituída por uma busca mais nova
+        console.error('Erro na busca:', err);
+        alert('⚠️ Não foi possível pesquisar agora: ' + err.message);
+    } finally {
+        if (minhaGeracao === geracaoLista) marcarBuscando(false);
+    }
+}
+
 </script>
 
+
+
+{% if rapido == 'inconsistencia' and not mes_historico %}
+<div class="modal fade" id="modalInc" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white" style="background-color: var(--deep);">
+                <h6 class="modal-title fw-bold">⚠️ Atuar na inconsistência do Bradesco</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="incResumo" class="small mb-3 p-2" style="background:var(--sunk); border-radius:8px;"></div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small mb-1">Situação</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="incSit" id="incSitOK" value="OK" autocomplete="off" onchange="incMontarObs(false)">
+                            <label class="btn btn-outline-success fw-bold" for="incSitOK">OK</label>
+                            <input type="radio" class="btn-check" name="incSit" id="incSitPend" value="PENDENTE" autocomplete="off" onchange="incMontarObs(false)">
+                            <label class="btn btn-outline-danger fw-bold" for="incSitPend">PENDENTE</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold small mb-1">Observação padrão</label>
+                        <select id="incFrase" class="form-select" onchange="incMontarObs(true)"></select>
+                    </div>
+                    <div class="col-md-4" id="incBlocoData">
+                        <label class="form-label fw-bold small mb-1">Data</label>
+                        <input type="date" id="incData" class="form-control" onchange="incMontarObs(false)">
+                    </div>
+                    <div class="col-md-8" id="incBlocoCompl">
+                        <label class="form-label fw-bold small mb-1" id="incRotuloCompl">Complemento (opcional)</label>
+                        <input type="text" id="incCompl" class="form-control" maxlength="120" oninput="incMontarObs(false)">
+                    </div>
+                </div>
+                <div class="mt-3 small"><span class="text-muted">Vai ficar na planilha:</span> <strong id="incPrevia">—</strong></div>
+                <div id="incConflito" class="alert alert-warning small mt-3 mb-0 d-none"></div>
+                <div id="incErro" class="alert alert-danger small mt-3 mb-0 d-none"></div>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-neutro" id="btnIncInternet" onclick="irInternetInc(-1)">💳 Enviar p/ Internet →</button>
+                <button type="button" class="btn btn-warning fw-bold d-none" id="btnIncForcar" onclick="salvarInc(true)">Sobrescrever mesmo assim</button>
+                <button type="button" class="btn btn-success fw-bold" id="btnIncSalvar" onclick="salvarInc(false)">Salvar na planilha</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.INC_CASOS = {{ inc_painel|tojson }};
+window.INC_FRASES = {{ inc_obs_padrao|tojson }};
+window.INC_URL_INTERNET = {{ url_for('modulo_internet')|tojson }};
+window.INC_VER_OK = {{ ver_ok_inc|tojson }};
+(function () {
+    const CASOS = window.INC_CASOS || [];
+    const FRASES = window.INC_FRASES || [];
+    const el = id => document.getElementById(id);
+    let ix = -1, modal = null;
+
+    function brl(v) { return (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function ddmm(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? m[3] + '/' + m[2] : ''; }
+    function hojeISO() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+    function aviso(texto, tipo) {
+        const a = el('incAviso');
+        if (!a) return;
+        a.className = 'px-3 py-2 small';
+        a.style.background = tipo === 'ok' ? 'var(--ok-bg)' : 'var(--warn-bg)';
+        a.style.color = tipo === 'ok' ? 'var(--ok-text)' : 'var(--warn-text)';
+        a.textContent = (tipo === 'ok' ? '✅ ' : '⚠️ ') + texto;
+    }
+
+    document.querySelectorAll('#tabelaInc .inc-valor').forEach(td => { td.textContent = brl(td.dataset.v); });
+
+    function linhas() { return Array.from(document.querySelectorAll('#tabelaInc tbody tr[data-ix]')); }
+    function contar() {
+        // "em aberto" e o chip do atalho contam só PENDENTE - os OK (quando mostrados) não entram nessa conta
+        const todas = linhas(), pendentes = todas.filter(r => r.dataset.situacao !== 'OK');
+        const vis = todas.filter(r => !r.classList.contains('d-none'));
+        const visPend = pendentes.filter(r => !r.classList.contains('d-none'));
+        const c = el('incContador'); if (c) c.textContent = visPend.length === pendentes.length ? pendentes.length : visPend.length + ' de ' + pendentes.length;
+        const chip = el('chipIncN'); if (chip) chip.textContent = pendentes.length;
+        const vazio = el('incVazio'); if (vazio) vazio.classList.toggle('d-none', vis.length > 0);
+    }
+    window.incFiltrar = function () {
+        const resp = (el('incFiltroResp').value || '').toLowerCase();
+        const q = (el('incBusca').value || '').toLowerCase().trim();
+        linhas().forEach(r => {
+            const ok = (!resp || r.dataset.resp === resp) && (!q || r.dataset.busca.indexOf(q) >= 0);
+            r.classList.toggle('d-none', !ok);
+        });
+        contar();
+    };
+
+    // opções da Observação padrão
+    const sel = el('incFrase');
+    if (sel) {
+        const vazio = document.createElement('option'); vazio.value = ''; vazio.textContent = '— escolha a observação —';
+        sel.appendChild(vazio);
+        FRASES.forEach((f, i) => {
+            const o = document.createElement('option');
+            o.value = f.texto; o.textContent = f.texto.replace('{dd/mm}', 'dd/mm');
+            sel.appendChild(o);
+        });
+        const outro = document.createElement('option'); outro.value = 'OUTRO'; outro.textContent = 'Outro (escrever o texto)';
+        sel.appendChild(outro);
+    }
+
+    window.incMontarObs = function (mudouFrase) {
+        el('incErro').classList.add('d-none');
+        const f = el('incFrase').value;
+        const info = FRASES.find(x => x.texto === f);
+        if (mudouFrase) {
+            if (info) { (info.situacao === 'OK' ? el('incSitOK') : el('incSitPend')).checked = true; }
+        }
+        const comData = !!(info && info.data);
+        el('incBlocoData').classList.toggle('d-none', !comData);
+        el('incRotuloCompl').textContent = f === 'OUTRO' ? 'Texto da observação' : 'Complemento (opcional)';
+        const compl = (el('incCompl').value || '').replace(/\s+/g, ' ').trim();
+        const d = ddmm(el('incData').value) || ddmm(hojeISO());
+        const txt = f === 'OUTRO' ? compl : (f ? f.replace('{dd/mm}', d) + (compl ? ' - ' + compl : '') : '');
+        el('incPrevia').textContent = txt || '—';
+        return txt;
+    };
+
+    window.abrirModalInc = function (i) {
+        const c = CASOS[i]; if (!c) return;
+        ix = i;
+        el('incResumo').innerHTML =
+            '<div><strong>Imóvel ' + esc(c.chave || 'sem ID') + '</strong> · ' + esc(c.empreendimento || '') + ' · ' + esc(c.administradora || '') +
+            (c.responsavel ? ' (' + esc(c.responsavel) + ')' : '') + '</div>' +
+            '<div>Ref. <strong>' + esc(c.referencia) + '</strong> · Doc. ' + esc(c.doc_pagfor) + ' · Venc. <strong>' + esc(c.venc_br) + '</strong> · ' + brl(c.valor) + '</div>' +
+            '<div>Ocorrência <strong>' + esc(c.ocorrencia) + '</strong> — ' + esc(c.descricao) + '</div>' +
+            '<div>Na planilha agora: Situação <strong>' + esc(c.situacao) + '</strong> · Obs.: ' + esc(c.obs || '—') + '</div>';
+        el('incFrase').selectedIndex = 0;
+        el('incSitOK').checked = false; el('incSitPend').checked = false;
+        el('incData').value = hojeISO();
+        el('incCompl').value = '';
+        el('incConflito').classList.add('d-none'); el('incErro').classList.add('d-none');
+        el('btnIncForcar').classList.add('d-none'); el('btnIncSalvar').classList.remove('d-none');
+        el('btnIncSalvar').disabled = false;
+        el('btnIncInternet').disabled = ['PENDENTE', 'PROCESSANDO', 'APROVADO'].indexOf(c.internet_status) >= 0;
+        window.incMontarObs(true);
+        modal = bootstrap.Modal.getOrCreateInstance(el('modalInc'));
+        modal.show();
+    };
+
+    window.irInternetInc = function (i) {
+        const c = CASOS[i < 0 ? ix : i]; if (!c) return;
+        const q = new URLSearchParams({ inc_aba: c.aba, inc_linha: c.linha, inc_ref: c.referencia, inc_doc: c.doc_pagfor });
+        window.open(window.INC_URL_INTERNET + '?' + q.toString(), '_blank');
+    };
+
+    window.salvarInc = function (forcar) {
+        const c = CASOS[ix]; if (!c) return;
+        const marcado = document.querySelector('input[name=incSit]:checked');
+        const obs = window.incMontarObs(false);
+        const erro = el('incErro'); erro.classList.add('d-none');
+        if (!marcado) { erro.textContent = 'Escolha a Situação (OK ou PENDENTE).'; erro.classList.remove('d-none'); return; }
+        if (!obs) { erro.textContent = 'Escolha a Observação (ou "Outro" e escreva o texto).'; erro.classList.remove('d-none'); return; }
+        const btn = el('btnIncSalvar'), btnF = el('btnIncForcar');
+        btn.disabled = true; btnF.disabled = true;
+        const textoBtn = btn.textContent; btn.textContent = 'Gravando na planilha...';
+        fetch('/api/inconsistencia/atuar', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                aba: c.aba, linha: c.linha, referencia: c.referencia, doc_pagfor: c.doc_pagfor,
+                situacao: marcado.value, obs_padrao: el('incFrase').value, data_obs: ddmm(el('incData').value),
+                complemento: el('incCompl').value, situacao_antes: c.situacao_planilha, obs_antes: c.obs_planilha, forcar: !!forcar
+            })
+        }).then(r => r.json()).then(data => {
+            if (data.conflito) {
+                const a = data.atual || {};
+                const box = el('incConflito');
+                box.innerHTML = '⚠️ Alguém alterou esta linha na planilha depois que a tela abriu: Situação <strong>' + esc(a.situacao || '—') +
+                                '</strong> · Obs.: <strong>' + esc(a.obs || '—') + '</strong>. Cancele e clique em "Atualizar da planilha", ou sobrescreva.';
+                box.classList.remove('d-none');
+                btn.classList.add('d-none'); btnF.classList.remove('d-none');
+                return;
+            }
+            if (!data.sucesso) { erro.textContent = data.msg || 'Não consegui gravar.'; erro.classList.remove('d-none'); return; }
+            if (modal) modal.hide();
+            const linha = document.querySelector('#tabelaInc tbody tr[data-ix="' + ix + '"]');
+            if (marcado.value === 'OK') {
+                // Com "Mostrar também os OK" ligado, o caso pode continuar aparecendo (agora como OK) em vez de desaparecer;
+                // sem isso ligado, ele realmente não apareceria mais num recarregamento, então some da tela já.
+                if (linha && window.INC_VER_OK) {
+                    linha.dataset.situacao = 'OK';
+                    linha.classList.add('inc-linha-ok');
+                    linha.querySelector('.inc-obs').textContent = obs;
+                    c.situacao = 'OK';
+                    if (data.no_google) { c.obs_planilha = obs; c.situacao_planilha = 'OK'; }
+                } else if (linha) {
+                    linha.remove();
+                }
+            } else if (linha) {
+                const td = linha.querySelector('.inc-obs');
+                td.textContent = obs;
+                if (!data.no_google) {
+                    const b = document.createElement('div');
+                    b.innerHTML = '<span class="badge border px-1" style="background:var(--warn-bg); color:var(--warn-text);">aguardando o Google</span>';
+                    td.appendChild(b);
+                }
+                c.obs = obs;
+                if (data.no_google) { c.obs_planilha = obs; c.situacao_planilha = 'PENDENTE'; }
+            }
+            contar();
+            aviso(data.msg || 'Pronto.', data.no_google ? 'ok' : 'warn');
+        }).catch(() => {
+            erro.textContent = 'Não consegui falar com o servidor. Tente de novo.'; erro.classList.remove('d-none');
+        }).finally(() => { btn.disabled = false; btnF.disabled = false; btn.textContent = textoBtn; });
+    };
+
+    window.atualizarIncDaPlanilha = function (btn) {
+        btn.disabled = true; const t = btn.textContent; btn.textContent = 'Lendo a planilha...';
+        fetch('/api/inconsistencia/atualizar', { method: 'POST' }).then(r => r.json()).then(d => {
+            if (d.sucesso) { location.reload(); return; }
+            aviso(d.msg || 'Não consegui ler a planilha agora.', 'warn');
+            btn.disabled = false; btn.textContent = t;
+        }).catch(() => { aviso('Não consegui falar com o servidor.', 'warn'); btn.disabled = false; btn.textContent = t; });
+    };
+})();
+</script>
+{% endif %}
 
 {% if aviso_virada %}
 <script>
@@ -3578,5 +4509,606 @@ window.addEventListener('load', function () {
 });
 </script>
 {% endif %}
+
+<script>window.USUARIO_LOGADO = {{ (session.get('usuario') or '')|tojson }};</script>
+
+<!-- ======================================================================
+     🔴 AO VIVO — a tabela acompanha o que os outros fazem, sem F5
+     A cada poucos segundos a tela pergunta ao servidor "mudou algo depois do nº X?".
+     Quase sempre a resposta é "não" e custa uma consulta de nada. Quando mudou,
+     só as linhas afetadas são repintadas — a página não recarrega e ninguém perde
+     o que estava digitando, a rolagem ou os filtros.
+     ====================================================================== -->
+
+
+<div id="avisoAoVivo"><span class="fechar" onclick="this.parentNode.style.display='none'">✕</span><span id="avisoAoVivoTxt"></span></div>
+
+<script>
+(function () {
+    const tbody = document.getElementById('tbodyImoveis');
+    if (!tbody) return;                       // fora do painel não há nada para acompanhar
+
+    const ESPERA = 6000;                      // de quanto em quanto tempo pergunta
+    const ESPERA_LENTA = 30000;               // quando a rede está ruim, pergunta menos
+    const ESPERA_OCIOSO = 60000;              // ninguém mexe no mouse há um tempo
+    const OCIOSO_APOS = 10 * 60 * 1000;
+
+    let cursor = null;                        // nº da última mudança que já vimos
+    let errosSeguidos = 0;
+    let ultimoToque = Date.now();
+    let timer = null;
+    const eu = (window.USUARIO_LOGADO || '').trim().toLowerCase();
+
+    ['mousemove', 'keydown', 'click', 'scroll'].forEach(ev =>
+        window.addEventListener(ev, () => { ultimoToque = Date.now(); }, { passive: true }));
+
+    // Tudo o que o atualizador viu, para dar para conferir sem abrir o console do navegador
+    const DIAG = { perguntas: 0, ultimaResposta: null, recebidas: 0, repintadas: 0,
+                   semLinha: [], semSeletor: [], ultimoErro: '', cursor: null, quando: '', gatilho: null };
+    window.AOVIVO = DIAG;
+
+    function selo(estado, texto) {
+        const el = document.getElementById('seloAoVivo');
+        if (!el) return;
+        el.classList.toggle('parado', estado !== 'ok');
+        el.querySelector('.texto').innerText = texto;
+    }
+
+    // Clicar no selo abre o raio-x: serve para descobrir onde parou quando algo não atualiza
+    window.mostrarDiagnosticoAoVivo = function () {
+        const lista = v => (v.length ? v.slice(-6).join(', ') : '—');
+        const linhas = [
+            'Perguntas feitas ao servidor: ' + DIAG.perguntas,
+            'Última resposta: ' + (DIAG.ultimaResposta === null ? 'nenhuma ainda' : DIAG.ultimaResposta),
+            'Horário da última resposta: ' + (DIAG.quando || '—'),
+            'Nº da última mudança vista: ' + (DIAG.cursor === null ? '—' : DIAG.cursor),
+            'Servidor anotando as mudanças: ' + (DIAG.gatilho === null ? '—' : (DIAG.gatilho ? 'sim' : 'NÃO — o banco não está anotando')),
+            'Mudanças recebidas: ' + DIAG.recebidas,
+            'Linhas repintadas na tela: ' + DIAG.repintadas,
+            'Chegaram mas não estão nesta tela: ' + lista(DIAG.semLinha),
+            'Chegaram mas a linha não tem seletor de status: ' + lista(DIAG.semSeletor),
+            'Último erro: ' + (DIAG.ultimoErro || 'nenhum'),
+            'Linhas na tela com id próprio: ' + document.querySelectorAll('tr[id^="linha_imovel_"]').length,
+            'Linhas na tela com caixinha: ' + document.querySelectorAll('.check-imovel').length
+        ];
+        alert('Atualização ao vivo — raio-x\n\n' + linhas.join('\n'));
+    };
+
+    function avisar(texto) {
+        const caixa = document.getElementById('avisoAoVivo');
+        document.getElementById('avisoAoVivoTxt').innerHTML = texto;
+        caixa.style.display = 'block';
+        clearTimeout(caixa._sumir);
+        caixa._sumir = setTimeout(() => { caixa.style.display = 'none'; }, 9000);
+    }
+
+    // Acha a linha do imóvel na tabela. Três caminhos, porque o id da linha pode mudar
+    // de template: primeiro o id, depois a caixinha de seleção, depois o número do imóvel.
+    // Boleto = imóvel + vencimento. Boleto com desconto vem em 2 linhas no banco mas a tela mostra 1 (outra linha
+    // da mesma gêmea pode ter sido a que mudou); já o imóvel com vencimento alternativo (05 e 15) tem 2 linhas
+    // na tela e a mudança do dia 05 NÃO pode repintar o dia 15. Por isso o vencimento entra na busca.
+    function normVenc(t) {
+        const p = String(t || '').match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
+        if (!p) return String(t || '').trim();
+        const ano = p[3].length === 2 ? '20' + p[3] : p[3];
+        return p[1].padStart(2, '0') + '/' + p[2].padStart(2, '0') + '/' + ano;
+    }
+    function acharLinha(m) {
+        let linha = document.getElementById('linha_imovel_' + m.imovel_id);
+        if (linha) return linha;
+        let cb = document.querySelector('.check-imovel[value="' + m.imovel_id + '"]');
+        if (cb) return cb.closest('tr');
+        if (m.imovel) {
+            const candidatos = document.querySelectorAll('.check-imovel[data-imovelnum="' + m.imovel + '"]');
+            if (m.vencimento) {
+                const alvo = normVenc(m.vencimento);
+                for (const c of candidatos) {
+                    if (normVenc(c.getAttribute('data-venc')) === alvo) return c.closest('tr');
+                }
+                return null;      // o imóvel está na tela, mas só com OUTRO vencimento: esta mudança não é daqui
+            }
+            if (candidatos.length) return candidatos[0].closest('tr');
+        }
+        return null;
+    }
+
+    // Repinta UMA linha com o status que chegou do servidor
+    function aplicarMudanca(m) {
+        const linha = acharLinha(m);
+        if (!linha) { DIAG.semLinha.push(m.imovel || m.imovel_id); return false; }   // não está nesta tela
+        const select = linha.querySelector('select.select-status');
+        if (!select) { DIAG.semSeletor.push(m.imovel || m.imovel_id); return false; }
+        if (select === document.activeElement) return false;       // a pessoa está mexendo nesse mesmo campo
+
+        const valor = m.status || '';
+        if (select.value === valor) return false;                  // já está assim (foi esta tela que mudou)
+
+        const existe = Array.from(select.options).some(o => o.value === valor);
+        if (!existe) {
+            const op = document.createElement('option');
+            op.value = valor; op.text = valor || 'Status...';
+            select.appendChild(op);
+        }
+        select.value = valor;
+
+        // cor do próprio seletor, igual ao que acionarTrocaStatus faz
+        select.classList.remove('status-pago', 'status-solicitado', 'status-coletado', 'status-cheque',
+                                'status-erro', 'status-robo', 'status-nao-emitido', 'status-branco');
+        if (['PAGO', 'PAGO NA 275', 'PAGO NA ADM'].includes(valor)) select.classList.add('status-pago');
+        else if (valor === 'SOLICITADO') select.classList.add('status-solicitado');
+        else if (valor === 'COLETADO') select.classList.add('status-coletado');
+        else if (valor === 'CHEQUE/DOC') select.classList.add('status-cheque');
+        else if (['ERRO PAGAMENTO', 'EMAIL RECEBIDO', 'ERRO DE REDE'].includes(valor)) select.classList.add('status-erro');
+        else if (valor === 'AUTOMAÇÃO') select.classList.add('status-robo');
+        else if (valor === 'NÃO EMITIDO') select.classList.add('status-nao-emitido');
+        else select.classList.add('status-branco');
+
+        // a memória do "status anterior" tem que acompanhar, senão o próximo salvamento usa o valor velho
+        const cbLinha = linha.querySelector('.check-imovel');
+        const idDaLinha = cbLinha ? cbLinha.value : m.imovel_id;      // a gêmea escondida tem outro id: vale o da linha que está na tela
+        select.setAttribute('onchange', "acionarTrocaStatus(this, '" + idDaLinha + "', '" + valor.replace(/'/g, "\\'") + "')");
+
+        // cor da linha inteira (mesma regra da planilha)
+        if (window.aplicarCorPlanilha) {
+            const cb = linha.querySelector('.check-imovel');
+            window.aplicarCorPlanilha(linha, (valor || 'STATUS...').toUpperCase(), cb ? cb.getAttribute('data-venc') : null);
+        }
+        linha.title = (m.usuario ? m.usuario + ' marcou' : 'Marcado') + ' como ' + (valor || 'sem status') +
+                      (m.hora ? ' às ' + m.hora : '');
+        linha.classList.remove('mudou-agora');
+        void linha.offsetWidth;                                     // reinicia a animação
+        linha.classList.add('mudou-agora');
+        return true;
+    }
+
+    function atualizarNumeros(r) {
+        if (!r) return;
+        const pt = n => Number(n || 0).toLocaleString('pt-BR');
+        const por = (id, texto) => { const el = document.getElementById(id); if (el) el.innerText = texto; };
+        por('numTotal', pt(r.total));
+        por('numPendentes', pt(r.pendentes));
+        por('numResolvidos', pt(r.resolvidos));
+        por('numColeteiHoje', pt(r.coletei_hoje));
+        por('numPct', String(r.pct).replace('.', ','));
+        const barra = document.getElementById('barraTopoPreenchida');
+        if (barra) barra.style.width = r.pct + '%';
+    }
+
+    function resumirParaOAviso(mudancas) {
+        // o mesmo imóvel pode aparecer mais de uma vez (o sistema replica o status nas cópias ativas):
+        // para o aviso, o que vale é quantos BOLETOS mudaram, não quantas linhas o banco anotou
+        const vistos = new Set();
+        const deOutros = mudancas.filter(m => {
+            if ((m.usuario || '').trim().toLowerCase() === eu) return false;
+            const chave = (m.imovel || m.imovel_id) + '|' + normVenc(m.vencimento) + '|' + m.status;   // 05 e 15 contam como 2 boletos
+            if (vistos.has(chave)) return false;
+            vistos.add(chave);
+            return true;
+        });
+        if (!deOutros.length) return '';
+        const porPessoa = {};
+        deOutros.forEach(m => {
+            const quem = (m.usuario || '').trim() || 'A automação';
+            porPessoa[quem] = (porPessoa[quem] || 0) + 1;
+        });
+        const nomes = Object.keys(porPessoa);
+        if (nomes.length === 1) {
+            const n = porPessoa[nomes[0]];
+            return '<b>' + nomes[0] + '</b> mexeu em ' + n + (n > 1 ? ' boletos' : ' boleto') + ' agora.';
+        }
+        return '<b>' + deOutros.length + ' boletos</b> mudaram de status agora (' + nomes.slice(0, 3).join(', ') + ').';
+    }
+
+    async function perguntar() {
+        try {
+            const url = '/api/sistema/mudancas' + (cursor === null ? '' : '?desde=' + cursor);
+            DIAG.perguntas++;
+            const r = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
+            DIAG.ultimaResposta = r.status;
+            if (r.status === 404) throw new Error('a rota /api/sistema/mudancas não existe neste servidor — o app.py novo não subiu');
+            if (!r.ok) throw new Error('o servidor respondeu ' + r.status);
+            const d = await r.json();
+            errosSeguidos = 0;
+            DIAG.quando = new Date().toLocaleTimeString('pt-BR');
+            if (d.gatilho !== null && d.gatilho !== undefined) DIAG.gatilho = d.gatilho;
+            DIAG.ultimoErro = '';
+            selo('ok', 'ao vivo');
+
+            const primeiraVez = cursor === null;
+            cursor = d.ultimo;
+            DIAG.cursor = cursor;
+
+            if (d.muitas) {
+                atualizarNumeros(d.resumo);
+                avisar('A planilha mudou bastante agora (virada de mês ou importação). Atualize a página (F5) para ver tudo.');
+                return;
+            }
+            if (!d.mudancas || !d.mudancas.length) return;
+
+            let repintadas = 0;
+            DIAG.recebidas += d.mudancas.length;
+            d.mudancas.forEach(m => { if (aplicarMudanca(m)) repintadas++; });
+            DIAG.repintadas += repintadas;
+            if (d.mudancas.length && !repintadas) {
+                console.warn('[ao vivo] chegaram', d.mudancas.length,
+                             'mudanças mas nenhuma linha foi encontrada na tela:', d.mudancas);
+            }
+            atualizarNumeros(d.resumo);
+            if (!primeiraVez && repintadas) {
+                const texto = resumirParaOAviso(d.mudancas);
+                if (texto) avisar(texto);
+            }
+        } catch (err) {
+            errosSeguidos++;
+            DIAG.ultimoErro = String(err && err.message || err);
+            console.warn('[ao vivo]', DIAG.ultimoErro);
+            if (errosSeguidos >= 2) selo('parado', 'não está atualizando');
+        }
+    }
+
+    function proximaEspera() {
+        if (errosSeguidos >= 3) return ESPERA_LENTA;
+        if (document.hidden) return ESPERA_LENTA;                   // aba de fundo: quase não pergunta
+        if (Date.now() - ultimoToque > OCIOSO_APOS) return ESPERA_OCIOSO;
+        return ESPERA;
+    }
+
+    function rodar() {
+        clearTimeout(timer);
+        timer = setTimeout(async () => { await perguntar(); rodar(); }, proximaEspera());
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { perguntar(); rodar(); }             // voltou para a aba: põe em dia na hora
+    });
+
+    perguntar();
+    rodar();
+}());
+</script>
+
+
+
+<div id="resumoRobo" role="dialog" aria-label="Resumo do robô">
+    <header>
+        <b>🤖 O robô hoje</b>
+        <button type="button" class="fechar-resumo" onclick="fecharResumoRobo(false)" aria-label="Fechar">✕</button>
+    </header>
+    <div class="corpo" id="resumoRoboCorpo"></div>
+    <footer>
+        <a class="btn-ver" id="resumoRoboVer" href="/raio_x_rpa">Ver meus casos</a>
+        <button type="button" class="depois" onclick="fecharResumoRobo(true)">Não mostrar hoje</button>
+    </footer>
+</div>
+
+<script>
+// ============================================================================
+// 🤖 RAIO-X NO PAINEL
+// Duas camadas de propósito:
+//   1) a FAIXA, sempre visível e sem botão de fechar — é o que garante o "ser visto sempre";
+//   2) o RESUMINHO, uma vez por dia por pessoa, e só se tiver caso dela. Entra de lado em
+//      vez de ser um pop-up no meio da tela: não trava o trabalho nem disputa com o modal
+//      de automação que já abre aqui. Pop-up que aparece todo dia vira parede: ninguém lê.
+// ============================================================================
+(function () {
+    var CHAVE_VISTO = 'raiox_resumo_visto';
+    var resumoAtual = null;
+
+    function guardar(chave, valor) {
+        try { localStorage.setItem(chave, valor); } catch (e) { /* navegador sem storage: tudo bem */ }
+    }
+    function ler(chave) {
+        try { return localStorage.getItem(chave); } catch (e) { return null; }
+    }
+
+    function pintarFaixa(d) {
+        var faixa = document.getElementById('faixaRaioX');
+        if (!faixa) return;
+        if (!d.total) {                                   // nada parado: a faixa some de vez
+            faixa.style.display = 'none';
+            return;
+        }
+        var meus = d.meus || 0;
+        faixa.style.display = 'flex';
+        faixa.classList.toggle('tranquila', meus === 0);
+        faixa.href = meus > 0 ? '/raio_x_rpa?responsavel=' + encodeURIComponent(d.eu) : '/raio_x_rpa';
+
+        document.getElementById('faixaRaioXTexto').innerText = meus > 0
+            ? meus + (meus === 1 ? ' boleto seu travado no robô' : ' boletos seus travados no robô')
+            : 'Robô sem pendência na sua carteira';
+
+        var maior = (d.categorias || [])[0];
+        var partes = [];
+        if (d.total !== meus) partes.push(d.total + ' na operação');
+        if (maior) partes.push('maior causa: ' + maior.rotulo.toLowerCase() + ' (' + maior.qtd + ')');
+        document.getElementById('faixaRaioXDetalhe').innerText = partes.length ? '· ' + partes.join(' · ') : '';
+    }
+
+    function montarResumo(d) {
+        var corpo = document.getElementById('resumoRoboCorpo');
+        var linhas = (d.categorias || []).filter(function (c) { return c.meus > 0; })
+            .map(function (c) {
+                return '<div class="linha-cat"><span>' + c.rotulo + '</span><b>' + c.meus + '</b></div>';
+            }).join('');
+
+        corpo.innerHTML =
+            '<div class="d-flex align-items-end gap-2 mb-1">' +
+                '<span class="numerao">' + d.meus + '</span>' +
+                '<span class="text-muted" style="font-size:.84rem; padding-bottom:4px;">' +
+                    (d.meus === 1 ? 'boleto seu parado' : 'boletos seus parados') + '</span>' +
+            '</div>' +
+            '<div class="text-muted mb-2" style="font-size:.78rem;">de ' + d.total + ' na operação · base desde ' + d.ciclo_desde + '</div>' +
+            linhas +
+            (d.meus_hoje ? '<div class="mt-2" style="font-size:.8rem; color:var(--warn-text);"><b>' + d.meus_hoje +
+                '</b> apareceram hoje.</div>' : '');
+
+        document.getElementById('resumoRoboVer').href = '/raio_x_rpa?responsavel=' + encodeURIComponent(d.eu);
+    }
+
+    window.fecharResumoRobo = function (hojeNao) {
+        document.getElementById('resumoRobo').classList.remove('aberto');
+        if (hojeNao && resumoAtual) guardar(CHAVE_VISTO, (resumoAtual.eu || '') + '|' + resumoAtual.dia);
+    };
+
+    function talvezMostrarResumo(d) {
+        if (!d.meus) return;                                     // nada seu: não interrompe
+        if (ler(CHAVE_VISTO) === (d.eu || '') + '|' + d.dia) return;   // já viu hoje
+        montarResumo(d);
+        // espera o modal de automação (que já abre aqui) sair da frente; desiste depois de 1 min
+        var tentativas = 0;
+        function mostrarQuandoDer() {
+            if (document.querySelector('.modal.show') && tentativas++ < 15) {
+                setTimeout(mostrarQuandoDer, 4000);
+                return;
+            }
+            document.getElementById('resumoRobo').classList.add('aberto');
+            guardar(CHAVE_VISTO, (d.eu || '') + '|' + d.dia);    // aparece uma vez por dia, mesmo sem clicar
+        }
+        setTimeout(mostrarQuandoDer, 2500);
+    }
+
+    // O resuminho é 'position: fixed', mas se o HTML em volta tiver uma div sem fechar ele
+    // vira filho de um elemento escondido e some. Pendurar no body tira essa dependência.
+    (function () {
+        var caixa = document.getElementById('resumoRobo');
+        if (caixa && caixa.parentElement !== document.body) document.body.appendChild(caixa);
+    }());
+
+    function buscarResumo(primeiraVez) {
+        fetch('/api/raio_x/resumo', { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d || !d.sucesso) return;
+                resumoAtual = d;
+                pintarFaixa(d);
+                if (primeiraVez) talvezMostrarResumo(d);
+            })
+            .catch(function () { /* o painel não para por causa disto */ });
+    }
+
+    window.atualizarFaixaRaioX = function () { buscarResumo(false); };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { buscarResumo(true); });
+    } else {
+        buscarResumo(true);
+    }
+    // acompanha o dia: quem deixa o painel aberto o dia todo vê o número mudar
+    setInterval(function () { buscarResumo(false); }, 5 * 60 * 1000);
+}());
+</script>
+
+<script>
+// =====================================================================================
+// 🔐 COLETADO em caso com erro de login (Raio-X RPA): exige login, senha, unidade e bloco
+//    — ou "não possui mais login". 🟢🟡🔴 Bolinha de dificuldade em cada linha.
+// =====================================================================================
+(function () {
+    'use strict';
+
+    // Pinta o select igual ao painel (para devolver a cor quando a pessoa cancela)
+    function pintarSelectStatus(sel, status) {
+        if (typeof window.aplicarCorStatus === 'function') { window.aplicarCorStatus(sel, status); return; }
+        sel.classList.remove('status-pago', 'status-solicitado', 'status-coletado', 'status-cheque', 'status-erro', 'status-robo', 'status-nao-emitido', 'status-branco');
+        if (['PAGO', 'PAGO NA 275', 'PAGO NA ADM'].includes(status)) sel.classList.add('status-pago');
+        else if (status === 'SOLICITADO') sel.classList.add('status-solicitado');
+        else if (status === 'COLETADO') sel.classList.add('status-coletado');
+        else if (status === 'CHEQUE/DOC') sel.classList.add('status-cheque');
+        else if (['ERRO PAGAMENTO', 'EMAIL RECEBIDO', 'ERRO DE REDE'].includes(status)) sel.classList.add('status-erro');
+        else if (status === 'AUTOMAÇÃO') sel.classList.add('status-robo');
+        else if (status === 'NÃO EMITIDO') sel.classList.add('status-nao-emitido');
+        else sel.classList.add('status-branco');
+    }
+
+    function el(id) { return document.getElementById(id); }
+    function semAcento(t) { return String(t || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+    function compartilhado(portal) { const p = semAcento(portal); return p === 'WINKER' || p === 'SUPERLOGICA'; }
+
+    let pedidoAtual = null;     // {selectObj, imovelId, statusAnterior, imovel}
+
+    function voltarStatus() {
+        if (!pedidoAtual) return;
+        const s = pedidoAtual.selectObj;
+        s.value = pedidoAtual.statusAnterior || '';
+        pintarSelectStatus(s, s.value);
+        pedidoAtual = null;
+    }
+
+    function seguirComColeta(p) {
+        p.selectObj.dataset.acessoConferido = '1';
+        window.acionarTrocaStatus(p.selectObj, p.imovelId, p.statusAnterior);
+    }
+
+    function aplicarEscolha() {
+        const semLogin = el('acesso_possui').value === 'NAO';
+        ['acesso_portal', 'acesso_emp', 'acesso_bloco', 'acesso_unid', 'acesso_login', 'acesso_senha', 'acesso_sem_bloco']
+            .forEach(id => { el(id).disabled = semLogin; });
+        el('acessoColetaCampos').style.opacity = semLogin ? '0.4' : '';
+        if (!semLogin) el('acesso_bloco').disabled = el('acesso_sem_bloco').checked;
+        const comp = compartilhado(el('acesso_portal').value);
+        el('acessoCompartilhado').style.display = (!semLogin && comp) ? '' : 'none';
+        document.querySelectorAll('#modalAcessoColeta .obrig-cred').forEach(x => { x.style.display = comp ? 'none' : ''; });
+        el('btnSalvarAcessoColeta').innerText = semLogin ? 'Confirmar sem login e marcar COLETADO' : 'Salvar dados e marcar COLETADO';
+    }
+
+    function abrirModal(p, info) {
+        const cad = info.cadastro || {};
+        const erro = info.erro || {};
+        el('acessoColetaSubtitulo').innerText = 'Imóvel ' + info.imovel + (cad.portal ? ' · portal atual: ' + cad.portal : '');
+        el('acessoColetaErro').innerText = 'Último retorno do robô' + (erro.data_hora ? ' (' + erro.data_hora + ')' : '') + ': ' +
+            [erro.status, erro.detalhe].filter(Boolean).join(' — ');
+        const sel = el('acesso_portal');
+        const portal = cad.portal || 'DIVERSOS';
+        if (!Array.from(sel.options).some(o => o.value === portal)) sel.appendChild(new Option(portal, portal));
+        sel.value = portal;
+        el('acesso_possui').value = cad.possui_login === 'NAO' ? 'NAO' : 'SIM';
+        el('acesso_emp').value = cad.emp_site || '';
+        el('acesso_bloco').value = cad.bloco_site || '';
+        el('acesso_sem_bloco').checked = false;
+        el('acesso_unid').value = cad.unid_site || '';
+        el('acesso_login').value = cad.login_acesso || '';
+        el('acesso_senha').value = '';              // a senha que falhou não serve: digita a certa
+        el('acessoColetaAviso').style.display = 'none';
+        aplicarEscolha();
+        bootstrap.Modal.getOrCreateInstance(el('modalAcessoColeta')).show();
+    }
+
+    function salvar() {
+        if (!pedidoAtual) return;
+        const semLogin = el('acesso_possui').value === 'NAO';
+        const dados = {
+            imovel: pedidoAtual.imovel, origem: 'coletado', sem_login: semLogin,
+            portal: el('acesso_portal').value, emp_site: el('acesso_emp').value.trim(),
+            bloco_site: el('acesso_bloco').value.trim(), sem_bloco: el('acesso_sem_bloco').checked,
+            unid_site: el('acesso_unid').value.trim(),
+            login_acesso: el('acesso_login').value.trim(), senha_acesso: el('acesso_senha').value.trim()
+        };
+        const aviso = el('acessoColetaAviso');
+        if (!semLogin) {
+            const falta = [];
+            if (!compartilhado(dados.portal) && !dados.login_acesso) falta.push('login');
+            if (!compartilhado(dados.portal) && !dados.senha_acesso) falta.push('senha');
+            if (!dados.unid_site) falta.push('unidade');
+            if (!dados.bloco_site && !dados.sem_bloco) falta.push('bloco (ou marque "sem bloco")');
+            if (falta.length) {
+                aviso.innerText = 'Falta informar: ' + falta.join(', ') + '. Ou escolha "Não possui mais login".';
+                aviso.style.display = '';
+                return;
+            }
+        }
+        const botao = el('btnSalvarAcessoColeta');
+        botao.disabled = true;
+        fetch('/api/raio_x/salvar_ajuste', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados)
+        })
+        .then(r => r.json())
+        .then(res => {
+            botao.disabled = false;
+            if (!res.sucesso) { aviso.innerText = res.msg || 'Não foi possível salvar.'; aviso.style.display = ''; return; }
+            const p = pedidoAtual;
+            pedidoAtual = null;
+            bootstrap.Modal.getOrCreateInstance(el('modalAcessoColeta')).hide();
+            if (typeof window.atualizarFaixaRaioX === 'function') window.atualizarFaixaRaioX();
+            seguirComColeta(p);        // agora segue o fluxo normal do COLETADO (emissão, gravação...)
+        })
+        .catch(() => { botao.disabled = false; aviso.innerText = 'O sistema não respondeu. Tente de novo.'; aviso.style.display = ''; });
+    }
+
+    // Chamado por acionarTrocaStatus: true = pode seguir; false = está conferindo (ele volta a chamar depois)
+    window.verificarAcessoAntesDeColetar = function (selectObj, imovelId, statusAnterior) {
+        if (selectObj.dataset.acessoConferido === '1') { delete selectObj.dataset.acessoConferido; return true; }
+        const pedido = { selectObj: selectObj, imovelId: imovelId, statusAnterior: statusAnterior, imovel: '' };
+        fetch('/api/raio_x/pendencia_login?id=' + encodeURIComponent(imovelId), { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null)
+            .then(info => {
+                if (!info || !info.sucesso || !info.pendente) { seguirComColeta(pedido); return; }
+                pedido.imovel = info.imovel;
+                pedidoAtual = pedido;
+                abrirModal(pedido, info);
+            })
+            .catch(() => seguirComColeta(pedido));     // sem resposta: o servidor confere de novo ao gravar
+        return false;
+    };
+
+    // Caixa de credenciais do detalhe do imóvel: "não possui login" leva para DIVERSOS
+    window.aplicarPossuiLoginIndex = function () {
+        const sel = el('cred_possui');
+        if (!sel) return;
+        const semLogin = sel.value === 'NAO';
+        ['cred_login', 'cred_senha', 'cred_portal'].forEach(id => { if (el(id)) el(id).disabled = semLogin; });
+        if (semLogin && el('cred_portal')) {
+            if (!Array.from(el('cred_portal').options).some(o => o.value === 'DIVERSOS')) el('cred_portal').appendChild(new Option('Diversos', 'DIVERSOS'));
+            el('cred_portal').value = 'DIVERSOS';
+        }
+        if (el('cred_possui_aviso')) el('cred_possui_aviso').style.display = semLogin ? '' : 'none';
+    };
+
+    function ligarModal() {
+        if (!el('modalAcessoColeta')) return;
+        el('acesso_possui').addEventListener('change', aplicarEscolha);
+        el('acesso_portal').addEventListener('change', aplicarEscolha);
+        el('acesso_sem_bloco').addEventListener('change', () => {
+            el('acesso_bloco').disabled = el('acesso_sem_bloco').checked;
+            if (el('acesso_sem_bloco').checked) el('acesso_bloco').value = '';
+        });
+        el('btnSalvarAcessoColeta').addEventListener('click', salvar);
+        el('btnCancelarAcessoColeta').addEventListener('click', () => {
+            bootstrap.Modal.getOrCreateInstance(el('modalAcessoColeta')).hide();
+            voltarStatus();
+        });
+    }
+
+    // ---------------- 🟢🟡🔴 bolinha de dificuldade ----------------
+    const SELETOR_LINHAS = '#tbodyImoveis tr[id^="linha_imovel_"]:not([data-dif]), #tbodyImoveis tr[id^="tr_imovel_"]:not([data-dif])';
+    let timerDif = null;
+
+    function idDaLinha(tr) { return tr.id.replace(/^(linha|tr)_imovel_/, ''); }
+
+    function pintarLinha(tr, info) {
+        if (!info || tr.querySelector('.dif-dot')) return;
+        const bola = document.createElement('span');
+        bola.className = 'dif-dot dif-' + info.nivel;
+        bola.title = ({ FACIL: 'Fácil', MEDIO: 'Médio', DIFICIL: 'Difícil' }[info.nivel] || '') + ' — ' + info.motivo;
+        bola.setAttribute('aria-label', bola.title);
+        const link = tr.querySelector('.imovel-link');
+        const celula = (link && link.parentNode) ? link.parentNode : tr.cells[4];
+        if (!celula) return;
+        celula.insertBefore(bola, (link && link.parentNode === celula) ? link : celula.firstChild);
+        celula.style.whiteSpace = 'nowrap';         // bolinha e número na mesma linha
+        tr.dataset.dif = info.nivel;
+    }
+
+    function decorarLinhas() {
+        const linhas = Array.from(document.querySelectorAll(SELETOR_LINHAS));
+        if (!linhas.length) return;
+        linhas.forEach(tr => { tr.dataset.dif = 'carregando'; });
+        for (let i = 0; i < linhas.length; i += 400) {
+            const lote = linhas.slice(i, i + 400);
+            fetch('/api/painel/dificuldade', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: lote.map(idDaLinha) })
+            })
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (!d || !d.sucesso) { lote.forEach(tr => { delete tr.dataset.dif; }); return; }
+                lote.forEach(tr => pintarLinha(tr, d.mapa[idDaLinha(tr)]));
+            })
+            .catch(() => lote.forEach(tr => { delete tr.dataset.dif; }));
+        }
+    }
+
+    function agendarDecoracao() { clearTimeout(timerDif); timerDif = setTimeout(decorarLinhas, 150); }
+
+    function iniciar() {
+        ligarModal();
+        const corpo = el('tbodyImoveis');
+        if (corpo) new MutationObserver(agendarDecoracao).observe(corpo, { childList: true });
+        decorarLinhas();
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+    else iniciar();
+}());
+</script>
 
 {% endblock %}

@@ -1,0 +1,53 @@
+        :root {
+            --papel: #ffffff; --vinho: #5c0521; --vermelho: #c20332; --vermelho-escuro: #9c0228;
+            --rosa: #fbeff2; --cinza: #6b5c62; --linha: #e9e2e5; --verde: #1e5b39;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0; background: var(--papel); color: var(--vinho);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh;
+        }
+        .boleto { height: 10px; display: flex; overflow: hidden; flex: none; }
+        .boleto i { display: block; height: 100%; background: var(--vermelho); flex: 1 1 0; }
+        .boleto i.vazio { background: transparent; }
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+        .coluna { width: 100%; max-width: 380px; }
+        .marca { height: 58px; margin-bottom: 36px; display: block; }
+        h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; line-height: 1.15; }
+        .linha-fina { color: var(--cinza); font-size: 0.95rem; margin: 0 0 28px; line-height: 1.5; }
+        label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+        .campo { position: relative; margin-bottom: 18px; }
+        input { width: 100%; height: 48px; padding: 0 14px; font-size: 1rem; color: var(--vinho); background: #fff;
+                border: 1px solid var(--linha); border-radius: 8px; outline: none; font-family: inherit;
+                transition: border-color .15s, box-shadow .15s; }
+        input::placeholder { color: #b9a9af; }
+        input:focus { border-color: var(--vermelho); box-shadow: 0 0 0 3px rgba(194,3,50,.13); }
+        .com-botao input { padding-right: 52px; }
+        .olho { position: absolute; right: 6px; bottom: 6px; width: 36px; height: 36px; border: 0; background: none;
+                color: var(--cinza); cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .olho:hover { background: var(--rosa); color: var(--vinho); }
+        .olho svg { width: 19px; height: 19px; }
+        button.principal { width: 100%; height: 48px; margin-top: 6px; border: 0; border-radius: 8px;
+            background: var(--vermelho); color: #fff; font-size: 1rem; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        button.principal:hover { background: var(--vermelho-escuro); }
+        button.principal:disabled { opacity: .72; cursor: default; }
+        .girando { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+                   border-radius: 50%; animation: gira .7s linear infinite; }
+        @keyframes gira { to { transform: rotate(360deg); } }
+        .recado { border-radius: 8px; padding: 12px 14px; font-size: 0.88rem; line-height: 1.45; margin-bottom: 20px; }
+        .recado.ruim { background: var(--rosa); color: #8e0226; border: 1px solid #f3d3dc; }
+        .regras { list-style: none; padding: 0; margin: -6px 0 20px; font-size: 0.84rem; color: var(--cinza); }
+        .regras li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+        .regras li::before { content: '○'; font-size: 0.9rem; color: #c9bcc1; width: 14px; }
+        .regras li.ok { color: var(--verde); }
+        .regras li.ok::before { content: '●'; color: var(--verde); }
+        .volta { display: inline-block; margin-top: 18px; font-size: 0.88rem; color: var(--cinza);
+                 text-decoration: underline; text-underline-offset: 3px; }
+        .volta:hover { color: var(--vermelho); }
+        footer { padding: 20px; border-top: 1px solid var(--linha); text-align: center; color: var(--cinza); font-size: 0.78rem; }
+        [hidden] { display: none !important; }
+        :focus-visible { outline: 2px solid var(--vermelho); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

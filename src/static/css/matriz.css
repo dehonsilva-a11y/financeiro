@@ -1,0 +1,31 @@
+    body { background-color: var(--bg); }
+    .matrix-container { background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
+    .table-responsive { max-height: 75vh; overflow: auto; }
+    
+    #tabelaMatriz { font-size: 0.72rem; border-collapse: separate; border-spacing: 0; width: 100%; margin: 0; }
+    #tabelaMatriz th { background-color: var(--deep) !important; color: #ffffff !important; border: 1px solid var(--deep); text-align: center; vertical-align: middle; padding: 6px 3px; position: sticky; top: 0; z-index: 10; font-weight: bold; }
+    #tabelaMatriz th.col-emissao { position: sticky; left: 0; z-index: 12; min-width: 90px; background-color: var(--deep) !important; line-height: 1.3; }
+    #tabelaMatriz td { border: 1px solid var(--line); text-align: center; vertical-align: middle; padding: 6px 3px; cursor: pointer; transition: all 0.15s ease; font-weight: 600; color: var(--ink); }
+    
+    #tabelaMatriz td:hover { background-color: var(--accent-soft) !important; color: var(--accent-detail); font-weight: 800; transform: scale(1.2); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 5; position: relative; border-radius: 4px; }
+    #tabelaMatriz td.celula-vazia { color: var(--line); font-weight: normal; pointer-events: none; }
+    
+    .diag-yellow { background-color: #F6E3B4 !important; } 
+    .area-mes-atual { background-color: #ffffff !important; } 
+    .area-mes-seguinte { background-color: var(--line) !important; } 
+    
+    #tabelaMatriz td.total-col { background-color: var(--deep) !important; color: #ffffff !important; font-weight: bold; position: sticky; bottom: 0; z-index: 9; }
+    #tabelaMatriz td.total-linha { background-color: var(--deep) !important; color: #ffffff !important; font-weight: bold; }
+    #tabelaMatriz th.total-corner { background-color: var(--ink) !important; color: #ffffff !important; }
+    
+    .divisor-coluna { border-left: 3px solid var(--accent) !important; }
+    .grand-total-badge { background-color: #fff; color: var(--deep); padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-modo-real { background-color: var(--ok-bg); color: var(--ok-text); border: 1px solid #C3E3CC; }
+    .badge-modo-planilha { background-color: var(--warn-bg); color: var(--warn-text); border: 1px solid #F6E3B4; }
+    .badge-modo-todos { background-color: var(--info-bg); color: var(--info-text); border: 1px solid #B5D5EE; }
+
+    /* 🎯 Número clicável que abre a origem (portal) dos boletos */
+    .celula-origem { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+    .celula-origem:hover { background-color: var(--accent-soft); }
+    tfoot .celula-origem:hover { background-color: var(--accent); }
+    .origem-barra { height: 8px; }

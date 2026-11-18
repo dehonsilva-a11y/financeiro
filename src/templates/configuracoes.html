@@ -3,20 +3,7 @@
 {% block title %}Configurações de Administradoras - Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    .table-container { border: 1px solid #e2e8f0; border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.03); overflow: hidden; }
-    .table-wrapper { max-height: 50vh; overflow-y: auto; }
-    .table thead th { background-color: #0f172a; color: #f8fafc; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 15px 12px; position: sticky; top: 0; z-index: 10; }
-    .table tbody td { font-size: 0.88rem; color: #334155; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .table tbody tr:hover { background-color: #f8fafc; }
-    .badge-resp { font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: 1px solid transparent; }
-    .badge-atribuido { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-    .badge-pendente { background-color: #fef2f2; color: #991b1b; border-color: #fecaca; }
-    .form-select-custom { font-size: 0.82rem; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; max-width: 150px; color: #334155; background-color: #f8fafc; }
-    .form-input-custom { font-size: 0.82rem; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; color: #334155; }
-    .form-input-custom:focus, .form-select-custom:focus { border-color: #00a7e1; box-shadow: 0 0 0 2px rgba(0, 167, 225, 0.1); outline: none; }
-    .btn-lello-save { background-color: #00a7e1; color: #ffffff; font-weight: 600; font-size: 0.8rem; border: none; padding: 8px 16px; border-radius: 6px; transition: all 0.2s ease; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/configuracoes.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -26,7 +13,7 @@
     </div>
 
     {% if eh_master %}
-    <div class="card border-0 mb-4" style="border-radius: 12px; background: linear-gradient(to bottom, #ffffff, #f8fafc); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <div class="card border-0 mb-4" style="border-radius: 12px; background: var(--surface); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid var(--line);">
         <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center mb-2">
                 <span class="fs-4 me-2">🛡️</span>
@@ -35,12 +22,16 @@
             <p class="text-muted small mb-4" style="max-width: 600px;">Adicione colaboradores para que possam assumir o controle de administradoras no sistema. Eleve os mais experientes ao cargo de Admin Master para liberar as ferramentas avançadas.</p>
             
             <div class="row align-items-end g-3 mb-4 bg-white p-3 rounded-3 shadow-sm border" style="max-width: 650px;">
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <label class="form-label small fw-bold text-secondary mb-1">Cadastrar Novo Colaborador (ID Curto):</label>
-                    <input type="text" id="inputNovoUsuarioPainel" class="form-control bg-light border-light shadow-none fw-medium" placeholder="Ex: ryan (como no e-mail)" style="font-size: 0.9rem;">
+                    <input type="text" id="inputNovoUsuarioPainel" class="form-control bg-light border-light shadow-none fw-medium" placeholder="Ex: henrique" style="font-size: 0.9rem;">
                 </div>
                 <div class="col-md-4">
-                    <button class="btn btn-dark w-100 fw-bold shadow-sm" style="background-color: #0f172a; border-radius: 6px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="adicionarUsuarioPainel()">
+                    <label class="form-label small fw-bold text-secondary mb-1">E-mail (para enviar a senha):</label>
+                    <input type="email" id="inputNovoEmailPainel" class="form-control bg-light border-light shadow-none fw-medium" placeholder="nome@lello.com.br" style="font-size: 0.9rem;">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-dark w-100 fw-bold shadow-sm" style="border-radius: 6px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="adicionarUsuarioPainel()">
                         ＋ Adicionar
                     </button>
                 </div>
@@ -68,7 +59,7 @@
                             </td>
                             <td class="text-center py-3">
                                 {% if usu.is_master == 1 or usu.nome in ['ryan', 'marcio', 'paulo', 'alessandra'] %}
-                                    <span class="badge" style="background-color: #1e293b; color: #f8fafc; font-size: 0.7rem; padding: 6px 12px; border: 1px solid #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">👑 Admin Master</span>
+                                    <span class="badge" style="background-color: var(--deep); color: var(--bg); font-size: 0.7rem; padding: 6px 12px; border: 1px solid var(--ink); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">👑 Admin Master</span>
                                 {% else %}
                                     <span class="badge bg-light text-secondary border px-3 py-2 fw-semibold" style="font-size: 0.7rem;">Operador Comum</span>
                                 {% endif %}
@@ -79,9 +70,9 @@
                                         <span class="text-muted small fw-bold py-1 opacity-50"><i class="fas fa-lock"></i> Fundador Protegido</span>
                                     {% else %}
                                         {% if usu.is_master == 1 %}
-                                            <button class="btn btn-sm btn-light text-warning fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 0)" title="Rebaixar para Operador Comum">⬇️ Remover</button>
+                                            <button class="btn btn-sm btn-light fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 0)" title="Rebaixar para Operador Comum">⬇️ Remover</button>
                                         {% else %}
-                                            <button class="btn btn-sm btn-light text-success fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 1)" title="Promover a Admin Master">⬆️ Promover</button>
+                                            <button class="btn btn-sm btn-light fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="alterarNivelMaster({{ usu.id }}, '{{ usu.nome }}', 1)" title="Promover a Admin Master">⬆️ Promover</button>
                                         {% endif %}
                                         <button class="btn btn-sm btn-light text-danger fw-bold border shadow-none" style="font-size: 0.75rem;" onclick="removerUsuarioPainel({{ usu.id }}, '{{ usu.nome }}')" title="Excluir do Sistema">🗑️</button>
                                     {% endif %}
@@ -99,13 +90,13 @@
     </div>
     {% endif %}
 
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #10b981 !important;">
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid var(--line); border-left: 5px solid var(--accent) !important;">
         <div class="card-body p-4">
-            <h6 class="fw-bold text-dark mb-1"><span class="text-success"><i class="fas fa-file-invoice-dollar me-1"></i></span> Importar Baixas (Liquidações)</h6>
+            <h6 class="fw-bold text-dark mb-1"><span style="color: var(--accent);"><i class="fas fa-file-invoice-dollar me-1"></i></span> Importar Baixas (Liquidações)</h6>
             <p class="text-muted small mb-3">Faça o upload do relatório financeiro <b>(CSV ou Excel)</b>. O sistema lerá a <b>Coluna K</b> e mudará o status para <b>PAGO</b> nos imóveis da <b>Coluna A</b> marcados com a letra "L".</p>
             
             <form id="formBaixaLote" class="d-flex align-items-center gap-3">
-                <input type="file" id="arquivoBaixa" class="form-control form-control-sm w-50 border-success" accept=".csv, .xlsx" required>
+                <input type="file" id="arquivoBaixa" class="form-control form-control-sm w-50" accept=".csv, .xlsx" required>
                 <button type="button" class="btn btn-success btn-sm px-4 fw-bold shadow-sm" onclick="processarBaixasEmLote()">
                     <i class="fas fa-check-double me-1"></i> Processar Baixas
                 </button>
@@ -114,13 +105,59 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+    <div class="card border-0 shadow-sm mb-4" id="baseAuto" style="border-radius: 10px; background-color: #ffffff; border: 1px solid var(--line);">
         <div class="card-body p-4">
-            <h6 class="fw-bold text-dark mb-1"><span style="color: #00a7e1;">|</span> Importar Base Padrão de Imóveis (Excel)</h6>
+            <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+                <div style="max-width: 680px;">
+                    <h6 class="fw-bold text-dark mb-1"><span style="color: var(--accent);">|</span> Atualização Automática da Base (Portal Lello) <span id="baPill" class="lo-pill lo-pill-neutral ms-2 align-middle">Carregando…</span></h6>
+                    <p class="text-muted small mb-0">O robô entra no portal da Lello, abre <b>Rel. Boletos Cond. não recebidos</b>, consulta o mês de vencimento abaixo (Resp. Pagto = Lello, do dia 1 ao último dia) e importa aqui, pelo mesmo caminho da importação manual. Só regrava a base quando algo mudou.</p>
+                </div>
+                <button type="button" id="baBotao" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm" onclick="baseAutoAtualizar()" disabled>Atualizar agora</button>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                    <div class="rotulo-cfg">Mês buscado</div>
+                    <div class="valor-cfg valor-ba" id="baMes">—</div>
+                    <div class="small text-muted" id="baMesOrigem">&nbsp;</div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="rotulo-cfg">Última conferência</div>
+                    <div class="valor-cfg valor-ba" id="baQuando">—</div>
+                    <div class="small text-muted" id="baQuem">&nbsp;</div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="rotulo-cfg">Boletos na última carga</div>
+                    <div class="valor-cfg valor-ba" id="baLinhas">—</div>
+                    <div class="small text-muted" id="baLinhasSub">&nbsp;</div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="rotulo-cfg">Próxima execução</div>
+                    <div class="valor-cfg valor-ba" id="baProxima">—</div>
+                    <div class="small text-muted" id="baHorarios">&nbsp;</div>
+                </div>
+            </div>
+
+            <div id="baMsg" class="mt-3 p-2 rounded small d-none" role="status"></div>
+
+            <div id="baMesBox" class="d-none mt-3 pt-3" style="border-top: 1px solid var(--line);">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label for="baMesSel" class="rotulo-cfg mb-0">Mês que o robô busca</label>
+                    <select id="baMesSel" class="form-select form-select-sm fw-bold border-secondary text-secondary" style="width: 340px; max-width: 100%; font-size: 0.8rem;"></select>
+                    <button type="button" id="baMesBotao" class="btn btn-outline-secondary btn-sm fw-bold" onclick="baseAutoSalvarMes()">Aplicar</button>
+                </div>
+                <div class="small text-muted mt-2">O robô acompanha o mês da base ativa e <b>nunca vira o mês sozinho</b>. Para virar (ex.: passar para Dezembro), escolha o mês novo e aplique; a virada acontece na próxima execução, ou agora, em <b>Atualizar agora</b>.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid var(--line);">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-dark mb-1"><span style="color: var(--accent);">|</span> Importar Base Padrão de Imóveis (Excel)</h6>
             <p class="text-muted small mb-3">Selecione o relatório oficial da Lello extraído do sistema (ex: <code>relatorioBoletoCondominioNaoRecebido.xlsx</code>) para alimentar ou atualizar o painel.</p>
             
             {% if ultimo_upload %}
-            <div class="mb-3 p-2 rounded" style="background-color: #f8fafc; border: 1px solid #cbd5e1; font-size: 0.8rem; color: #475569;">
+            <div class="mb-3 p-2 rounded" style="background-color: var(--bg); border: 1px solid var(--line); font-size: 0.8rem; color: var(--muted);">
                 <b>ℹ️ Última importação realizada:</b> O arquivo <span class="badge bg-white text-dark border border-secondary font-monospace px-2 py-1">{{ ultimo_upload['acao'].split('|')[1] }}</span> 
                 foi processado por <b>{{ ultimo_upload['usuario'] }}</b> em <b>{{ ultimo_upload['data_hora'] }}</b>.
             </div>
@@ -128,15 +165,15 @@
             
             <form action="/api/sistema/upload_base" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-3">
                 <input type="file" name="arquivo_base" class="form-control form-control-sm w-50" accept=".xlsx, .xls, .csv" required>
-                <button type="submit" class="btn btn-dark btn-sm px-4 fw-bold shadow-sm" style="background-color: #1e293b;">Carregar Nova Base 🚀</button>
+                <button type="submit" class="btn btn-dark btn-sm px-4 fw-bold shadow-sm">Carregar Nova Base 🚀</button>
             </form>
         </div>
     </div>
 
     {% if usuario_atual in ['ryan', 'marcio', 'paulo', 'alessandra'] %}
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background-color: #ffffff; border: 1px solid var(--line);">
         <div class="card-body p-4">
-            <h6 class="fw-bold text-dark mb-1"><span style="color: #00a7e1;">|</span> Movimentação Rápida de Administradora/Imóveis (Transferir / Inverter)</h6>
+            <h6 class="fw-bold text-dark mb-1"><span style="color: var(--accent);">|</span> Movimentação Rápida de Administradora/Imóveis (Transferir / Inverter)</h6>
             <p class="text-muted small mb-3">Troque os Imóveis entre dois operadores ou passe todas as administradoras de um para o outro instantaneamente.</p>
             
             <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -144,11 +181,7 @@
                     <label class="small fw-bold text-secondary mb-0">Colaborador A:</label>
                     <select id="swapOpA" class="form-select form-select-sm fw-bold border-secondary text-secondary" style="width: 150px; font-size: 0.8rem;">
                         <option value="" disabled selected>Selecionar...</option>
-                        <option value="Ryan">Ryan</option>
-                        <option value="Jéssica">Jéssica</option>
-                        <option value="Victor">Victor</option>
-                        <option value="Arthur">Arthur</option>
-                        <option value="Ellen">Ellen</option>
+                        {% for r in responsaveis %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
                     </select>
                 </div>
 
@@ -158,17 +191,13 @@
                     <label class="small fw-bold text-secondary mb-0">Colaborador B:</label>
                     <select id="swapOpB" class="form-select form-select-sm fw-bold border-secondary text-secondary" style="width: 150px; font-size: 0.8rem;">
                         <option value="" disabled selected>Selecionar...</option>
-                        <option value="Ryan">Ryan</option>
-                        <option value="Jéssica">Jéssica</option>
-                        <option value="Victor">Victor</option>
-                        <option value="Arthur">Arthur</option>
-                        <option value="Ellen">Ellen</option>
+                        {% for r in responsaveis %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
                     </select>
                 </div>
 
                 <div class="d-flex gap-2 ms-md-2">
                     <button type="button" class="btn btn-outline-dark btn-sm fw-bold px-3" onclick="processarMovimentacao('transferir')">➡️ Transferir A para B</button>
-                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3" style="background-color: #00a7e1; border-color: #00a7e1;" onclick="processarMovimentacao('inverter')">🔀 Inverter (Trocar)</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3" onclick="processarMovimentacao('inverter')">🔀 Inverter (Trocar)</button>
                 </div>
             </div>
         </div>
@@ -177,16 +206,63 @@
 
   
 
+    <!-- ====================================================================
+         ADMINISTRADORAS: busca, filtros e gravação sem recarregar a página
+         ==================================================================== -->
+    <div class="card border-0 shadow-sm mb-3" style="border-radius: 10px; border: 1px solid var(--line);">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                <div class="numero-cfg" title="Administradoras com imóveis na base de hoje">
+                    <div class="rotulo-cfg">Administradoras</div>
+                    <div class="valor-cfg" id="cfgTotal">0</div>
+                </div>
+                <div class="numero-cfg" title="Sem e-mail cadastrado, o disparo de cobrança não alcança essa administradora">
+                    <div class="rotulo-cfg">Sem e-mail</div>
+                    <div class="valor-cfg text-danger" id="cfgSemEmail">0</div>
+                </div>
+                <div class="numero-cfg" title="Ninguém responde por essas administradoras">
+                    <div class="rotulo-cfg">Sem responsável</div>
+                    <div class="valor-cfg text-warning" id="cfgSemResp">0</div>
+                </div>
+                <div class="flex-grow-1" style="min-width: 260px;">
+                    <input type="search" id="buscaAdm" class="form-control form-control-sm"
+                           placeholder="Buscar por administradora, e-mail ou responsável..." autocomplete="off">
+                </div>
+                <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="abrirColarEmails()">📋 Colar lista de e-mails</button>
+                <div class="btn-group">
+                    <a class="btn btn-sm btn-success fw-bold" href="/relatorio/carteira_por_portal.xlsx"
+                       title="Uma linha por administradora, uma coluna por portal de coleta">📊 Excel: minha carteira por portal</a>
+                    <a class="btn btn-sm btn-outline-success fw-bold" href="/relatorio/carteira_por_portal.xlsx?responsavel=todos"
+                       title="O mesmo relatório, com a operação inteira">operação inteira</a>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="small fw-bold text-secondary">Ver rápido:</span>
+                <button class="chip-cfg ativo" data-filtro="todas" onclick="filtrarAdm(this)">Todas</button>
+                <button class="chip-cfg" data-filtro="sem_email" onclick="filtrarAdm(this)">Sem e-mail</button>
+                <button class="chip-cfg" data-filtro="com_email" onclick="filtrarAdm(this)">Com e-mail</button>
+                <button class="chip-cfg" data-filtro="sem_resp" onclick="filtrarAdm(this)">Sem responsável</button>
+                <span id="chipsResp"></span>
+                <span class="ms-auto small text-muted" id="cfgMostrando"></span>
+            </div>
+
+            {% if repetidas %}
+            <div class="alert alert-warning d-flex align-items-center justify-content-between mt-3 mb-0 py-2 px-3" style="font-size: .85rem;">
+                <span>⚠️ <b>{{ repetidas }}</b> administradora(s) estão gravadas com duas grafias diferentes (maiúscula/acento).
+                      É o que fazia o e-mail parecer que não salvou.</span>
+                <button class="btn btn-sm btn-warning fw-bold text-nowrap ms-3" onclick="juntarRepetidas()">Juntar agora</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-2 px-1">
         <div class="d-flex align-items-center gap-2" id="containerAcoesLoteConfig" style="display: none;">
             <span class="small fw-bold text-muted">Ação em Lote:</span>
             <select id="operadorLote" class="form-select form-select-sm fw-bold border-secondary text-secondary shadow-sm" style="width: 200px;">
                 <option value="" disabled selected>Atribuir para Colaborador(a)...</option>
-                <option value="Ryan">Ryan</option>
-                <option value="Jéssica">Jéssica</option>
-                <option value="Victor">Victor</option>
-                <option value="Arthur">Arthur</option>
-                <option value="Ellen">Ellen</option>
+                {% for r in responsaveis %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
             </select>
             <button class="btn btn-sm btn-dark fw-bold px-3 shadow-sm" onclick="aplicarOperadorLote()">Aplicar a Selecionados</button>
         </div>
@@ -195,54 +271,55 @@
 
     <div class="card card-table-container border-0 table-container">
         <div class="table-wrapper">
-            <table class="table m-0">
+            <table class="table m-0" id="tabelaAdm">
                 <thead>
                     <tr>
-                        <th style="width: 5%;" class="text-center">
+                        <th style="width: 4%;" class="text-center">
                             <input type="checkbox" id="checkTodosConfig" class="form-check-input" onclick="selecionarTodosConfig(this)">
                         </th>
-                        <th style="width: 30%;">Administradora</th>
-                        <th style="width: 15%;">Responsável Atual</th>
-                        <th style="width: 50%;">Ações de Update (Colaborador / E-mail Corporativo)</th>
+                        <th style="width: 32%;">Administradora</th>
+                        <th style="width: 16%;">Responsável</th>
+                        <th style="width: 48%;">E-mail para cobrança <span class="fw-normal" style="text-transform: none; color: #FFE3E8;">— pode ter mais de um, separados por vírgula</span></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for vinculo in vinculos %}
-                    <tr>
+                    {% set tem_email = vinculo['email'] and vinculo['email']|trim != '' %}
+                    {% set tem_resp = vinculo['colaborador'] and vinculo['colaborador'] != 'Não Atribuído' %}
+                    <tr class="linha-adm"
+                        data-adm="{{ vinculo['administradora'] }}"
+                        data-busca="{{ (vinculo['administradora'] ~ ' ' ~ (vinculo['email'] or '') ~ ' ' ~ (vinculo['colaborador'] or ''))|lower }}"
+                        data-tememail="{{ 1 if tem_email else 0 }}"
+                        data-temresp="{{ 1 if tem_resp else 0 }}"
+                        data-resp="{{ vinculo['colaborador'] or '' }}">
                         <td class="text-center">
                             <input type="checkbox" class="form-check-input check-adm" value="{{ vinculo['administradora'] }}">
                         </td>
-                        <td class="fw-bold text-dark">{{ vinculo['administradora'] }}</td>
-                        <td>
-                            {% if vinculo['colaborador'] and vinculo['colaborador'] != 'Não Atribuído' %}
-                                <span class="badge badge-resp badge-atribuido">{{ vinculo['colaborador'] }}</span>
-                            {% else %}
-                                <span class="badge badge-resp badge-pendente">Não Atribuído</span>
-                            {% endif %}
+                        <td class="fw-bold text-dark">
+                            {{ vinculo['administradora'] }}
+                            {% if not tem_email %}<span class="selo-alerta" title="Sem e-mail: o disparo de cobrança não alcança esta administradora">sem e-mail</span>{% endif %}
                         </td>
                         <td>
-                            <form action="/atualizar_configuracoes_adm" method="POST" class="d-flex gap-2 m-0 align-items-center">
-                                <input type="hidden" name="administradora" value="{{ vinculo['administradora'] }}">
-                                
-                                <select name="colaborador" class="form-select form-select-custom">
-                                    <option value="" disabled selected>Alterar...</option>
-                                    <option value="Ryan">Ryan</option>
-                                    <option value="Jéssica">Jéssica</option>
-                                    <option value="Victor">Victor</option>
-                                    <option value="Arthur">Arthur</option>
-                                    <option value="Ellen">Ellen</option>
-                                </select>
-                                
-                                <input type="text" name="email" class="form-control form-input-custom"
-                                       placeholder="" 
-                                       value="{{ vinculo['email'] if vinculo['email'] else '' }}">
-                                
-                                <button type="submit" class="btn btn-lello-save text-nowrap">Gravar Dados</button>
-                            </form>
+                            <select class="form-select form-select-custom campo-resp" onchange="marcarSujo(this)">
+                                <option value="">{{ 'Não Atribuído' }}</option>
+                                {% for r in responsaveis %}
+                                <option value="{{ r }}" {% if vinculo['colaborador'] == r %}selected{% endif %}>{{ r }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-input-custom campo-email flex-grow-1"
+                                       value="{{ vinculo['email'] if vinculo['email'] else '' }}"
+                                       placeholder="contato@administradora.com.br"
+                                       oninput="marcarSujo(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();salvarLinha(this);}">
+                                <button type="button" class="btn btn-lello-save text-nowrap" onclick="salvarLinha(this)">Gravar</button>
+                                <span class="aviso-linha"></span>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
-                    
+
                     {% if not vinculos %}
                     <tr>
                         <td colspan="4" class="text-center py-5 text-muted">
@@ -255,6 +332,34 @@
             </table>
         </div>
     </div>
+
+<!-- MODAL: colar lista de e-mails -->
+<div class="modal fade" id="modalColarEmails" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold">Colar lista de e-mails</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">
+          Cole uma linha por administradora, do jeito que estiver — planilha, e-mail, bloco de notas.
+          O sistema acha o e-mail e o nome sozinho. Exemplo:
+        </p>
+        <pre class="bg-light border rounded p-2 small mb-3" style="font-size: .78rem;">8A Condomínios; contato@8acondominios.com.br
+GK Administração de Bens - financeiro@gk.com.br, boletos@gk.com.br
+Lello Condomínios    atendimento@lellocond.com.br</pre>
+        <textarea id="textoColado" class="form-control font-monospace" rows="8" style="font-size: .82rem;"
+                  placeholder="Cole aqui..."></textarea>
+        <div id="resultadoColagem" class="mt-3 small"></div>
+      </div>
+      <div class="modal-footer bg-light py-2">
+        <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="conferirColagem()">Conferir antes de gravar</button>
+        <button class="btn btn-sm btn-dark fw-bold" id="btnGravarColagem" onclick="gravarColagem()" disabled>Gravar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ==========================================
@@ -425,17 +530,208 @@ function adicionarUsuarioPainel() {
     fetch('/api/sistema/adicionar_usuario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: nomeInput })
+        body: JSON.stringify({ nome: nomeInput, email: document.getElementById('inputNovoEmailPainel').value.trim() })
     })
     .then(r => r.json())
     .then(data => {
         if(data.sucesso) {
-            window.location.reload();
+            // a senha é gerada na tela Acessos e senhas (e enviada ao e-mail, se houver)
+            alert("Colaborador cadastrado.\n\nPara ele entrar: abra \"Acessos e senhas\" e clique em \"Gerar senha\".");
+            window.location.href = '/acessos';
         } else {
             alert(" Erro: " + data.msg);
         }
     });
 }
+
+// ==========================================
+// ADMINISTRADORAS: busca, filtros e gravação sem sair da página
+// Antes, cada "Gravar Dados" era um POST de formulário que recarregava tudo:
+// quem tinha preenchido outras linhas perdia o que digitou. Agora a linha
+// grava sozinha e diz o que aconteceu ali mesmo.
+// ==========================================
+let filtroAdmAtual = 'todas';
+
+function linhasAdm() {
+    return Array.from(document.querySelectorAll('tr.linha-adm'));
+}
+
+function atualizarContadoresAdm() {
+    const linhas = linhasAdm();
+    const visiveis = linhas.filter(l => l.style.display !== 'none');
+    document.getElementById('cfgTotal').innerText = linhas.length.toLocaleString('pt-BR');
+    document.getElementById('cfgSemEmail').innerText =
+        linhas.filter(l => l.dataset.tememail === '0').length.toLocaleString('pt-BR');
+    document.getElementById('cfgSemResp').innerText =
+        linhas.filter(l => l.dataset.temresp === '0').length.toLocaleString('pt-BR');
+    document.getElementById('cfgMostrando').innerText =
+        visiveis.length === linhas.length ? '' : `mostrando ${visiveis.length} de ${linhas.length}`;
+}
+
+function aplicarBuscaEFiltro() {
+    const termo = (document.getElementById('buscaAdm').value || '').trim().toLowerCase();
+    linhasAdm().forEach(linha => {
+        let passa = true;
+        if (termo && !linha.dataset.busca.includes(termo)) passa = false;
+        if (passa && filtroAdmAtual === 'sem_email') passa = linha.dataset.tememail === '0';
+        if (passa && filtroAdmAtual === 'com_email') passa = linha.dataset.tememail === '1';
+        if (passa && filtroAdmAtual === 'sem_resp') passa = linha.dataset.temresp === '0';
+        if (passa && filtroAdmAtual.startsWith('resp:')) passa = linha.dataset.resp === filtroAdmAtual.slice(5);
+        linha.style.display = passa ? '' : 'none';
+        if (!passa) { const cb = linha.querySelector('.check-adm'); if (cb) cb.checked = false; }
+    });
+    atualizarContadoresAdm();
+    atualizarContadorConfig();
+}
+
+function filtrarAdm(botao) {
+    document.querySelectorAll('.chip-cfg').forEach(b => b.classList.remove('ativo'));
+    botao.classList.add('ativo');
+    filtroAdmAtual = botao.dataset.filtro;
+    aplicarBuscaEFiltro();
+}
+
+function marcarSujo(campo) {
+    const linha = campo.closest('tr');
+    linha.classList.add('linha-suja');
+    const aviso = linha.querySelector('.aviso-linha');
+    if (aviso) { aviso.className = 'aviso-linha pendente'; aviso.innerText = 'não gravado'; }
+}
+
+function salvarLinha(elemento) {
+    const linha = elemento.closest('tr');
+    const aviso = linha.querySelector('.aviso-linha');
+    const botao = linha.querySelector('.btn-lello-save');
+    const email = linha.querySelector('.campo-email').value;
+    const resp = linha.querySelector('.campo-resp').value;
+
+    botao.disabled = true;
+    aviso.className = 'aviso-linha pendente';
+    aviso.innerText = 'gravando...';
+
+    fetch('/api/sistema/salvar_vinculo_adm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ administradora: linha.dataset.adm, email: email, colaborador: resp })
+    })
+    .then(r => r.json())
+    .then(d => {
+        botao.disabled = false;
+        if (!d.sucesso) {
+            aviso.className = 'aviso-linha erro';
+            aviso.innerText = d.msg || 'não gravou';
+            return;
+        }
+        // o servidor devolve como ficou: a tela passa a mostrar exatamente o que está no banco
+        linha.querySelector('.campo-email').value = d.registro.email || '';
+        const temEmail = (d.registro.email || '').trim() !== '';
+        const temResp = d.registro.responsavel && d.registro.responsavel !== 'Não Atribuído';
+        linha.dataset.tememail = temEmail ? '1' : '0';
+        linha.dataset.temresp = temResp ? '1' : '0';
+        linha.dataset.resp = temResp ? d.registro.responsavel : '';
+        linha.dataset.busca = (linha.dataset.adm + ' ' + (d.registro.email || '') + ' ' + (d.registro.responsavel || '')).toLowerCase();
+        const selo = linha.querySelector('.selo-alerta');
+        if (temEmail && selo) selo.remove();
+        linha.classList.remove('linha-suja');
+
+        aviso.className = 'aviso-linha ok';
+        aviso.innerText = d.ignorados && d.ignorados.length
+            ? 'gravado (ignorei: ' + d.ignorados.join(', ') + ')'
+            : 'gravado ✓';
+        setTimeout(() => { if (aviso.classList.contains('ok')) aviso.innerText = ''; }, 6000);
+        atualizarContadoresAdm();
+    })
+    .catch(() => {
+        botao.disabled = false;
+        aviso.className = 'aviso-linha erro';
+        aviso.innerText = 'o servidor não respondeu';
+    });
+}
+
+// Ninguém sai da página com coisa digitada e não gravada
+window.addEventListener('beforeunload', function (e) {
+    if (document.querySelector('tr.linha-suja')) { e.preventDefault(); e.returnValue = ''; }
+});
+
+function juntarRepetidas() {
+    if (!confirm('Juntar as administradoras que estão gravadas com duas grafias?\n\nO responsável e os e-mails das duas linhas ficam em uma só.')) return;
+    fetch('/api/sistema/juntar_vinculos', { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+            alert(d.sucesso ? `${d.qtd} administradora(s) juntada(s).` : 'Não consegui juntar: ' + (d.msg || ''));
+            if (d.sucesso) window.location.reload();
+        });
+}
+
+// ----- colar lista de e-mails -----
+function abrirColarEmails() {
+    document.getElementById('resultadoColagem').innerHTML = '';
+    document.getElementById('btnGravarColagem').disabled = true;
+    new bootstrap.Modal(document.getElementById('modalColarEmails')).show();
+}
+
+function pedirColagem(conferir) {
+    const texto = document.getElementById('textoColado').value;
+    if (!texto.trim()) { alert('Cole a lista primeiro.'); return Promise.resolve(null); }
+    return fetch('/api/sistema/importar_emails_adm', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto: texto, conferir: conferir })
+    }).then(r => r.json());
+}
+
+function conferirColagem() {
+    const caixa = document.getElementById('resultadoColagem');
+    caixa.innerHTML = '<span class="text-muted">Conferindo...</span>';
+    pedirColagem(true).then(d => {
+        if (!d) { caixa.innerHTML = ''; return; }
+        if (!d.sucesso) { caixa.innerHTML = '<span class="text-danger">' + (d.msg || 'falhou') + '</span>'; return; }
+        let html = `<div class="fw-bold text-success mb-2">${d.qtd} linha(s) prontas para gravar</div>`;
+        if (d.casados.length) {
+            html += '<div class="border rounded" style="max-height: 180px; overflow: auto;"><table class="table table-sm m-0" style="font-size:.78rem;">';
+            d.casados.forEach(c => { html += `<tr><td class="fw-bold">${c.administradora}</td><td>${c.emails.join(', ')}</td></tr>`; });
+            html += '</table></div>';
+        }
+        if (d.sem_dono.length) {
+            html += `<div class="text-warning fw-bold mt-2">${d.sem_dono.length} linha(s) sem administradora reconhecida (vão ser ignoradas):</div>
+                     <div class="small text-muted">${d.sem_dono.map(s => s.linha).join('<br>')}</div>`;
+        }
+        if (d.sem_email.length) {
+            html += `<div class="text-muted mt-2">${d.sem_email.length} linha(s) sem e-mail nenhum, ignoradas.</div>`;
+        }
+        caixa.innerHTML = html;
+        document.getElementById('btnGravarColagem').disabled = d.qtd === 0;
+    });
+}
+
+function gravarColagem() {
+    const btn = document.getElementById('btnGravarColagem');
+    btn.disabled = true; btn.innerText = 'Gravando...';
+    pedirColagem(false).then(d => {
+        btn.innerText = 'Gravar';
+        if (!d) { btn.disabled = false; return; }
+        alert(d.sucesso ? `${d.qtd} administradora(s) atualizadas.` : 'Falhou: ' + (d.msg || ''));
+        if (d.sucesso) window.location.reload(); else btn.disabled = false;
+    });
+}
+
+// Só vira atalho quem realmente tem administradora na carteira — a lista de
+// colaboradores do sistema tem gente que não responde por nenhuma.
+function montarChipsDeResponsavel() {
+    const caixa = document.getElementById('chipsResp');
+    if (!caixa) return;
+    const conta = {};
+    linhasAdm().forEach(l => { const r = l.dataset.resp; if (r) conta[r] = (conta[r] || 0) + 1; });
+    caixa.innerHTML = Object.keys(conta).sort((a, b) => conta[b] - conta[a])
+        .map(r => `<button class="chip-cfg" data-filtro="resp:${r}" onclick="filtrarAdm(this)">${r} <span class="text-muted">${conta[r]}</span></button>`)
+        .join(' ');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const busca = document.getElementById('buscaAdm');
+    if (busca) busca.addEventListener('input', aplicarBuscaEFiltro);
+    montarChipsDeResponsavel();
+    atualizarContadoresAdm();
+});
 
 function removerUsuarioPainel(idUsuario, nomeUsuario) {
     if(!confirm(`⚠️ Tem certeza absoluta que deseja remover o acesso do operador "${nomeUsuario}"?`)) return;
@@ -455,5 +751,190 @@ function removerUsuarioPainel(idUsuario, nomeUsuario) {
     });
 }
 
+
+// ==========================================
+// ATUALIZAÇÃO AUTOMÁTICA DA BASE (ROBÔ DO PORTAL LELLO)
+// ==========================================
+(function () {
+    var API = '/api/sistema/base_lello/';
+    var MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    var estado = null;
+    var temporizador = null;
+    var enviando = false;
+
+    function el(id) { return document.getElementById(id); }
+    function texto(id, valor) { var e = el(id); if (e) e.textContent = (valor === undefined || valor === null || valor === '') ? '\u00a0' : valor; }
+
+    function rotuloMes(valor) {                     // '2026-12' -> 'Dezembro/2026'
+        var m = /^(\d{4})-(\d{2})$/.exec(valor || '');
+        return m ? MESES[parseInt(m[2], 10) - 1] + '/' + m[1] : (valor || '');
+    }
+    function somarMes(valor, n) {
+        var m = /^(\d{4})-(\d{2})$/.exec(valor);
+        var total = parseInt(m[1], 10) * 12 + (parseInt(m[2], 10) - 1) + n;
+        var ano = Math.floor(total / 12), mes = total % 12 + 1;
+        return ano + '-' + (mes < 10 ? '0' : '') + mes;
+    }
+    function quandoCurto(q) {                       // '2026-11-12 09:04:51' -> '09:04' (hoje) ou '11/11 17:00'
+        var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec(q || '');
+        if (!m) return '—';
+        var h = new Date();
+        var hoje = h.getFullYear() === +m[1] && h.getMonth() + 1 === +m[2] && h.getDate() === +m[3];
+        return hoje ? m[4] + ':' + m[5] : m[3] + '/' + m[2] + ' ' + m[4] + ':' + m[5];
+    }
+    function etapaAtual(logs) {                     // linha mais recente do que o robô está fazendo
+        if (!logs || !logs.length) return '';
+        return String(logs[0].msg || '').replace(/^\[\d\d:\d\d:\d\d\]\s*/, '');
+    }
+    function mensagem(classe, conteudo, giro) {
+        var caixa = el('baMsg');
+        caixa.className = 'mt-3 p-2 rounded small ' + classe;
+        caixa.textContent = '';
+        if (giro) {
+            var s = document.createElement('span');
+            s.className = 'spinner-border spinner-border-sm me-2';
+            s.setAttribute('aria-hidden', 'true');
+            caixa.appendChild(s);
+        }
+        caixa.appendChild(document.createTextNode(conteudo));
+    }
+    function estiloCaixa(tipo) {
+        var caixa = el('baMsg');
+        var cores = {
+            neutra: ['var(--bg)', 'var(--line)', 'var(--muted)'],
+            erro:   ['var(--danger-bg)', '#F3C4BB', 'var(--danger-text)'],
+            aviso:  ['var(--warn-bg)', '#F6E3B4', 'var(--warn-text)'],
+            info:   ['var(--info-bg)', '#B5D5EE', 'var(--info-text)']
+        }[tipo];
+        caixa.style.backgroundColor = cores[0];
+        caixa.style.border = '1px solid ' + cores[1];
+        caixa.style.color = cores[2];
+    }
+    function pill(classe, rotulo) {
+        var p = el('baPill');
+        p.className = 'lo-pill ' + classe + ' ms-2 align-middle';
+        p.textContent = rotulo;
+    }
+
+    function pintar(d) {
+        estado = d;
+        var u = d.ultima, ok = d.ultima_ok;
+        var rodando = !!d.rodando;
+
+        texto('baMes', d.mes && d.mes.rotulo);
+        texto('baMesOrigem', d.mes ? ({'base ativa': 'acompanha a base ativa', 'manual': 'virada de mês pedida', 'mês seguinte': 'ainda não há base ativa'}[d.mes.origem] || d.mes.origem) : '');
+        texto('baQuando', u ? quandoCurto(u.quando) : '—');
+        texto('baQuem', u ? (u.origem || '') : 'ainda não rodou');
+        texto('baLinhas', ok && ok.linhas ? Number(ok.linhas).toLocaleString('pt-BR') : '—');
+        texto('baLinhasSub', ok ? ((ok.ignorado ? 'sem mudanças · ' : 'importados · ') + quandoCurto(ok.quando)) : '');
+        texto('baProxima', d.proxima || (d.agendador ? '—' : 'desligado'));
+        texto('baHorarios', d.horarios && d.horarios.length ? d.horarios.join(' · ') : (d.agendador ? 'sem horários' : 'agendador do sistema desligado'));
+
+        // selo + caixa de mensagem (a primeira condição que valer)
+        var caixa = el('baMsg');
+        if (!d.credenciais) {
+            pill('lo-pill-warn', 'Sem usuário e senha');
+            estiloCaixa('aviso'); mensagem('', 'Faltam LELLO_USUARIO e LELLO_SENHA no arquivo .env do sistema (depois de gravar, reinicie o sistema).');
+        } else if (rodando) {
+            pill('lo-pill-info', 'Atualizando…');
+            estiloCaixa('info'); mensagem('', 'Atualizando agora — ' + (etapaAtual(d.logs) || 'iniciando o robô…'), true);
+        } else if (u && !u.ok) {
+            pill('lo-pill-danger', 'Falhou às ' + quandoCurto(u.quando));
+            estiloCaixa('erro');
+            mensagem('', 'Não atualizou: ' + u.msg + (ok ? '  (Última atualização boa: ' + quandoCurto(ok.quando) + '.)' : ''));
+        } else if (u) {
+            pill('lo-pill-ok', u.ignorado ? 'Em dia' : 'Atualizada');
+            estiloCaixa('neutra'); mensagem('', u.msg);
+        } else {
+            pill('lo-pill-neutral', 'Ainda não rodou');
+            estiloCaixa('neutra'); mensagem('', 'O robô ainda não rodou. Ele roda sozinho nos horários acima; para testar agora, use Atualizar agora.');
+        }
+        caixa.classList.remove('d-none');
+
+        var botao = el('baBotao');
+        botao.disabled = rodando || enviando || !d.credenciais;
+        botao.textContent = rodando ? 'Atualizando…' : 'Atualizar agora';
+
+        // seletor do mês (só gestor)
+        var caixaMes = el('baMesBox');
+        if (d.gestor) {
+            caixaMes.classList.remove('d-none');
+            montarSeletor(d);
+        } else {
+            caixaMes.classList.add('d-none');
+        }
+    }
+
+    function montarSeletor(d) {
+        var sel = el('baMesSel');
+        if (document.activeElement === sel) return;      // não mexe enquanto a pessoa escolhe
+        var base = d.ativa ? d.ativa.valor : d.mes.valor;
+        var manual = d.mes.origem === 'manual' ? d.mes.valor : '';
+        var opcoes = [['', 'Automático — ' + rotuloMes(base) + (d.ativa ? ' (base ativa)' : '')]];
+        var vistos = {};
+        [1, 2].forEach(function (n) { var v = somarMes(base, n); vistos[v] = 1; opcoes.push([v, rotuloMes(v) + ' — virada de mês']); });
+        if (manual && !vistos[manual]) opcoes.push([manual, rotuloMes(manual) + ' — virada de mês']);
+        sel.textContent = '';
+        opcoes.forEach(function (o) {
+            var op = document.createElement('option');
+            op.value = o[0]; op.textContent = o[1];
+            if (o[0] === manual) op.selected = true;
+            sel.appendChild(op);
+        });
+    }
+
+    function agendar() {
+        clearTimeout(temporizador);
+        var espera = (estado && estado.rodando) || enviando ? 3000 : 30000;
+        temporizador = setTimeout(buscar, espera);
+    }
+    function buscar() {
+        if (document.hidden) { agendar(); return; }
+        fetch(API + 'status', { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { if (d && d.sucesso) pintar(d); })
+            .catch(function () {})
+            .then(agendar);
+    }
+
+    window.baseAutoAtualizar = function () {
+        if (enviando || (estado && estado.rodando)) return;
+        enviando = true;
+        el('baBotao').disabled = true;
+        fetch(API + 'atualizar', { method: 'POST', credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                enviando = false;
+                if (!d.sucesso) { alert('⚠️ ' + (d.msg || 'Não consegui iniciar a atualização.')); }
+                buscar();
+            })
+            .catch(function () { enviando = false; alert('Falha de comunicação com o servidor.'); buscar(); });
+    };
+
+    window.baseAutoSalvarMes = function () {
+        var valor = el('baMesSel').value;
+        if (valor) {
+            var atual = estado && estado.ativa ? estado.ativa.rotulo : 'o mês atual';
+            if (!confirm('VIRADA DE MÊS\n\nNa próxima execução o robô vai arquivar ' + atual + ' e começar ' + rotuloMes(valor) +
+                         ' do zero (status e observações em branco, meta do mês congelada).\n\nSó faça isso se a Lello já virou o vencimento principal para ' +
+                         rotuloMes(valor) + '.\n\nConfirma?')) { el('baMesSel').blur(); buscar(); return; }
+        }
+        var botao = el('baMesBotao');
+        botao.disabled = true;
+        fetch(API + 'mes', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify({ mes: valor }) })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                botao.disabled = false;
+                el('baMesSel').blur();
+                if (d && d.sucesso === false) { alert('⚠️ ' + (d.msg || 'Não consegui gravar o mês.')); return; }
+                buscar();
+            })
+            .catch(function () { botao.disabled = false; alert('Falha de comunicação com o servidor.'); });
+    };
+
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) buscar(); });
+    if (el('baseAuto')) buscar();
+})();
 </script>
 {% endblock %}

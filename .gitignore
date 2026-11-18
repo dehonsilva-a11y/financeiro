@@ -8,3 +8,8 @@ GEMINI_KEY_3=AIzaSyAGWBDAXzlKNKniJjBX7E8pVsH9oWX7W10
 
 # --- INTEGRAÇÕES DO GOOGLE CHAT ---
 WEBHOOK_URL_CHAT=https://chat.googleapis.com/v1/spaces/AAQAdojcNRA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=RGzjUWzI1_hL6jgFgcnj7PH7jTbHtP4uePyoWeokwGc
+*.db
+*.db.gz
+backups/
+_backup_em_andamento/
+.venv*/

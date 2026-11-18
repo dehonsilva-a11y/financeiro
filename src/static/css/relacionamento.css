@@ -1,0 +1,12 @@
+    .card-resumo { border-radius: 10px; border: 1px solid var(--line); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .badge-tipo { font-size: 0.75rem; letter-spacing: 0.5px; padding: 5px 10px; border-radius: 6px; font-weight: 700; }
+    
+    .tipo-comunicado { background-color: var(--info-bg); color: var(--info-text); border: 1px solid #B5D5EE; }
+    .tipo-ata { background-color: #F3E4F4; color: var(--sec-roxo); border: 1px solid #D6B0DB; }
+    .tipo-sorteio { background-color: var(--ok-bg); color: var(--ok-text); border: 1px solid #C3E3CC; }
+    .tipo-multa { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid #F3C4BB; }
+    
+    .table-container { border: 1px solid var(--line); border-radius: 10px; background-color: #ffffff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.03); overflow: hidden; }
+    .table-wrapper { max-height: 70vh; overflow-y: auto; }
+    .table thead th { background-color: var(--deep); color: var(--bg); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; padding: 15px 12px; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--deep); text-align: center; }
+    .table tbody td { font-size: 0.85rem; color: var(--ink); padding: 12px; vertical-align: middle; text-align: center; }

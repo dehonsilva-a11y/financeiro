@@ -1,0 +1,792 @@
+{% extends 'base.html' %}
+
+{% block title %}Base × Relatório × BW - Lello{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conciliacao_bw.css') }}">
+{% endblock %}
+
+{% block content %}
+{% raw %}
+<div class="cb" id="cb-root">
+  <header class="cb-head">
+    <div>
+      <h1 class="cb-title">Base × Relatório × BW</h1>
+      <p class="cb-sub" id="cb-sub">Abre no dia de ontem (D-1, o último dia útil): o que tínhamos para pagar, o que foi lançado e o que foi pago no banco. Para ver outro dia, escolha a data; o BW daquele dia é buscado na pasta do retorno. Sábado, domingo e feriado entram no dia útil seguinte.</p>
+    </div>
+    <div class="cb-actions">
+      <a class="cb-btn" href="/dashboard_gerencial"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Dashboard gerencial</a>
+      <button class="cb-btn is-primary" id="cb-btn-rel" type="button" title="relBolMovFinanCondominios (.xlsx). Substitui só os meses que vierem no arquivo.">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Enviar relatório
+      </button>
+      <button class="cb-btn" id="cb-btn-bw" type="button" title="Arquivo de retorno do banco (.RET). Pode mandar vários; o mesmo arquivo não entra duas vezes.">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Enviar BW (.RET)
+      </button>
+      <button class="cb-btn" id="cb-btn-inc" type="button" title="Lê de novo a planilha Inc. Bradesco no Google Sheets (as devoluções do banco). Ela também é lida sozinha ao abrir um dia, no máximo a cada 10 minutos.">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>Atualizar Inc. Bradesco
+      </button>
+      <button class="cb-btn" id="cb-btn-inc-arq" type="button" hidden title="Plano B, se o Google não responder: manda a planilha baixada em Excel (.xlsx)">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Inc. por arquivo
+      </button>
+      <button class="cb-btn" id="cb-btn-prev" type="button" title="O que está programado (base) e o que já foi lançado (relatório) de hoje para a frente">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span id="cb-btn-prev-t">Previsão</span>
+      </button>
+      <button class="cb-btn" id="cb-btn-rede" type="button" title="Procura de novo, na pasta BRADESCO RETORNO (e PAGFOR), o BW do dia que está na tela">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>Buscar BW do dia
+      </button>
+      <a class="cb-btn" id="cb-btn-csv" href="#" title="Baixa os boletos do dia com a situação de cada um (CSV para o Excel)">
+        <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Exportar dia
+      </a>
+      <input type="file" id="cb-file-rel" accept=".xlsx,.xls" hidden>
+      <input type="file" id="cb-file-bw" accept=".ret,.RET,.txt" multiple hidden>
+      <input type="file" id="cb-file-inc" accept=".xlsx" hidden>
+    </div>
+  </header>
+
+  <div id="cb-msg" aria-live="polite"></div>
+  <div id="cb-load" class="cb-load">Montando o dia…</div>
+
+  <div id="cb-vazio" class="cb-vazio" hidden>
+    <h2>Envie o relatório de lançamentos para começar</h2>
+    <p>A base já está no sistema. Falta o <b>relBolMovFinanCondominios</b> (.xlsx) com os boletos lançados. O BW é lido da pasta do retorno na rede; se a pasta não abrir daqui, envie o arquivo .RET pela tela.</p>
+    <button class="cb-btn is-primary" type="button" id="cb-btn-rel2">Escolher relatório</button>
+  </div>
+
+  <div id="cb-app" hidden>
+    <section class="cb-panel" id="cb-sec-dia" aria-label="Escolha do dia">
+      <div class="cb-nav">
+        <div class="cb-nav-dia">
+          <button class="cb-btn" type="button" id="cb-ant" aria-label="Dia útil anterior"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg><span id="cb-ant-t"></span></button>
+          <div class="cb-dia-titulo" id="cb-dia-titulo" aria-live="polite"></div>
+          <button class="cb-btn" type="button" id="cb-prox" aria-label="Próximo dia útil"><span id="cb-prox-t"></span><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+        <label class="cb-rot" for="cb-data">Ver outro dia</label>
+        <input type="date" id="cb-data">
+        <button class="cb-btn" type="button" id="cb-ontem"></button>
+      </div>
+    </section>
+
+    <div id="cb-aviso-dia"></div>
+    <section class="cb-bloq" id="cb-bloq" hidden>
+      <div class="cb-selo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h2>BW não disponível</h2>
+      <p id="cb-bloq-p"></p>
+      <button class="cb-btn is-primary" type="button" id="cb-bloq-ontem"></button>
+      <button class="cb-btn" type="button" id="cb-bloq-prev">Ver a previsão dos próximos dias</button>
+    </section>
+
+    <div id="cb-conteudo">
+    <section class="cb-hero" id="cb-hero" aria-live="polite">
+      <div class="cb-hero-top"><div class="cb-selo" id="cb-selo"></div><div><h2 id="cb-h"></h2><p id="cb-hp"></p></div></div>
+      <div class="cb-placar">
+        <div class="cb-passo">
+          <div class="cb-passo-num"><div class="l">Tínhamos para pagar</div><div class="v" id="cb-n-base"></div><div class="s" id="cb-s-base"></div></div>
+          <div class="cb-passo2" id="cb-p1"></div>
+        </div>
+        <div class="cb-sinal" id="cb-s1"></div>
+        <div class="cb-passo">
+          <div class="cb-passo-num"><div class="l">Foi lançado</div><div class="v" id="cb-n-rel"></div><div class="s" id="cb-s-rel"></div><div class="rs" id="cb-v-rel"></div></div>
+        </div>
+        <div class="cb-sinal" id="cb-s2"></div>
+        <div class="cb-passo">
+          <div class="cb-passo-num"><div class="l">Foi pago no banco</div><div class="v" id="cb-n-bw"></div><div class="s" id="cb-s-bw"></div><div class="rs" id="cb-v-bw"></div></div>
+          <div class="cb-passo2" id="cb-p2"></div>
+        </div>
+      </div>
+      <p class="cb-dica">Clique numa linha para ver, na tabela abaixo, <b>quais boletos são</b>, onde estão e por que não subiram.</p>
+    </section>
+
+    <section class="cb-valor" id="cb-valor" aria-label="Valor do dia"></section>
+
+    <section class="cb-panel" id="cb-sec-fds" hidden>
+      <div class="cb-phead"><div><h2 id="cb-fds-titulo">Fim de semana e feriado</h2>
+        <p class="cb-desc">Boleto que vence no sábado, domingo ou feriado entra neste dia útil (é quando a Lello lança e o banco paga). Aqui está como cada data foi lançada no relatório.</p></div></div>
+      <div class="cb-scroll">
+        <table>
+          <thead><tr><th scope="col">Vencimento</th><th scope="col" class="n">Na base</th><th scope="col" class="n">Lançados no dia útil</th>
+            <th scope="col" class="n">Lançados na data original</th><th scope="col" class="n">Com outro vencimento</th><th scope="col" class="n">Sem lançamento</th><th scope="col" class="n">Visão dupla</th></tr></thead>
+          <tbody id="cb-fds"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="cb-panel" id="cb-sec-itens">
+      <div class="cb-phead">
+        <div><h2 id="cb-itens-titulo">Boletos do dia</h2><p class="cb-desc" id="cb-itens-desc"></p></div>
+        <div class="cb-filters">
+          <label class="visually-hidden" for="cb-busca">Buscar</label>
+          <input type="search" id="cb-busca" placeholder="Buscar imóvel, carteira, condomínio…">
+        </div>
+      </div>
+      <div class="cb-chips" id="cb-chips" role="group" aria-label="Situação"></div>
+      <div class="cb-filtro-parcela" id="cb-filtro-parcela" hidden></div>
+      <p class="cb-ajuda" id="cb-ajuda" hidden></p>
+      <div class="cb-scroll is-tall">
+        <table>
+          <thead><tr>
+            <th scope="col">Situação</th><th scope="col">Venc.</th><th scope="col">Imóvel · carteira</th>
+            <th scope="col">Condomínio / ADM</th><th scope="col">Lançamentos</th>
+            <th scope="col" class="n">Lançado</th><th scope="col" class="n">Pago BW</th><th scope="col">Onde está · por que não subiu</th>
+          </tr></thead>
+          <tbody id="cb-itens"></tbody>
+        </table>
+      </div>
+      <div class="cb-pager"><span id="cb-pag-info"></span><button class="cb-btn" type="button" id="cb-mais" hidden>Mostrar mais 200</button></div>
+    </section>
+
+    </div>
+
+    <section id="cb-prev" hidden>
+      <div class="cb-panel">
+        <div class="cb-phead">
+          <div><h2>Previsão: o que está programado × o que já foi lançado</h2>
+            <p class="cb-desc">De hoje para a frente, dia útil a dia útil. <b>Programado</b> = boletos na base que vencem no dia (sábado, domingo e feriado entram no dia útil seguinte).
+              <b>Já lançado</b> = tem lançamento no relatório. <b>Falta lançar</b> = está na base e ainda não tem lançamento. Clique no dia para ver os boletos.</p></div>
+          <div class="cb-filters">
+            <label class="cb-rot" for="cb-prev-n" style="font-size:.78rem;font-weight:600;color:var(--cb-muted)">Olhar</label>
+            <select id="cb-prev-n" style="height:34px;border:1px solid var(--cb-line);border-radius:8px;padding:0 8px;font-size:.82rem;background:var(--cb-surface);color:var(--cb-ink)">
+              <option value="10">10 dias úteis</option><option value="15" selected>15 dias úteis</option><option value="22">22 dias úteis</option><option value="44">44 dias úteis</option>
+            </select>
+          </div>
+        </div>
+        <div id="cb-prev-aviso"></div>
+        <div class="cb-prev-cards" id="cb-prev-cards"></div>
+        <div class="cb-scroll">
+          <table>
+            <thead><tr><th scope="col">Dia</th><th scope="col" class="n">Programado (base)</th><th scope="col" class="n">Já lançado</th><th scope="col" class="n">Falta lançar</th>
+              <th scope="col" class="n">Valor lançado</th><th scope="col">Andamento</th></tr></thead>
+            <tbody id="cb-prev-linhas"></tbody>
+          </table>
+        </div>
+      </div>
+      <section class="cb-panel" id="cb-prev-det" hidden>
+        <div class="cb-phead"><div><h2 id="cb-prev-det-t"></h2><p class="cb-desc" id="cb-prev-det-d"></p></div>
+          <div class="cb-filters"><input type="search" id="cb-prev-busca" placeholder="Buscar imóvel, carteira, condomínio…"></div></div>
+        <div class="cb-chips" id="cb-prev-chips" role="group" aria-label="Situação"></div>
+        <div class="cb-scroll is-tall">
+          <table>
+            <thead><tr><th scope="col">Situação</th><th scope="col">Imóvel</th><th scope="col">Carteira</th><th scope="col">Condomínio / ADM</th>
+              <th scope="col">Base</th><th scope="col">Lançamentos</th><th scope="col" class="n">Valor lançado</th></tr></thead>
+            <tbody id="cb-prev-itens"></tbody>
+          </table>
+        </div>
+        <div class="cb-pager"><span id="cb-prev-info"></span><button class="cb-btn" type="button" id="cb-prev-mais" hidden>Mostrar mais 200</button></div>
+      </section>
+    </section>
+
+    <footer class="cb-rodape" id="cb-rodape"></footer>
+  </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var $ = function (id) { return document.getElementById(id); };
+    var DADOS = null;
+    var filtro = { vis: 'ACAO', parcela: '', busca: '' };   // vis: ACAO (o que pede ação) | TODOS | FDS | PARCELA (uma linha da conta)
+    var GR_ACAO = ['TRAS', 'ORIGEM', 'DIF', 'AGUARDA'];
+    var limite = 200;
+    var modoPrev = false, PREV = null, prevDia = null, prevFiltro = 'FALTA', prevBusca = '', prevLimite = 200;
+    var catEscolhida = false;
+    var DS = { 'seg': 'segunda', 'ter': 'terça', 'qua': 'quarta', 'qui': 'quinta', 'sex': 'sexta', 'sáb': 'sábado', 'dom': 'domingo' };
+    var ICO = {
+        ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
+        div: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg>',
+        wait: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    };
+
+    function esc(v) {
+        return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function n(v) { return (v || 0).toLocaleString('pt-BR'); }
+    function rs(v) { return v == null ? '–' : 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function rsSinal(v) { return v == null ? '–' : (v < 0 ? '−' : (v > 0 ? '+' : '')) + rs(Math.abs(v)); }
+    function br(iso) { return iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : ''; }
+    function brAno(iso) { return iso ? br(iso) + '/' + iso.slice(0, 4) : ''; }
+    function dataHora(t) { if (!t) return ''; var p = String(t).slice(0, 16).split(' '); return br(p[0]) + (p[1] ? ' ' + p[1].slice(0, 5) : ''); }
+    function semana(iso) { return ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][new Date(iso + 'T12:00:00').getDay()]; }
+    function plural(q, um, varios) { return n(q) + ' ' + (q === 1 ? um : varios); }
+
+    function msg(texto, tipo) {
+        $('cb-msg').innerHTML = texto ? '<div class="cb-note is-' + (tipo || 'ok') + '">' + texto + '</div>' : '';
+    }
+
+    function dataDaUrl() {
+        try { var m = /[?&]data=(\d{4}-\d{2}-\d{2})/.exec(location.search); return m ? m[1] : ''; } catch (e) { return ''; }
+    }
+
+    function carregar(data, primeira, forcar) {
+        if (!DADOS) $('cb-load').hidden = false;
+        var url = '/api/conciliacao_bw/dia' + (data ? '?data=' + encodeURIComponent(data) : '');
+        if (forcar) url += (data ? '&' : '?') + 'atualizar=1';
+        return fetch(url, { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                $('cb-load').hidden = true;
+                if (!d.sucesso) { msg(esc(d.msg || 'Não consegui montar o dia.'), 'erro'); return; }
+                var mudouDia = !DADOS || DADOS.data !== d.data;
+                DADOS = d;
+                if (mudouDia) { limite = 200; if (!catEscolhida) { filtro.vis = (d.dia && d.dia.n_div) ? 'ACAO' : 'TODOS'; filtro.parcela = ''; } }
+                try { history.replaceState(null, '', location.pathname + '?data=' + d.data + (modoPrev ? '&aba=previsao' : '')); } catch (e) { /* sem histórico: segue */ }
+                if (!(d.fontes.relatorio_meses || []).length) { $('cb-vazio').hidden = false; $('cb-app').hidden = true; }
+                else { $('cb-vazio').hidden = true; $('cb-app').hidden = false; desenhar(); }
+                $('cb-btn-csv').href = '/api/conciliacao_bw/exportar?data=' + encodeURIComponent(d.data);
+                aplicarModo();
+                var is = d.inc_sync || {};
+                $('cb-btn-inc-arq').hidden = is.ok !== false;
+                if (is.ok === false && is.msg) msg('Inc. Bradesco: ' + esc(is.msg), 'aviso');
+            })
+            .catch(function () { $('cb-load').hidden = true; msg('O sistema não respondeu.', 'erro'); });
+    }
+
+    function desenhar() {
+        var d = DADOS, r = d.dia || {}, f = d.fontes;
+        // cabeçalho do dia
+        $('cb-dia-titulo').innerHTML = esc((DS[(r.dia_semana || semana(d.data)).split(' ·')[0]] || '') + ', ' + brAno(d.data)) +
+            '<small>' + (d.data === d.padrao ? 'dia útil anterior a hoje (BW de ontem)' : (d.data > d.hoje ? 'ainda vai vencer' : (d.data === d.hoje ? 'hoje: o BW chega amanhã' : 'dia útil'))) +
+            ((r.dia_semana || '').indexOf('feriado') >= 0 ? ' · feriado' : '') + '</small>';
+        $('cb-ant-t').textContent = semana(d.anterior) + ' ' + br(d.anterior);
+        $('cb-prox-t').textContent = semana(d.proximo) + ' ' + br(d.proximo);
+        $('cb-data').value = d.data;
+        $('cb-ontem').textContent = 'Ir para ' + br(d.padrao) + ' (ontem)';
+        $('cb-ontem').hidden = d.data === d.padrao;
+        // aviso: pediu sábado/domingo/feriado
+        var bb = d.bw_busca || {};
+        var avisoBw = (bb.acessivel === false) ? '<div class="cb-note is-aviso">' + esc(bb.msg) + '</div>' : '';
+        $('cb-aviso-dia').innerHTML = avisoBw + ((d.pedido && d.pedido !== d.data)
+            ? '<div class="cb-note is-aviso">' + esc(semana(d.pedido) + ' ' + br(d.pedido)) + ' não é dia útil: os boletos desse dia entram em ' + esc(semana(d.data) + ' ' + br(d.data)) + ', que é o que está na tela.</div>'
+            : ((f.relatorio_meses || []).indexOf(d.data.slice(0, 7)) < 0
+                ? '<div class="cb-note is-aviso">O relatório de vencimentos ' + esc(d.data.slice(5, 7) + '/' + d.data.slice(0, 4)) + ' ainda não foi enviado: os boletos deste dia aparecem como "mês sem relatório".</div>' : ''));
+
+        var bloq = !!d.bloqueado;
+        $('cb-bloq').hidden = !bloq;
+        $('cb-conteudo').hidden = bloq;
+        $('cb-btn-csv').hidden = bloq;
+        if (bloq) {
+            $('cb-aviso-dia').innerHTML = '';
+            $('cb-bloq-p').textContent = (d.data === d.hoje ? 'Hoje é ' + br(d.data) + '. ' : br(d.data) + ' ainda não chegou. ') +
+                'O BW é D-1: os pagamentos de ' + br(d.data) + ' chegam no dia útil seguinte (' + br(d.bw_disponivel_em) + '). Até lá, confira o dia de ontem.';
+            $('cb-bloq-ontem').textContent = 'Ver ' + br(d.padrao) + ' (ontem)';
+            return;
+        }
+        desenharResultado();
+        desenharConta();
+        desenharFds();
+        desenharChips();
+        desenharItens();
+
+        var partes = [];
+        if (f.relatorio) partes.push('Relatório: ' + f.relatorio.arquivo + ' · enviado ' + dataHora(f.relatorio.carregado_em) +
+            (f.relatorio_meses.length ? ' · vencimentos ' + f.relatorio_meses.map(function (m) { return m.slice(5, 7) + '/' + m.slice(0, 4); }).join(', ') : ''));
+        if (f.base_ultima_carga) partes.push('Base: última carga ' + dataHora(f.base_ultima_carga));
+        if (f.inc) partes.push('Inc. Bradesco: ' + (f.inc.origem === 'google' ? 'Google Sheets · lido ' : f.inc.arquivo + ' · enviado ') + dataHora(f.inc.carregado_em) + ' · vencimentos até ' + brAno(f.inc.venc_ate));
+        if (f.bw_ultimo_dia) partes.push('Último BW: pagamentos de ' + br(f.bw_ultimo_dia) + (f.bw_ultimo_arquivos.length ? ' (' + f.bw_ultimo_arquivos.slice(0, 2).join(', ') + ')' : ''));
+        if (f.bw_ultima_leitura_rede) partes.push('Pasta da rede lida ' + dataHora(f.bw_ultima_leitura_rede));
+        $('cb-rodape').innerHTML = partes.map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('');
+    }
+
+    // ------------------------------------------------------------------ de onde vêm os boletos de cada linha da conta
+    var ROT = {
+        VISAO_DUPLA: 'Repetidos na base (o mesmo boleto em 2 linhas; só 1 foi lançado)',
+        entrando: 'Vieram de outro dia (a base vence em outra data)',
+        BOLETO_EXTRA: '2º boleto do mesmo imóvel',
+        saindo: 'Lançados para outro dia (outro vencimento)',
+        NAO_LANCADO: 'Na base e ainda sem lançamento',
+        SEM_RELATORIO: 'Vencem em mês sem relatório enviado',
+        LANC_A_MAIS: 'Lançamentos a mais que a base',
+        LANC_FORA_BASE: 'Lançados sem estar na base',
+        DEVOLVIDO_TRAT: 'Banco devolveu, já tratado (Inc. Bradesco)',
+        DEVOLVIDO_PEND: 'Banco devolveu, ainda pendente (Inc. Bradesco)',
+        NAO_PAGO_BW: 'Lançados e o banco não pagou',
+        BW_BAIXADO: 'Pagos no banco sem lançamento, já baixados',
+        BW_SEM_LANC: 'Pagos no banco sem lançamento no relatório',
+        VALOR_DIFERENTE: 'Pagos com valor diferente do lançado',
+        BW_OUTRO: 'Pagamentos do BW que não são de condomínio',
+        DESCONTO: 'Pagos com desconto (banco pagou o valor líquido)'
+    };
+    var AJUDA = {
+        VISAO_DUPLA: 'O mesmo boleto aparece em 2 linhas na base (desconto ou vencimento alternativo) e só 1 foi lançada. Esta é a linha repetida: não precisa lançar.',
+        entrando: 'A base vence esses boletos em outra data, mas o lançamento caiu neste dia. Estão aqui porque o relatório os lançou para este vencimento.',
+        BOLETO_EXTRA: 'Imóveis com 2 boletos lançados. A base dessa época tinha 1 linha por imóvel, então o 2º aparece só no relatório.',
+        saindo: 'Estão na base neste dia, mas o relatório os lançou para outro vencimento (veja a data na última coluna). Na conta desse outro dia eles aparecem como "vieram de outro dia".',
+        NAO_LANCADO: 'Estão na base atual e não têm lançamento no relatório: ainda falta lançar.',
+        SEM_RELATORIO: 'O relatório desse mês ainda não foi enviado, então não dá para saber se estes boletos foram lançados.',
+        LANC_A_MAIS: 'O relatório lançou mais boletos do que a base tem neste vencimento.',
+        LANC_FORA_BASE: 'Estão lançados no relatório, mas o imóvel não está na base neste vencimento.',
+        NAO_PAGO_BW: 'Foram lançados, mas não aparecem no BW e o banco não devolveu. Confira se o pagamento caiu em outro dia, se o boleto foi cancelado ou se ficou parado.',
+        DEVOLVIDO_PEND: 'O banco devolveu estes boletos e a devolução ainda está pendente na planilha Inc. Bradesco. O motivo está na última coluna.',
+        DEVOLVIDO_TRAT: 'O banco devolveu estes boletos, mas a devolução já foi tratada na planilha Inc. Bradesco. O motivo está na última coluna.',
+        BW_BAIXADO: 'O banco pagou sem lançamento no relatório, mas o boleto já está baixado na base: foi para o banco.',
+        BW_SEM_LANC: 'O banco pagou e não achamos o lançamento no relatório. A última coluna mostra o que foi procurado.',
+        VALOR_DIFERENTE: 'Foi lançado um valor e o banco pagou outro.',
+        BW_OUTRO: 'Pagamentos do BW que não são de condomínio (TED, conta de consumo, fiança, prefeitura…): ficam fora da conta.',
+        DESCONTO: 'O boleto foi lançado com um valor e o banco pagou o valor líquido, já com o desconto (pontualidade, acordo etc.) aplicado. O pagamento bate; só o valor em reais é menor.'
+    };
+    // fonte: 'itens' (lista do dia) ou 'conta' (linhas extras da conta); g = grupo, só nas linhas "para olhar"
+    var PARC = {
+        VISAO_DUPLA: { f: 'itens', cats: ['VISAO_DUPLA'] },
+        entrando: { f: 'conta', cats: ['ENTRANDO'] },
+        BOLETO_EXTRA: { f: 'conta', cats: ['BOLETO_EXTRA'] },
+        saindo: { f: 'conta', cats: ['SAINDO'], g: 'DIF' },
+        NAO_LANCADO: { f: 'itens', cats: ['NAO_LANCADO'], g: 'TRAS' },
+        SEM_RELATORIO: { f: 'itens', cats: ['SEM_RELATORIO'], origem: 'base', g: 'AGUARDA' },
+        LANC_A_MAIS: { f: 'itens', cats: ['LANC_A_MAIS'], g: 'ORIGEM' },
+        LANC_FORA_BASE: { f: 'itens', cats: ['LANC_FORA_BASE'], g: 'ORIGEM' },
+        DEVOLVIDO_TRAT: { f: 'conta', cats: ['DEVOLVIDO_TRAT'] },
+        DEVOLVIDO_PEND: { f: 'conta', cats: ['DEVOLVIDO_PEND'], g: 'TRAS' },
+        NAO_PAGO_BW: { f: 'conta', cats: ['NAO_PAGO_BW'], g: 'TRAS' },
+        BW_BAIXADO: { f: 'itens', cats: ['BW_BAIXADO'] },
+        BW_SEM_LANC: { f: 'itens', cats: ['BW_SEM_LANC', 'SEM_RELATORIO'], origem: 'bw', g: 'ORIGEM' },
+        VALOR_DIFERENTE: { f: 'itens', cats: ['VALOR_DIFERENTE'], g: 'DIF' },
+        BW_OUTRO: { f: 'itens', cats: ['BW_OUTRO'] },
+        DESCONTO: { f: 'conta', cats: ['DESCONTO'] }
+    };
+    function linhasDaParcela(chave) {
+        var P = PARC[chave];
+        if (!P || !DADOS) return [];
+        var fonte = P.f === 'conta' ? (DADOS.conta_itens || []) : (DADOS.itens || []);
+        return fonte.filter(function (it) { return P.cats.indexOf(it.categoria) >= 0 && (!P.origem || it.origem === P.origem); });
+    }
+    function somaQtd(lista) { return lista.reduce(function (t, it) { return t + (it.qtd || 1); }, 0); }
+    function linhasAcao() {
+        var out = [];
+        Object.keys(PARC).forEach(function (k) { if (PARC[k].g) out = out.concat(linhasDaParcela(k)); });
+        return out;
+    }
+    function resumoAcao() {                      // quantos pontos para olhar em cada grupo (mesmos números da conta)
+        var c = {};
+        Object.keys(PARC).forEach(function (k) { var g = PARC[k].g; if (g) c[g] = (c[g] || 0) + somaQtd(linhasDaParcela(k)); });
+        return c;
+    }
+    function grupoDe(it) { return (DADOS.categorias[it.categoria] || {}).grupo || 'OK'; }
+    function grupoLinha(it) { var g = grupoDe(it); return (g === 'OK' && it.categoria !== 'OK' && it.categoria !== 'OK_PORTAL') ? 'EXPL' : g; }
+    function nomeGrupo(g) { return g === 'EXPL' ? 'Explicado' : ((DADOS.grupos[g] || {}).nome || g); }
+
+    function desenharResultado() {
+        var d = DADOS, r = d.dia || {}, f = d.fontes;
+        var temBw = !!(r.bw_carregado || r.bw_qtd);
+        var h, p, ic;
+        var ra = resumoAcao(), nAcao = 0;
+        GR_ACAO.forEach(function (g) { nAcao += ra[g] || 0; });
+        var PEDACO = { TRAS: 'ficaram para trás', ORIGEM: 'sem origem', DIF: 'com outro vencimento ou valor', AGUARDA: 'esperando o relatório' };
+        if (r.status === 'OK3') { h = 'Bateu'; ic = ICO.ok; p = 'Base, relatório e banco conferem em ' + br(d.data) + '.'; }
+        else if (r.status === 'DIV') {
+            h = 'Não bateu'; ic = ICO.div;
+            var pedaco = GR_ACAO.filter(function (g) { return ra[g]; }).map(function (g) { return n(ra[g]) + ' ' + PEDACO[g]; });
+            p = nAcao ? plural(nAcao, 'ponto para olhar', 'pontos para olhar') + ': ' + pedaco.join(' · ') + '. Os quadros abaixo mostram onde está cada um.'
+                      : 'Os números do dia não fecham: veja nos quadros abaixo.';
+        } else if (r.status === 'PARCIAL') { h = 'BW chegando'; ic = ICO.wait; p = r.lanc_boletos ? n(r.bw_qtd) + ' de ' + n(r.lanc_boletos) + ' já pagos no banco.' : n(r.bw_qtd) + ' pagamentos no banco, mas este dia ainda não tem lançamentos no relatório: envie o relatório do mês para conferir.'; }
+        else { h = 'Aguardando o banco'; ic = ICO.wait; p = 'Base e relatório conferem; o BW de ' + br(d.data) + (d.data >= d.hoje ? ' chega no dia útil seguinte (D-1).' : ' não foi encontrado na pasta.'); }
+        $('cb-hero').className = 'cb-hero is-' + (r.status || 'OK2');
+        $('cb-selo').innerHTML = ic;
+        $('cb-h').textContent = h;
+        $('cb-hp').textContent = p;
+
+        $('cb-n-base').textContent = n(r.lanc_boletos);
+        $('cb-s-base').textContent = (r.lanc_boletos === 1 ? 'boleto' : 'boletos') + ' no relatório' + (r.cancelados ? ' · ' + n(r.cancelados) + ' cancelados fora' : '');
+        $('cb-n-rel').textContent = n(r.lanc_boletos);
+        $('cb-s-rel').textContent = (r.lanc_boletos === 1 ? 'boleto' : 'boletos') + ' no relatório' + (r.cancelados ? ' · ' + n(r.cancelados) + ' cancelados fora' : '');
+        $('cb-n-bw').textContent = temBw ? n(r.bw_qtd) : '–';
+        $('cb-s-bw').textContent = temBw ? ((r.bw_qtd === 1 ? 'pagamento' : 'pagamentos') + ' no BW' + ((f.bw_arquivos_dia || []).length ? ' · ' + f.bw_arquivos_dia.join(', ') : ''))
+            : (d.data > d.hoje ? 'ainda vai vencer' : (d.data === d.hoje ? 'o BW chega amanhã' : 'BW não encontrado'));
+        $('cb-v-rel').textContent = rs(r.lanc_valor);
+        $('cb-v-bw').textContent = temBw ? rs(r.bw_valor) : '';
+
+        var erro1 = (r.ponte || []).some(function (t) { return t.tipo === 'erro' && t.qtd; });
+        var erro2 = (r.ponte_bw || []).some(function (t) { return t.tipo === 'erro' && t.qtd; });
+        // os 2 primeiros cards agora mostram o mesmo número (o resultado da conta): o sinal entre eles passa a
+        // dizer se essa conta tem algo para olhar (erro) ou não, em vez de comparar 2 números que já são iguais.
+        var igual1 = !erro1;
+        $('cb-s1').className = 'cb-sinal ' + (igual1 ? 'is-igual' : 'is-dif');
+        $('cb-s1').textContent = igual1 ? '=' : '≠';
+        $('cb-s1').title = igual1 ? 'Igual' : 'Tem ponto para olhar: veja a conta no quadro "Tínhamos para pagar"';
+        var igual2 = temBw && r.bw_qtd === r.lanc_boletos;
+        $('cb-s2').className = 'cb-sinal ' + (!temBw ? '' : (igual2 ? 'is-igual' : (erro2 ? 'is-dif' : 'is-expl')));
+        $('cb-s2').textContent = !temBw ? '…' : (igual2 ? '=' : '≠');
+        $('cb-s2').title = !temBw ? 'BW ainda não chegou' : (igual2 ? 'Igual' : (erro2 ? 'Diferente: tem ponto para olhar (veja a conta no quadro "Foi pago no banco")' : 'Diferente, mas explicado: veja a conta no quadro "Foi pago no banco"'));
+
+        var pill, dv = (r.bw_valor || 0) - (r.lanc_valor || 0), descV = r.desc_valor || 0;
+        if (!temBw) pill = '<span class="cb-pill">' + ICO.wait + 'Aguardando o BW</span>';
+        else if (Math.abs(dv) < 0.01) pill = '<span class="cb-pill is-ok">' + ICO.ok + 'Bateu</span>';
+        else if (Math.abs(dv + descV) < 0.01) pill = '<span class="cb-pill is-ok">' + ICO.ok + 'Bateu (com desconto)</span>';
+        else pill = '<span class="cb-pill is-dif">' + ICO.div + 'Diferença ' + esc(rsSinal(dv)) + '</span>';
+        var vd = linhasDaParcela('VALOR_DIFERENTE'), ve = r.valor_explica || {};
+        var linhaValor = vd.length ? '<div class="cb-valdif">' + linhaParcela({ chave: 'VALOR_DIFERENTE', qtd: somaQtd(vd), tipo: 'erro', valorTxt: ve.valor_diferente ? rsSinal(ve.valor_diferente) + ' no total' : '' }, true) + '</div>' : '';
+        $('cb-valor').innerHTML = '<div class="t">Valor do dia</div>' +
+            '<div class="par"><span>Lançado no relatório</span><b>' + esc(rs(r.lanc_valor)) + '</b></div>' +
+            '<div class="igual" aria-hidden="true">' + (temBw && Math.abs(dv + descV) < 0.01 ? '=' : '→') + '</div>' +
+            '<div class="par"><span>Pago no banco</span><b>' + (temBw ? esc(rs(r.bw_valor)) : '–') + '</b></div>' + pill + linhaValor;
+    }
+
+    // ------------------------------------------------------------------ a conta, passo a passo
+    function valorDaParcela(chave) {            // R$ dos boletos da linha (mesma soma que a tabela mostra)
+        var lista = linhasDaParcela(chave), campo = (chave === 'BW_BAIXADO' || chave === 'BW_SEM_LANC' || chave === 'BW_OUTRO') ? 'valor_pago' : 'valor_lanc';
+        return lista.reduce(function (t, it) { return t + (it[campo] || 0); }, 0);
+    }
+    function linhaParcela(p, semSinal) {
+        var P = PARC[p.chave] || {}, info = p.tipo === 'info';
+        var q = semSinal ? n(Math.abs(p.qtd)) : (p.qtd < 0 ? '−' : '+') + n(Math.abs(p.qtd));
+        var lista = linhasDaParcela(p.chave), tem = lista.length > 0;
+        var v = p.valorTxt || (valorDaParcela(p.chave) > 0.004 ? rs(valorDaParcela(p.chave)) : '');
+        var sel = filtro.vis === 'PARCELA' && filtro.parcela === p.chave;
+        var cls = 'cb-lin ' + (info ? 'is-info' : 'g-' + (P.g || 'TRAS')) + (sel ? ' is-sel' : '');
+        var peq = (info ? '' : '<b>' + esc(nomeGrupo(P.g || 'TRAS').toLowerCase()) + '</b>' + (v ? ' · ' : '')) + esc(v);
+        var corpo = '<span class="n">' + q + '</span><span class="t">' + esc(ROT[p.chave] || p.rotulo || p.chave) + (peq ? '<small>' + peq + '</small>' : '') + '</span>' +
+            '<span class="go" aria-hidden="true">' + (tem ? '›' : '') + '</span>';
+        return tem ? '<button type="button" class="' + cls + '" data-parc="' + p.chave + '" aria-pressed="' + sel + '" title="' + esc(AJUDA[p.chave] || '') + ' · clique para ver os boletos">' + corpo + '</button>'
+                   : '<div class="' + cls + '" title="' + esc(AJUDA[p.chave] || '') + '">' + corpo + '</div>';
+    }
+    function passoHtml(titulo, sub, topo, parcelas, fim, fecha, extra) {
+        var info = parcelas.filter(function (p) { return p.tipo === 'info'; }), erro = parcelas.filter(function (p) { return p.tipo !== 'info'; });
+        var h = '<h3>' + esc(titulo) + '</h3>' +
+            '<div class="cb-lin is-base"><span class="n">' + n(topo.n) + '</span><span class="t">' + esc(topo.t) + '</span></div>';
+        if (erro.length) h += '<div class="cb-sub-t">Para olhar</div>' + erro.map(function (p) { return linhaParcela(p); }).join('');
+        if (info.length) h += '<div class="cb-sub-t">Só explica (não é erro)</div>' + info.map(function (p) { return linhaParcela(p); }).join('');
+        if (!parcelas.length) h += '<div class="cb-lin-vazio">Nada mudou entre um número e o outro.</div>';
+        h += '<div class="cb-lin is-fim"><span class="n">= ' + n(fim.n) + '</span><span class="t">' + esc(fim.t) + '</span>' +
+            (fecha ? '<span class="ok">' + ICO.ok + ' conta fecha</span>' : '<span class="nao">não fecha</span>') + '</div>';
+        return h + (extra || '');
+    }
+    function desenharConta() {
+        var r = DADOS.dia;
+        if (!r) { $('cb-p1').innerHTML = ''; $('cb-p2').innerHTML = ''; return; }
+        var temBw = !!(r.bw_carregado || r.bw_qtd);
+        var p1 = (r.ponte || []).filter(function (t) { return t.chave !== 'base'; });
+        $('cb-p1').innerHTML = passoHtml('A conta: da base ao lançado', '',
+            { n: r.base, t: 'Tínhamos na base' + (r.fds ? ' (inclui ' + n(r.fds) + ' de fim de semana/feriado)' : '') }, p1,
+            { n: r.lanc_boletos, t: 'Foi lançado no relatório' }, r.ponte_fecha);
+        if (temBw && (r.ponte_bw || []).length) {
+            var p2 = r.ponte_bw.filter(function (t) { return t.chave !== 'lanc'; });
+            var extra = '';
+            if (r.bw_outros) extra += '<p class="cb-nota-conta">+' + n(r.bw_outros) + (r.bw_outros === 1 ? ' pagamento do BW não é' : ' pagamentos do BW não são') +
+                ' de condomínio (TED, conta de consumo, fiança, prefeitura…) e ficam fora da conta. <button type="button" data-parc="BW_OUTRO">Ver a lista</button></p>';
+            if (!r.inc_ativo && r.nao_pagos) extra += '<p class="cb-nota-conta"><button type="button" data-enviar-inc="1">Ler o Inc. Bradesco</button> para ver se o banco devolveu estes boletos.</p>';
+            $('cb-p2').innerHTML = passoHtml('A conta: do lançado ao pago', '',
+                { n: r.lanc_boletos, t: 'Foi lançado no relatório' }, p2, { n: r.bw_qtd, t: 'Foi pago no banco' }, r.ponte_bw_fecha, extra);
+        } else {
+            $('cb-p2').innerHTML = '<h3>A conta: do lançado ao pago</h3><div class="cb-lin-vazio">' +
+                (temBw ? 'Sem lançamentos neste dia.' : 'O BW de ' + br(DADOS.data) + ' ainda não está aqui: não dá para conferir o pagamento.') + '</div>';
+        }
+    }
+
+    function desenharFds() {
+        var r = DADOS.dia, lista = (r && r.fds_detalhe) || [];
+        $('cb-sec-fds').hidden = !lista.length;
+        if (!lista.length) return;
+        $('cb-fds-titulo').textContent = 'Fim de semana e feriado que entram em ' + br(DADOS.data);
+        var tot = { base: 0, u: 0, o: 0, x: 0, s: 0, v: 0 };
+        var html = lista.map(function (f) {
+            var sem = f.sem_lanc + (f.sem_relatorio || 0);
+            tot.base += f.base; tot.u += f.no_dia_util; tot.o += f.na_data; tot.x += f.outra_data; tot.s += sem; tot.v += f.visao_dupla || 0;
+            return '<tr><td class="is-first">' + esc(f.rotulo.split(' ·')[0] + ' ' + f.venc.slice(0, 5)) + (f.rotulo.indexOf('feriado') >= 0 ? '<span class="sub">feriado</span>' : '') + '</td>' +
+                '<td class="n">' + n(f.base) + '</td><td class="n">' + n(f.no_dia_util) + '</td><td class="n">' + n(f.na_data) + '</td>' +
+                '<td class="n">' + (f.outra_data ? '<span class="neg">' + n(f.outra_data) + '</span>' : '0') + '</td>' +
+                '<td class="n">' + (sem ? '<span class="neg">' + n(sem) + '</span>' : '0') + (f.sem_relatorio ? '<span class="sub">' + n(f.sem_relatorio) + ' de mês sem relatório</span>' : '') + '</td>' +
+                '<td class="n">' + (f.visao_dupla ? '<span style="color:var(--cb-info)">' + n(f.visao_dupla) + '</span>' : '0') + '</td></tr>';
+        }).join('');
+        if (lista.length > 1) html += '<tr class="is-total"><td>Total</td><td class="n">' + n(tot.base) + '</td><td class="n">' + n(tot.u) + '</td><td class="n">' + n(tot.o) +
+            '</td><td class="n">' + n(tot.x) + '</td><td class="n">' + n(tot.s) + '</td><td class="n">' + n(tot.v) + '</td></tr>';
+        $('cb-fds').innerHTML = html;
+    }
+
+    function itensFiltrados(ignorarFiltro) {
+        var b = filtro.busca.trim().toLowerCase(), base;
+        if (ignorarFiltro || filtro.vis === 'TODOS') base = DADOS.itens.filter(function (it) { return ignorarFiltro || it.categoria !== 'BW_OUTRO'; });
+        else if (filtro.vis === 'ACAO') base = linhasAcao();
+        else if (filtro.vis === 'FDS') base = DADOS.itens.filter(function (it) { return it.fds; });
+        else base = linhasDaParcela(filtro.parcela);
+        if (!b) return base;
+        return base.filter(function (it) {
+            var alvo = [it.imovel, it.carteira, it.emp, it.adm, it.detalhe, it.ref_bw].join(' ').toLowerCase();
+            return alvo.indexOf(b) >= 0;
+        });
+    }
+
+    function desenharChips() {
+        var nacao = linhasAcao().length, ntodos = DADOS.itens.filter(function (it) { return it.categoria !== 'BW_OUTRO'; }).length;
+        var nfds = DADOS.itens.filter(function (it) { return it.fds; }).length;
+        var chips = [['ACAO', 'Só o que pede ação', nacao, true], ['TODOS', 'Todos os boletos', ntodos, false]];
+        if (nfds) chips.push(['FDS', 'De fim de semana/feriado', nfds, false]);
+        $('cb-chips').innerHTML = chips.map(function (c) {
+            return '<button type="button" class="cb-chip' + (c[3] ? ' is-div' : '') + '" data-vis="' + c[0] + '" aria-pressed="' + (filtro.vis === c[0]) + '">' +
+                esc(c[1]) + ' <small>' + n(c[2]) + '</small></button>';
+        }).join('');
+        var fp = $('cb-filtro-parcela'), aj = $('cb-ajuda');
+        if (filtro.vis === 'PARCELA') {
+            fp.hidden = false; aj.hidden = false;
+            fp.innerHTML = 'Mostrando só:<button type="button" class="cb-chip" data-vis="LIMPAR" title="Tirar o filtro">' + esc(ROT[filtro.parcela] || filtro.parcela) + ' ✕</button>';
+            aj.textContent = AJUDA[filtro.parcela] || '';
+        } else { fp.hidden = true; aj.hidden = filtro.vis !== 'ACAO'; aj.textContent = filtro.vis === 'ACAO'
+            ? 'Estes são os boletos das linhas "para olhar" dos quadros acima. Para ver só uma linha, clique nela.' : ''; }
+    }
+
+    function rotuloSituacao(it) {
+        var g = grupoLinha(it), cat = DADOS.categorias[it.categoria];
+        return '<span class="cb-st g-' + g + '">' + esc(nomeGrupo(g)) + '</span><span class="sub">' + esc(cat.rotulo) + '</span>';
+    }
+
+    function descricaoLista(lista) {
+        if (filtro.vis === 'TODOS') return 'Todos os boletos do dia (sem os pagamentos que não são de condomínio).';
+        if (filtro.vis === 'FDS') return 'Boletos que vencem no sábado, domingo ou feriado e entram neste dia útil.';
+        if (filtro.vis === 'PARCELA') {
+            var q = somaQtd(lista), l = lista.length;
+            return l + (l === 1 ? ' linha' : ' linhas') + (q !== l ? ' = ' + n(q) + ' boletos na conta (algumas linhas valem mais de um boleto)' : '') + '.';
+        }
+        return '';
+    }
+
+    function desenharItens() {
+        var C = DADOS.categorias, G = DADOS.grupos || {};
+        var lista = itensFiltrados(false).map(function (it, i) { return { it: it, i: i }; }).sort(function (a, b) {
+            var ga = (G[grupoDe(a.it)] || {}).ordem || 9, gb = (G[grupoDe(b.it)] || {}).ordem || 9;
+            return ga - gb || C[a.it.categoria].ordem - C[b.it.categoria].ordem || a.i - b.i;
+        }).map(function (x) { return x.it; });
+        $('cb-itens-titulo').textContent = 'Boletos de ' + br(DADOS.data);
+        $('cb-itens-desc').textContent = descricaoLista(lista);
+        var vis = lista.slice(0, limite);
+        $('cb-itens').innerHTML = vis.length ? vis.map(function (it) {
+            var g = grupoLinha(it);
+            var lancs = it.lancs.length ? '<ul class="cb-lancs">' + it.lancs.map(function (l) {
+                return '<li>' + esc(l.flag || '?') + ' · ' + esc(l.tp_lanc || '') + ' · ' + esc(l.venc) + ' · ' + rs(l.valor) +
+                    (l.pago ? ' → <b>BW ' + rs(l.valor_bw) + '</b>' : '') +
+                    (l.inc ? ' · <b class="' + (l.inc.pendente ? 'neg' : '') + '">banco devolveu (' + esc(l.inc.ocorrencia) + (l.inc.pendente ? ', pendente' : ', tratado') + ')</b>' : '') + '</li>';
+            }).join('') + '</ul>' : '<span class="mut">–</span>';
+            var base = it.origem === 'base' ? (it.na_base_atual ? 'Na base atual' : 'Saiu da base') + (it.status_sistema ? ' · ' + esc(it.status_sistema) : '')
+                : (it.origem === 'bw' ? 'Só no BW' : 'Só no relatório');
+            var varios = (it.qtd || 1) > 1 ? '<span class="sub">×' + n(it.qtd) + ' boletos iguais</span>' : '';
+            return '<tr class="g-' + g + '"><td>' + rotuloSituacao(it) + '</td><td class="is-first">' + esc(it.venc.slice(0, 5)) + (it.fds ? '<span class="sub">' + esc(semana(it.venc.slice(6, 10) + '-' + it.venc.slice(3, 5) + '-' + it.venc.slice(0, 2))) + '</span>' : '') + '</td>' +
+                '<td class="is-first">' + esc(it.imovel || '–') + '<span class="sub">cart. ' + esc(it.carteira == null || it.carteira === '' ? '–' : it.carteira) + (it.ref_bw ? ' · ' + esc(it.ref_bw) : '') + '</span>' +
+                    '<span class="sub">' + base + '</span>' + varios + '</td>' +
+                '<td class="is-emp">' + esc(it.emp || '–') + '<span class="sub">' + esc(it.adm || '') + '</span></td><td class="is-lanc">' + lancs + '</td>' +
+                '<td class="n">' + (it.valor_lanc ? rs(it.valor_lanc) : '<span class="mut">–</span>') + '</td>' +
+                '<td class="n">' + (it.valor_pago ? rs(it.valor_pago) : '<span class="mut">–</span>') + '</td>' +
+                '<td class="is-detalhe">' + esc(it.detalhe) + '</td></tr>';
+        }).join('') : '<tr><td colspan="8" class="cb-empty">' + (filtro.vis === 'ACAO' && !filtro.busca ? 'Nada pede ação neste dia.' : 'Nenhum boleto com esses filtros.') + '</td></tr>';
+        $('cb-pag-info').textContent = 'Mostrando ' + n(vis.length) + ' de ' + n(lista.length);
+        $('cb-mais').hidden = lista.length <= vis.length;
+    }
+
+    function enviar(url, campo, arquivos, botao) {
+        var fd = new FormData();
+        Array.prototype.forEach.call(arquivos, function (f) { fd.append(campo, f); });
+        botao.disabled = true;
+        msg('Enviando…', 'aviso');
+        return fetch(url, { method: 'POST', body: fd }).then(function (r) { return r.json(); })
+            .then(function (d) {
+                botao.disabled = false;
+                msg(esc(d.msg || (d.sucesso ? 'Pronto.' : 'Não deu certo.')), d.sucesso ? 'ok' : 'erro');
+                if (d.sucesso) return carregar(DADOS ? DADOS.data : dataDaUrl(), false);
+            })
+            .catch(function () { botao.disabled = false; msg('O sistema não respondeu.', 'erro'); });
+    }
+
+    function buscarBwDoDia() {
+        var b = $('cb-btn-rede');
+        b.disabled = true;
+        msg('Procurando o BW do dia na pasta do retorno…', 'aviso');
+        carregar(DADOS ? DADOS.data : dataDaUrl(), false, true).then(function () {
+            b.disabled = false;
+            var bb = (DADOS && DADOS.bw_busca) || {};
+            if (bb.acessivel === false) { msg('', ''); return; }
+            msg(esc(bb.msg + (bb.linhas_novas ? ' · ' + plural(bb.linhas_novas, 'pagamento novo', 'pagamentos novos') : '')), bb.arquivos && bb.arquivos.length ? 'ok' : 'aviso');
+        });
+    }
+
+    function irPara(data) { if (data) { catEscolhida = false; filtro.busca = ''; $('cb-busca').value = ''; carregar(data, false); } }
+
+    $('cb-btn-rel').addEventListener('click', function () { $('cb-file-rel').click(); });
+    $('cb-btn-rel2').addEventListener('click', function () { $('cb-file-rel').click(); });
+    $('cb-btn-bw').addEventListener('click', function () { $('cb-file-bw').click(); });
+    $('cb-btn-rede').addEventListener('click', buscarBwDoDia);
+    function atualizarInc() {
+        var b = $('cb-btn-inc');
+        b.disabled = true;
+        msg('Lendo a planilha Inc. Bradesco no Google…', 'aviso');
+        return fetch('/api/conciliacao_bw/inc_google', { method: 'POST' }).then(function (r) { return r.json(); })
+            .then(function (d) {
+                b.disabled = false;
+                msg(esc(d.msg || (d.sucesso ? 'Pronto.' : 'Não deu certo.')), d.sucesso ? 'ok' : 'erro');
+                if (!d.sucesso) $('cb-btn-inc-arq').hidden = false;
+                return carregar(DADOS ? DADOS.data : dataDaUrl(), false);
+            })
+            .catch(function () { b.disabled = false; msg('O sistema não respondeu.', 'erro'); });
+    }
+    $('cb-btn-inc').addEventListener('click', atualizarInc);
+    $('cb-btn-inc-arq').addEventListener('click', function () { $('cb-file-inc').click(); });
+    $('cb-file-inc').addEventListener('change', function (e) { if (e.target.files.length) enviar('/api/conciliacao_bw/inc', 'arquivo', e.target.files, $('cb-btn-inc')); e.target.value = ''; });
+    $('cb-file-rel').addEventListener('change', function (e) { if (e.target.files.length) enviar('/api/conciliacao_bw/relatorio', 'arquivo', e.target.files, $('cb-btn-rel')); e.target.value = ''; });
+    $('cb-file-bw').addEventListener('change', function (e) { if (e.target.files.length) enviar('/api/conciliacao_bw/bw', 'arquivos', e.target.files, $('cb-btn-bw')); e.target.value = ''; });
+    $('cb-ant').addEventListener('click', function () { irPara(DADOS && DADOS.anterior); });
+    $('cb-prox').addEventListener('click', function () { irPara(DADOS && DADOS.proximo); });
+    $('cb-ontem').addEventListener('click', function () { irPara(DADOS && DADOS.padrao); });
+    $('cb-bloq-ontem').addEventListener('click', function () { irPara(DADOS && DADOS.padrao); });
+    $('cb-data').addEventListener('change', function (e) { irPara(e.target.value); });
+    function escolher(e) {
+        var el = e.target.closest('[data-parc], [data-vis]');
+        if (!el) return;
+        if (el.dataset.parc) {
+            var igual = filtro.vis === 'PARCELA' && filtro.parcela === el.dataset.parc && !el.closest('.cb-nota-conta');
+            filtro.vis = igual ? ((DADOS.dia && DADOS.dia.n_div) ? 'ACAO' : 'TODOS') : 'PARCELA';       // clicar de novo na mesma linha solta o filtro
+            filtro.parcela = igual ? '' : el.dataset.parc;
+            e.preventDefault();
+        } else {
+            filtro.vis = el.dataset.vis === 'LIMPAR' ? ((DADOS.dia && DADOS.dia.n_div) ? 'ACAO' : 'TODOS') : el.dataset.vis;
+            filtro.parcela = '';
+        }
+        catEscolhida = true; limite = 200; desenharConta(); desenharResultado(); desenharChips(); desenharItens();
+        if (el.dataset.parc && !el.closest('#cb-sec-itens')) $('cb-sec-itens').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    $('cb-chips').addEventListener('click', escolher);
+    $('cb-filtro-parcela').addEventListener('click', escolher);
+    $('cb-hero').addEventListener('click', function (e) {
+        if (e.target.closest('[data-enviar-inc]')) { atualizarInc(); return; }
+        escolher(e);
+    });
+    $('cb-valor').addEventListener('click', escolher);
+    var timer = null;
+    $('cb-busca').addEventListener('input', function (e) {
+        clearTimeout(timer);
+        timer = setTimeout(function () { filtro.busca = e.target.value; limite = 200; desenharChips(); desenharItens(); }, 200);
+    });
+    $('cb-mais').addEventListener('click', function () { limite += 200; desenharItens(); });
+
+    // ------------------------------------------------------------------ previsão (hoje para a frente)
+    function aplicarModo() {
+        var bloq = !!(DADOS && DADOS.bloqueado);
+        $('cb-prev').hidden = !modoPrev;
+        $('cb-sec-dia').hidden = modoPrev;
+        $('cb-aviso-dia').hidden = modoPrev;
+        $('cb-bloq').hidden = modoPrev || !bloq;
+        $('cb-conteudo').hidden = modoPrev || bloq;
+        $('cb-btn-csv').hidden = modoPrev || bloq;
+        $('cb-btn-prev').classList.toggle('is-primary', modoPrev);
+        $('cb-btn-prev-t').textContent = modoPrev ? 'Voltar à conferência' : 'Previsão';
+    }
+
+    function corPct(p) { return p == null ? '' : (p >= 95 ? 'is-good' : (p < 50 ? 'is-warn' : '')); }
+
+    function desenharPrevisao() {
+        var P = PREV, t = P.totais;
+        var semRel = P.meses_sem_relatorio || [];
+        $('cb-prev-aviso').innerHTML = semRel.length ? '<div class="cb-note is-aviso">O relatório de vencimentos ' + esc(semRel.map(function (m) { return m.slice(5, 7) + '/' + m.slice(0, 4); }).join(', ')) +
+            ' ainda não foi enviado: nesses dias não dá para saber o que já foi lançado (aparecem como "sem relatório").</div>' : '';
+        var comRel = P.dias.filter(function (l) { return !l.sem_relatorio; });
+        var fal = comRel.reduce(function (a, l) { return a + l.falta_lancar; }, 0);
+        var lb = comRel.reduce(function (a, l) { return a + l.lancado_da_base; }, 0);
+        var pct = (lb + fal) ? Math.round(1000 * lb / (lb + fal)) / 10 : null;
+        $('cb-prev-cards').innerHTML =
+            '<div class="cb-pc"><div class="l">Programado</div><div class="big">' + n(t.programado) + '</div><div class="s">boletos na base de ' + br(P.de) + ' a ' + br(P.ate) + '</div></div>' +
+            '<div class="cb-pc is-good"><div class="l">Já lançado</div><div class="big">' + n(t.lancado) + '</div><div class="s">' + esc(rs(t.valor_lancado)) + ' no relatório' + (t.lancados_fora_base ? ' · ' + n(t.lancados_fora_base) + ' fora da base' : '') + '</div></div>' +
+            '<div class="cb-pc ' + (fal ? 'is-warn' : 'is-good') + '"><div class="l">Falta lançar</div><div class="big">' + n(fal) + '</div><div class="s">estão na base e ainda sem lançamento</div></div>' +
+            '<div class="cb-pc ' + corPct(pct) + '"><div class="l">Já lançado da base</div><div class="big">' + (pct == null ? '–' : String(pct).replace('.', ',') + '%') + '</div><div class="s">do que está programado (nos dias com relatório)</div></div>';
+        $('cb-prev-linhas').innerHTML = P.dias.map(function (l) {
+            var total = l.lancado_da_base + l.falta_lancar;
+            var barra = l.sem_relatorio ? '<span class="mut">relatório não enviado</span>' :
+                (total ? '<div style="display:flex;align-items:center;gap:10px"><div class="cb-bar" aria-hidden="true"><i class="ok" style="width:' + (100 * l.lancado_da_base / total) + '%"></i><i class="falta" style="width:' + (100 * l.falta_lancar / total) + '%"></i></div><span class="cb-prev-pct">' + String(l.pct).replace('.', ',') + '%</span></div>'
+                    : '<span class="mut">nada programado</span>');
+            return '<tr' + (prevDia === l.data ? ' class="is-aberto"' : '') + '><td class="is-first"><button type="button" class="cb-linkdia" data-prev-dia="' + l.data + '">' + esc(l.dia_semana + ' ' + brAno(l.data)) + '</button>' +
+                (l.fds ? '<span class="sub">inclui ' + n(l.fds) + ' de fim de semana/feriado</span>' : '') + (l.data === P.hoje ? '<span class="sub">hoje</span>' : '') + '</td>' +
+                '<td class="n">' + n(l.programado) + '</td>' +
+                '<td class="n">' + (l.sem_relatorio ? '<span class="mut">–</span>' : n(l.lancado) + (l.lancados_fora_base ? '<span class="sub">' + n(l.lancados_fora_base) + ' fora da base</span>' : '')) + '</td>' +
+                '<td class="n">' + (l.sem_relatorio ? '<span class="mut">–</span>' : (l.falta_lancar ? '<b class="neg">' + n(l.falta_lancar) + '</b>' : '<span class="pos">0</span>')) + '</td>' +
+                '<td class="n">' + (l.sem_relatorio ? '<span class="mut">–</span>' : esc(rs(l.valor_lancado))) + '</td><td>' + barra + '</td></tr>';
+        }).join('') + '<tr class="is-total"><td>Total</td><td class="n">' + n(t.programado) + '</td><td class="n">' + n(t.lancado) + '</td><td class="n">' + n(fal) + '</td><td class="n">' + esc(rs(t.valor_lancado)) + '</td><td></td></tr>';
+    }
+
+    function carregarPrevisao() {
+        $('cb-load').hidden = false;
+        return fetch('/api/conciliacao_bw/previsao?dias=' + encodeURIComponent($('cb-prev-n').value), { cache: 'no-store' }).then(function (r) { return r.json(); })
+            .then(function (d) {
+                $('cb-load').hidden = true;
+                if (!d.sucesso) { msg(esc(d.msg || 'Não consegui montar a previsão.'), 'erro'); return; }
+                PREV = d;
+                desenharPrevisao();
+            })
+            .catch(function () { $('cb-load').hidden = true; msg('O sistema não respondeu.', 'erro'); });
+    }
+
+    function prevItensFiltrados(ignorarCat) {
+        var q = prevBusca.trim().toLowerCase();
+        return (prevDia && prevDia.itens || []).filter(function (it) {
+            if (q && (it.imovel + ' ' + it.carteira + ' ' + it.emp + ' ' + it.adm).toLowerCase().indexOf(q) < 0) return false;
+            if (ignorarCat || prevFiltro === 'TODOS') return true;
+            if (prevFiltro === 'FALTA') return it.categoria === 'NAO_LANCADO' || it.categoria === 'SEM_RELATORIO';
+            if (prevFiltro === 'LANCADO') return (it.qtd_lanc || 0) > 0 && it.categoria !== 'LANC_FORA_BASE' && it.categoria !== 'LANC_A_MAIS';
+            if (prevFiltro === 'FORA') return it.categoria === 'LANC_FORA_BASE' || it.categoria === 'LANC_A_MAIS';
+            return true;
+        });
+    }
+
+    function desenharDetPrev() {
+        var det = prevDia;
+        $('cb-prev-det').hidden = !det;
+        if (!det) return;
+        var l = det.linha || {};
+        $('cb-prev-det-t').textContent = 'Boletos de ' + (l.dia_semana || '') + ' ' + brAno(det.data);
+        $('cb-prev-det-d').textContent = l.sem_relatorio ? 'O relatório desse mês ainda não foi enviado.' :
+            n(l.programado) + ' programados · ' + n(l.lancado) + ' já lançados (' + rs(l.valor_lancado) + ') · ' + n(l.falta_lancar) + ' faltam lançar.';
+        var todos = prevItensFiltrados(true);
+        var c = { FALTA: 0, LANCADO: 0, FORA: 0 };
+        todos.forEach(function (it) {
+            if (it.categoria === 'NAO_LANCADO' || it.categoria === 'SEM_RELATORIO') c.FALTA++;
+            else if (it.categoria === 'LANC_FORA_BASE' || it.categoria === 'LANC_A_MAIS') c.FORA++;
+            else if ((it.qtd_lanc || 0) > 0) c.LANCADO++;
+        });
+        var chips = [['FALTA', 'Falta lançar', c.FALTA, true], ['LANCADO', 'Já lançados', c.LANCADO, false]];
+        if (c.FORA) chips.push(['FORA', 'Lançados fora da base', c.FORA, true]);
+        chips.push(['TODOS', 'Todos', todos.length, false]);
+        $('cb-prev-chips').innerHTML = chips.map(function (x) {
+            return '<button type="button" class="cb-chip' + (x[3] ? ' is-div' : '') + '" data-prev-cat="' + x[0] + '" aria-pressed="' + (prevFiltro === x[0]) + '">' + esc(x[1]) + ' <small>' + n(x[2]) + '</small></button>';
+        }).join('');
+        var lista = prevItensFiltrados(false), vis = lista.slice(0, prevLimite);
+        var rot = { NAO_LANCADO: ['is-div', 'Falta lançar'], AGUARDANDO: ['is-ok3', 'Lançado'], SEM_RELATORIO: ['is-wait', 'Mês sem relatório'] };
+        $('cb-prev-itens').innerHTML = vis.length ? vis.map(function (it) {
+            var cat = (det.categorias || {})[it.categoria] || { rotulo: it.categoria, divergencia: false };
+            var r = rot[it.categoria] || [cat.divergencia ? 'is-div' : 'is-wait', cat.rotulo];
+            var lancs = (it.lancs || []).length ? '<ul class="cb-lancs">' + it.lancs.map(function (x) {
+                return '<li>' + esc(x.flag || '?') + ' · ' + esc(x.tp_lanc || '') + ' · ' + esc(x.venc) + ' · ' + rs(x.valor) + '</li>';
+            }).join('') + '</ul>' : '<span class="mut">–</span>';
+            return '<tr><td><span class="cb-st ' + r[0] + '">' + esc(r[1]) + '</span></td><td class="is-first">' + esc(it.imovel || '') + '</td><td>' + esc(it.carteira == null ? '' : it.carteira) + '</td>' +
+                '<td>' + esc(it.emp || '') + (it.adm ? '<span class="sub">' + esc(it.adm) + '</span>' : '') + '</td>' +
+                '<td>' + (it.origem === 'base' ? (it.na_base_atual ? 'Na base atual' : 'Saiu da base') : 'Só no relatório') + '</td><td>' + lancs + '</td>' +
+                '<td class="n">' + (it.valor_lanc ? rs(it.valor_lanc) : '<span class="mut">–</span>') + '</td></tr>';
+        }).join('') : '<tr><td colspan="7" class="cb-empty">Nenhum boleto com esses filtros.</td></tr>';
+        $('cb-prev-info').textContent = 'Mostrando ' + n(vis.length) + ' de ' + n(lista.length);
+        $('cb-prev-mais').hidden = lista.length <= vis.length;
+    }
+
+    function abrirDiaPrevisao(data) {
+        prevDia = null; prevFiltro = 'FALTA'; prevBusca = ''; prevLimite = 200; $('cb-prev-busca').value = '';
+        if (PREV) desenharPrevisao();
+        return fetch('/api/conciliacao_bw/dia?data=' + encodeURIComponent(data), { cache: 'no-store' }).then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d.sucesso || !d.previsao_dia) { msg(esc(d.msg || 'Esse dia já passou: veja na conferência.'), 'aviso'); return; }
+                prevDia = { data: d.data, linha: d.previsao_dia.linha, itens: d.previsao_dia.itens, categorias: d.categorias };
+                desenharPrevisao();
+                desenharDetPrev();
+                $('cb-prev-det').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            })
+            .catch(function () { msg('O sistema não respondeu.', 'erro'); });
+    }
+
+    function ligarPrevisao(ligar, diaAbrir) {
+        modoPrev = ligar;
+        aplicarModo();
+        try { history.replaceState(null, '', location.pathname + '?data=' + (DADOS ? DADOS.data : dataDaUrl()) + (ligar ? '&aba=previsao' : '')); } catch (e) { /* sem histórico: segue */ }
+        if (ligar) carregarPrevisao().then(function () { if (diaAbrir) abrirDiaPrevisao(diaAbrir); });
+    }
+
+    $('cb-btn-prev').addEventListener('click', function () { ligarPrevisao(!modoPrev); });
+    $('cb-bloq-prev').addEventListener('click', function () { ligarPrevisao(true, DADOS && DADOS.data); });
+    $('cb-prev-n').addEventListener('change', carregarPrevisao);
+    $('cb-prev-linhas').addEventListener('click', function (e) { var b = e.target.closest('[data-prev-dia]'); if (b) abrirDiaPrevisao(b.dataset.prevDia); });
+    $('cb-prev-chips').addEventListener('click', function (e) { var b = e.target.closest('[data-prev-cat]'); if (b) { prevFiltro = b.dataset.prevCat; prevLimite = 200; desenharDetPrev(); } });
+    $('cb-prev-busca').addEventListener('input', function (e) { prevBusca = e.target.value; prevLimite = 200; desenharDetPrev(); });
+    $('cb-prev-mais').addEventListener('click', function () { prevLimite += 200; desenharDetPrev(); });
+
+    try { modoPrev = /[?&]aba=previsao/.test(location.search); } catch (e) { modoPrev = false; }
+    carregar(dataDaUrl(), true).then(function () { if (modoPrev) carregarPrevisao(); });
+})();
+</script>
+{% endraw %}
+{% endblock %}

@@ -3,27 +3,7 @@
 {% block title %}Automações - Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    .robo-card { background: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.2s ease; height: 100%; display: flex; flex-direction: column;}
-    .robo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    .robo-icon { width: 45px; height: 45px; object-fit: contain; }
-    
-    .status-badge { font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 20px; }
-    .status-parado { background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-    .status-rodando { background-color: #ecfdf5; color: #10b981; border: 1px solid #a7f3d0; animation: pulse 2s infinite; }
-    
-    .console-terminal { background-color: #0f172a; border-radius: 8px; padding: 15px; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.8rem; color: #e2e8f0; height: 280px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); border: 1px solid #334155; }
-    .log-info { color: #94a3b8; }
-    .log-success { color: #10b981; font-weight: bold; }
-    .log-error { color: #ef4444; font-weight: bold; }
-    .log-warn { color: #f59e0b; }
-    
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-    .metric-box { text-align: center; padding: 10px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex: 1; }
-    .metric-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1; }
-    .metric-label { font-size: 0.65rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 4px; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/automacoes.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -34,7 +14,7 @@
         </div>
         
         <!-- 🚀 BOTAO PRINCIPAL DE FERRAMENTAS DE PDF -->
-        <button class="btn px-4 fw-bold shadow-sm d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border-radius: 8px; transition: all 0.2s ease; border: none;" data-bs-toggle="modal" data-bs-target="#modalCompressaoPdf" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <button class="btn px-4 fw-bold shadow-sm d-flex align-items-center gap-2 btn-primary" style="background: var(--accent); color: white; border-radius: 8px; transition: all 0.2s ease; border: none;" data-bs-toggle="modal" data-bs-target="#modalCompressaoPdf" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <i class="fas fa-file-pdf fs-5"></i>
             <div class="text-start">
                 <div style="line-height: 1.2; font-size: 0.9rem;">Ferramentas de PDF</div>
@@ -118,10 +98,10 @@
                 </div>
                 <div class="mt-auto d-flex gap-2" style="flex-wrap: wrap;">
     <!-- Botão Tradicional (Abre o modal de filtros) -->
-    <button class="btn btn-sm btn-success flex-grow-1 fw-bold text-white" id="btn_iniciar_PAGAMENTOS" onclick="abrirModalPagamentos()" style="background-color: #10b981; border: none;">▶ Exec. Pagamentos</button>
+    <button class="btn btn-sm btn-success flex-grow-1 fw-bold text-white" id="btn_iniciar_PAGAMENTOS" onclick="abrirModalPagamentos()" style="border: none;">▶ Exec. Pagamentos</button>
     
-    <!-- NOVO BOTÃO: Roda Ryan e Jessica Simultâneos -->
-    <button class="btn btn-sm btn-warning flex-grow-1 fw-bold text-dark" id="btn_iniciar_duplo" onclick="iniciarDoisRobos()">▶ Rodar 2 Robôs</button>
+    <!-- Força Tarefa: vários robôs ao mesmo tempo (um por responsável) -->
+    <button class="btn btn-sm btn-warning flex-grow-1 fw-bold text-dark" id="btn_iniciar_duplo" onclick="iniciarDoisRobos()" title="Vários robôs de pagamento ao mesmo tempo, um por responsável">▶ Força Tarefa</button>
     
     <!-- Botão de Parar (Ocupa a linha toda quando aparece) -->
     <button class="btn btn-sm btn-danger fw-bold w-100 mt-1" id="btn_parar_PAGAMENTOS" style="display: none;" onclick="pararRobo('PAGAMENTOS')">■ Parar</button>
@@ -145,7 +125,7 @@
                     <div class="metric-box"><div class="metric-value text-danger" id="err_FINMAIL">0</div><div class="metric-label">Falhas</div></div>
                 </div>
                 <div class="mt-auto d-flex gap-2 flex-wrap">
-                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold text-white" id="btn_iniciar_FINMAIL" onclick="perguntarMesFinMail()" style="background-color: #3b82f6; border: none;">▶ Validar Caixa</button>
+                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold text-white" id="btn_iniciar_FINMAIL" onclick="perguntarMesFinMail()" style="border: none;">▶ Validar Caixa</button>
                     
                     <!-- 🎯 NOVO BOTÃO DE PAUSAR -->
                     <button class="btn btn-sm btn-secondary fw-bold" id="btn_pausar_FINMAIL" onclick="abrirPausaFinMail()">⏸ Pausar</button>
@@ -171,7 +151,7 @@
                     <div class="metric-box"><div class="metric-value text-danger" id="err_SCANNER">0</div><div class="metric-label">Não Reconhecidos</div></div>
                 </div>
                 <div class="mt-auto d-flex gap-2">
-                    <button class="btn btn-sm text-white flex-grow-1 fw-bold" id="btn_iniciar_SCANNER" onclick="iniciarRobo('SCANNER')" style="background-color: #8b5cf6; border: none;">▶ Processar Pasta Scanner</button>
+                    <button class="btn btn-sm text-white flex-grow-1 fw-bold btn-primary" id="btn_iniciar_SCANNER" onclick="iniciarRobo('SCANNER')" style="border: none;">▶ Processar Pasta Scanner</button>
                     <button class="btn btn-sm btn-danger fw-bold" id="btn_parar_SCANNER" style="display: none;" onclick="pararRobo('SCANNER')">■ Parar</button>
                 </div>
             </div>
@@ -203,7 +183,33 @@
         </div>
 
         <div class="col-xl-4 col-md-6">
-            <div class="robo-card bg-dark text-white" style="border: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);">
+            <div class="robo-card" id="card_SUPERLOGICA">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" class="robo-icon">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1 m-0">Automação Superlógica</h6>
+                            <span class="status-badge status-parado" id="status_txt_SUPERLOGICA">DESLIGADO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                    <div class="metric-box"><div class="metric-value text-success" id="suc_SUPERLOGICA">0</div><div class="metric-label">Sucessos</div></div>
+                    <div class="metric-box"><div class="metric-value text-danger" id="err_SUPERLOGICA">0</div><div class="metric-label">Falhas / Erros</div></div>
+                </div>
+                <div class="small text-muted mb-3" style="font-size: 0.7rem;">
+                    🔐 Login Google automático (ctrlcond@lello.com.br + código do autenticador)
+                </div>
+                <div class="mt-auto d-flex gap-2">
+                    <button class="btn btn-sm btn-dark flex-grow-1 fw-bold" id="btn_iniciar_SUPERLOGICA" onclick="iniciarRobo('SUPERLOGICA')">▶ Iniciar Motor</button>
+                    <button class="btn btn-sm btn-danger fw-bold" id="btn_parar_SUPERLOGICA" style="display: none;" onclick="pararRobo('SUPERLOGICA')">■ Parar</button>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 mt-2" onclick="abrirBoletosRobo('SUPERLOGICA')">📄 Ver boletos</button>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="robo-card bg-dark text-white" style="border: none; background: var(--deep); box-shadow: 0 8px 20px rgba(194, 3, 50, 0.15);">
                 <div class="d-flex justify-content-between align-items-start mb-3 border-bottom border-secondary pb-2">
                     <div class="d-flex align-items-center gap-3">
                         <span style="font-size: 1.8rem;"></span>
@@ -214,36 +220,103 @@
                     </div>
                 </div>
                 
-                <div class="row g-2 mb-3">
+                <div class="row g-2 mb-2">
+                    {% for chave, rotulo in [('webware', '🤖 Webware'), ('winker', '🤖 Winker'), ('pagamentos', '💰 Pagamentos'), ('scanner', '📄 Scanner'), ('superlogica', '🤖 Superlógica')] %}
                     <div class="col-6">
-                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">🤖 Webware:</label>
-                        <input type="time" id="time_webware" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_webware', '') }}">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;" for="time_{{ chave }}">{{ rotulo }}:</label>
+                        <input type="text" inputmode="numeric" autocomplete="off" id="time_{{ chave }}"
+                               class="form-control form-control-sm bg-black text-white border-secondary shadow-none campo-horarios"
+                               placeholder="ex.: 09:00, 14:00, 18:00" title="Um ou mais horários, separados por vírgula"
+                               value="{{ (agenda.get(chave, {}).get('horario') if agenda and agenda.get(chave) else horarios.get('horario_robo_' ~ chave, '')) or '' }}">
+                        <span class="d-block text-muted mt-1" style="font-size: 0.6rem;" id="proxima_{{ chave }}">
+                            {% if agenda and agenda.get(chave, {}).get('proxima') %}próxima: {{ agenda[chave]['proxima'] }}{% else %}desligado{% endif %}
+                        </span>
                     </div>
+                    {% endfor %}
                     <div class="col-6">
-                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">🤖 Winker:</label>
-                        <input type="time" id="time_winker" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_winker', '') }}">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">📧 FinMail (minutos):</label>
+                        <input type="number" min="0" max="1440" step="1" id="time_finmail_minutos"
+                               class="form-control form-control-sm bg-black text-white border-secondary shadow-none"
+                               value="{{ agenda.get('finmail', {}).get('minutos', 5) if agenda else 5 }}">
+                        <span class="d-block text-muted mt-1" style="font-size: 0.6rem;" id="proxima_finmail">
+                            {% if agenda and agenda.get('finmail', {}).get('proxima') %}próxima: {{ agenda['finmail']['proxima'] }}{% else %}desligado{% endif %}
+                        </span>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">💰 Pagamentos:</label>
-                        <input type="time" id="time_pagamentos" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_pagamentos', '') }}">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.65rem;">📧 FinMail:</label>
-                        <input type="time" id="time_finmail" class="form-control form-control-sm bg-black text-white border-secondary shadow-none" value="{{ horarios.get('horario_robo_finmail', '') }}">
+                    <div class="col-6 d-flex align-items-end">
+                        <span class="text-muted" style="font-size: 0.6rem; line-height: 1.3;">
+                            Vários horários: separe por vírgula (ex.: 09:00, 14:00, 18:00).<br>
+                            Campo vazio = automação desligada.<br>O FinMail roda de X em X minutos.
+                        </span>
                     </div>
                 </div>
-                
-                <div class="mt-auto d-flex gap-2">
-                    <button class="btn btn-sm btn-info text-white flex-grow-1 fw-bold shadow-sm" onclick="salvarHorariosRobos()">💾 Gravar Horários</button>
+
+                <div class="mt-auto">
+                    <div class="mb-2" style="font-size: 0.62rem;" id="estadoAgendador">
+                        {% if agenda and agenda.get('_agendador_ativo') %}
+                            <span class="text-success">● agendador ligado</span>
+                        {% elif agenda and agenda.get('_agendador_outro_processo') %}
+                            <span class="text-danger">● o agendador está preso em outro processo do sistema (um Python antigo ainda aberto): os robôs automáticos rodam lá e não aparecem aqui. Feche todos os terminais/Python do sistema e suba de novo.</span>
+                        {% else %}
+                            <span class="text-warning">● agendador parado — os horários só valem com o servidor rodando</span>
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-sm btn-info text-white w-100 fw-bold shadow-sm" onclick="salvarHorariosRobos()">💾 Gravar Horários</button>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- ====================================================================
+         💾 BACKUP DO BANCO
+         Cópia consistente mesmo com o sistema rodando (VACUUM INTO), conferida
+         antes de contar como válida e comprimida. Backup que ninguém restaurou
+         não é backup: por isso o botão "Conferir o último".
+         ==================================================================== -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h6 class="m-0 fw-bold">💾 Backup do banco de dados</h6>
+            <span class="badge" id="selo_backup">verificando...</span>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-secondary mb-1">Horário diário:</label>
+                    <input type="time" id="backup_horario" class="form-control form-control-sm">
+                    <span class="d-block text-muted mt-1" style="font-size: .68rem;">Vazio = desligado.</span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-secondary mb-1">Pasta onde guardar:</label>
+                    <input type="text" id="backup_pasta" class="form-control form-control-sm font-monospace"
+                           placeholder="\\192.168.100.13\Lello2\backups_sistema" style="font-size: .78rem;">
+                    <span class="d-block text-muted mt-1" style="font-size: .68rem;">
+                        O ideal é outro disco ou a rede: backup no mesmo HD do banco morre junto com ele.
+                    </span>
+                </div>
+                <div class="col-md-3 d-grid gap-2">
+                    <button class="btn btn-sm btn-dark fw-bold" id="btnGravarBackup" onclick="salvarConfigBackup()">💾 Gravar backup</button>
+                    <button class="btn btn-sm btn-success fw-bold" onclick="backupAgora()" id="btnBackupAgora">Fazer backup agora</button>
+                </div>
+            </div>
+
+            <div class="mt-3 p-3 rounded border bg-light" id="estado_backup" style="font-size: .82rem;">carregando...</div>
+
+            <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="conferirBackup()" id="btnConferirBackup">
+                    🔍 Conferir o último backup
+                </button>
+                <span class="text-muted" style="font-size: .72rem;">
+                    Abre a cópia, confere a integridade e conta as linhas — sem encostar no banco de produção.
+                </span>
+            </div>
+
+            <div class="mt-3" id="lista_backups"></div>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 fw-bold"><span style="color: #10b981;">>_</span> Console Central de Operações</h6>
+            <h6 class="m-0 fw-bold"><span style="color: var(--accent);">>_</span> Console Central de Operações</h6>
             <span class="badge bg-secondary">Acompanhamento em Tempo Real</span>
         </div>
         <div class="card-body p-0">
@@ -256,6 +329,7 @@
                         <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('PAGAMENTOS', this)">Portal</button>
                         <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('FINMAIL', this)">FinMail</button>
                         <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('SCANNER', this)">Scanner</button>
+                        <button class="list-group-item list-group-item-action fw-bold text-secondary" onclick="filtrarTerminal('SUPERLOGICA', this)">Superlógica</button>
                     </div>
                 </div>
                 <div class="col-md-10">
@@ -271,7 +345,7 @@
     <div class="modal fade" id="modalCompressaoPdf" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-                <div class="modal-header p-4" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none;">
+                <div class="modal-header p-4" style="background: var(--deep); color: white; border: none;">
                     <div>
                         <h5 class="modal-title fw-bold mb-1"><i class="fas fa-tools me-2"></i> Ferramentas de PDF</h5>
                         <span style="font-size: 0.8rem; opacity: 0.8;">Comprima, divida e desbloqueie arquivos rapidamente</span>
@@ -306,7 +380,7 @@
                                 <p class="text-muted small mb-3">Selecione <b>um ou mais arquivos PDF</b> do seu computador para reduzi-los instantaneamente.</p>
                                 <form id="formCompressaoManual" enctype="multipart/form-data">
                                     <input type="file" id="arquivoPdfManual" class="form-control form-control-sm mb-3 border-secondary" accept=".pdf" multiple required>
-                                    <button type="button" class="btn w-100 fw-bold shadow-sm text-white" style="background-color: #10b981; border-radius: 8px;" onclick="comprimirPdfManual()">
+                                    <button type="button" class="btn w-100 fw-bold shadow-sm text-white btn-primary" style="border-radius: 8px;" onclick="comprimirPdfManual()">
                                         <i class="fas fa-download me-1"></i> Comprimir e Baixar
                                     </button>
                                 </form>
@@ -327,7 +401,7 @@
                                 {% endfor %}
                                 </datalist>
                                 
-                                <button type="button" class="btn w-100 fw-bold shadow-sm text-white" style="background-color: #3b82f6; border-radius: 8px;" onclick="comprimirPdfLote()">
+                                <button type="button" class="btn w-100 fw-bold shadow-sm text-white btn-primary" style="border-radius: 8px;" onclick="comprimirPdfLote()">
                                     <i class="fas fa-cogs me-1"></i> Iniciar Varredura e Compressão
                                 </button>
                             </div>
@@ -415,7 +489,7 @@
     <div class="modal fade" id="modalFiltroPagamentos" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                <div class="modal-header text-white" style="background-color: #10b981; border: none;">
+                <div class="modal-header text-white" style="background-color: var(--deep); border: none;">
                     <h6 class="modal-title fw-bold">⚙️ Lançamento de Pagamentos (Filtros)</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -442,7 +516,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold text-secondary small">Dias de Vencimento (Múltipla Escolha):</label>
-                        <div class="border rounded p-2 bg-white shadow-sm custom-scroll" style="max-height: 120px; overflow-y: auto; border-color: #cbd5e1 !important;">
+                        <div class="border rounded p-2 bg-white shadow-sm custom-scroll" style="max-height: 120px; overflow-y: auto; border-color: var(--line) !important;">
                             {% for i in range(1, 32) %}
                             {% set val = '%02d' % i %}
                             <div class="form-check form-check-inline" style="width: 45px;">
@@ -455,7 +529,7 @@
                 </div>
                 <div class="modal-footer bg-light border-top-0">
                     <button class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-success fw-bold px-4" onclick="dispararRoboPagamentosFiltrado()" style="background-color: #10b981;">▶ Iniciar Automação</button>
+                    <button class="btn btn-success fw-bold px-4" onclick="dispararRoboPagamentosFiltrado()">▶ Iniciar Automação</button>
                 </div>
             </div>
         </div>
@@ -465,7 +539,7 @@
     <div class="modal fade" id="modalMesFinMail" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                <div class="modal-header text-white" style="background-color: #3b82f6; border: none;">
+                <div class="modal-header text-white" style="background-color: var(--deep); border: none;">
                     <h6 class="modal-title fw-bold">📧 Mês de Coleta (FinMail)</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -475,7 +549,7 @@
                 </div>
                 <div class="modal-footer bg-light border-top-0 justify-content-center pb-4">
                     <button class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary fw-bold px-4" onclick="confirmarMesFinMail()" style="background-color: #3b82f6; border: none;">▶ Iniciar</button>
+                    <button class="btn btn-primary fw-bold px-4" onclick="confirmarMesFinMail()" style="border: none;">▶ Iniciar</button>
                 </div>
             </div>
         </div>
@@ -486,7 +560,7 @@
     <div class="modal fade" id="modalBoletosRobo" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                <div class="modal-header text-white" style="background-color: #0f172a; border: none;">
+                <div class="modal-header text-white" style="background-color: var(--deep); border: none;">
                     <h6 class="modal-title fw-bold" id="tituloBoletosRobo">📄 Boletos do robô</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -550,15 +624,15 @@
 
         const termo = document.getElementById('buscaBoletosRobo').value.trim().toLowerCase();
         let lista = dadosBoletosRobo.filter(l => abaBoletosRobo === 'TODOS' || l.situacao === abaBoletosRobo);
-        if (termo) lista = lista.filter(l => [l.imovel, l.empreendimento, l.administradora, l.winker_unidade, l.winker_predio].join(' ').toLowerCase().includes(termo));
+        if (termo) lista = lista.filter(l => [l.imovel, l.empreendimento, l.administradora, l.winker_unidade, l.winker_predio, l.site].join(' ').toLowerCase().includes(termo));
 
         const LIMITE = 600;
         const cores = {PENDENTE: 'warning text-dark', COLETADO: 'success', PAGO: 'primary'};
         document.getElementById('msgBoletosRobo').innerText = lista.length + ' imóvel(is) nesta lista' + (lista.length > LIMITE ? ' — mostrando os primeiros ' + LIMITE + ' (use a busca)' : '');
         document.getElementById('corpoBoletosRobo').innerHTML = lista.slice(0, LIMITE).map(l => {
-            let site = [l.winker_predio, l.winker_unidade].filter(x => x && x.trim()).join(' / ') || '-';
+            let site = l.site || [l.winker_predio, l.winker_unidade].filter(x => x && x.trim()).join(' / ') || '-';
             let aviso = '';
-            if (roboBoletosAtual === 'WINKER' && l.situacao === 'PENDENTE' && !l.pronto_robo) aviso = ' <span class="badge bg-secondary" title="Sem vínculo com o site: o robô não visita este imóvel">sem vínculo</span>';
+            if ((roboBoletosAtual === 'WINKER' || roboBoletosAtual === 'SUPERLOGICA') && l.situacao === 'PENDENTE' && !l.pronto_robo) aviso = ' <span class="badge bg-secondary" title="Sem vínculo com o site: o robô não visita este imóvel">sem vínculo</span>';
             const quem = l.coletado_por ? escHtmlBoletos(l.coletado_por) + '<br><span class="text-muted">' + escHtmlBoletos(l.coletado_em) + '</span>' : '-';
             return '<tr><td class="fw-bold">' + escHtmlBoletos(l.imovel) + '</td><td>' + escHtmlBoletos(l.empreendimento) + '</td><td>' + escHtmlBoletos(l.administradora) +
                    '</td><td>' + escHtmlBoletos(site) + '</td><td>' + escHtmlBoletos(l.vencimento) + '</td><td><span class="badge bg-' + (cores[l.situacao] || 'secondary') + '">' +
@@ -571,7 +645,7 @@
     <div class="modal fade" id="modalLoginLiax" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                <div class="modal-header text-white" style="background-color: #f59e0b; border: none;">
+                <div class="modal-header text-white" style="background-color: var(--deep); border: none;">
                     <h6 class="modal-title fw-bold">🔑 Credenciais Portal Lello</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -650,31 +724,31 @@
 // Configuração visual das Abas (Pills)
 document.querySelectorAll('.tab-custom').forEach(tab => {
     // Cores originais: cinza inativo
-    tab.style.backgroundColor = '#e2e8f0';
-    tab.style.color = '#475569';
+    tab.style.backgroundColor = 'var(--line)';
+    tab.style.color = 'var(--muted)';
     
     tab.addEventListener('show.bs.tab', function (e) {
         // Reseta todos para cinza
         document.querySelectorAll('.tab-custom').forEach(t => {
-            t.style.backgroundColor = '#e2e8f0';
-            t.style.color = '#475569';
+            t.style.backgroundColor = 'var(--line)';
+            t.style.color = 'var(--muted)';
         });
         
         // Define a cor do ativo com base no ID
         if(this.id === 'tab-manual' || this.id === 'tab-lote') {
-            this.style.backgroundColor = '#6366f1'; // Azul roxo
+            this.style.backgroundColor = 'var(--accent)'; // vermelho Lello
             this.style.color = 'white';
         } else if (this.id === 'tab-dividir') {
-            this.style.backgroundColor = '#f59e0b'; // Amarelo
+            this.style.backgroundColor = 'var(--accent)'; // vermelho Lello
             this.style.color = 'white';
         } else if (this.id === 'tab-desbloquear') {
-            this.style.backgroundColor = '#ef4444'; // Vermelho
+            this.style.backgroundColor = 'var(--accent)'; // vermelho Lello
             this.style.color = 'white';
         }
     });
 });
 // Força a cor do ativo inicial
-document.getElementById('tab-manual').style.backgroundColor = '#6366f1';
+document.getElementById('tab-manual').style.backgroundColor = 'var(--accent)';
 document.getElementById('tab-manual').style.color = 'white';
 
 
@@ -946,14 +1020,155 @@ function pararRobo(roboId) {
     });
 }
 
+// ==========================================
+// 💾 BACKUP DO BANCO
+// ==========================================
+function pintarEstadoBackup(d) {
+    var selo = document.getElementById('selo_backup');
+    var caixa = document.getElementById('estado_backup');
+    var u = d.ultimo || {};
+
+    if (document.activeElement !== document.getElementById('backup_horario')) {
+        document.getElementById('backup_horario').value = d.horario || '';
+    }
+    if (document.activeElement !== document.getElementById('backup_pasta')) {
+        document.getElementById('backup_pasta').value = d.pasta_configurada || '';
+    }
+
+    if (!u.quando) {
+        selo.className = 'badge bg-danger';
+        selo.innerText = 'nunca foi feito';
+        caixa.innerHTML = '<b class="text-danger">Nenhum backup registrado ainda.</b><br>' +
+            'Grave um horário e clique em "Fazer backup agora" para começar.';
+        return;
+    }
+
+    var horas = (Date.now() - new Date(u.quando.replace(' ', 'T')).getTime()) / 3600000;
+    if (!u.sucesso) { selo.className = 'badge bg-danger'; selo.innerText = 'o último falhou'; }
+    else if (horas > 48) { selo.className = 'badge bg-warning text-dark'; selo.innerText = 'atrasado'; }
+    else { selo.className = 'badge bg-success'; selo.innerText = 'em dia'; }
+
+    var contagens = u.contagens || {};
+    caixa.innerHTML =
+        '<div><b>Último backup:</b> ' + u.quando + ' (' + (u.motivo || '-') + ', por ' + (u.usuario || '-') + ')</div>' +
+        (u.sucesso
+            ? '<div><b>Arquivo:</b> <span class="font-monospace">' + (u.arquivo || '-') + '</span></div>' +
+              '<div><b>Tamanho:</b> ' + (u.tamanho_mb || '?') + ' MB comprimido (banco com ' + (u.tamanho_banco_mb || '?') + ' MB) · levou ' + (u.segundos || '?') + 's</div>' +
+              '<div><b>Conferência:</b> ' + (u.conferencia === 'ok' ? '<span class="text-success fw-bold">cópia íntegra</span>' : '<span class="text-danger">' + u.conferencia + '</span>') +
+              (contagens.imoveis ? ' · ' + Number(contagens.imoveis).toLocaleString('pt-BR') + ' imóveis na cópia' : '') + '</div>'
+            : '<div class="text-danger fw-bold">' + (u.msg || 'falhou') + '</div>') +
+        '<div class="text-muted mt-1" style="font-size:.75rem;">Guardando em: <span class="font-monospace">' + (d.pasta || '-') + '</span></div>';
+
+    var lista = d.arquivos || [];
+    document.getElementById('lista_backups').innerHTML = lista.length
+        ? '<div class="small fw-bold text-secondary mb-1">Backups guardados (' + lista.length + '):</div>' +
+          '<div class="d-flex flex-wrap gap-2">' + lista.map(function (a) {
+              return '<span class="badge bg-light text-dark border font-monospace" style="font-size:.7rem;" title="' +
+                  a.quando + '">' + a.nome.replace('banco_', '').replace('.db.gz', '') + ' · ' + a.tamanho_mb + ' MB</span>';
+          }).join('') + '</div>'
+        : '';
+}
+
+function carregarEstadoBackup() {
+    fetch('/api/sistema/backup/estado', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.sucesso) pintarEstadoBackup(d); })
+        .catch(function () { });
+}
+
+function backupAgora() {
+    var btn = document.getElementById('btnBackupAgora');
+    btn.disabled = true; btn.innerText = 'Fazendo...';
+    fetch('/api/sistema/backup/agora', { method: 'POST' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            btn.disabled = false; btn.innerText = 'Fazer backup agora';
+            alert(d.sucesso
+                ? 'Backup feito e conferido.\n\n' + d.arquivo + '\n' + d.tamanho_mb + ' MB em ' + d.segundos + 's'
+                : 'Não deu certo: ' + (d.msg || 'sem detalhes'));
+            carregarEstadoBackup();
+        })
+        .catch(function (e) {
+            btn.disabled = false; btn.innerText = 'Fazer backup agora';
+            alert('O servidor não respondeu: ' + e);
+        });
+}
+
+function conferirBackup() {
+    var btn = document.getElementById('btnConferirBackup');
+    btn.disabled = true; btn.innerText = 'Conferindo...';
+    fetch('/api/sistema/backup/conferir', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({})
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            btn.disabled = false; btn.innerText = '🔍 Conferir o último backup';
+            var c = d.contagens || {};
+            alert(d.sucesso
+                ? 'O backup ' + d.arquivo + ' restaura certinho.\n\n' +
+                  'Banco descompactado: ' + d.tamanho_mb + ' MB\n' +
+                  'Imóveis: ' + Number(c.imoveis || 0).toLocaleString('pt-BR') + '\n' +
+                  'Cadastro mestre: ' + Number(c.cadastro_mestre_imoveis || 0).toLocaleString('pt-BR') + '\n' +
+                  'Administradoras: ' + Number(c.vinculos_adm || 0).toLocaleString('pt-BR')
+                : 'Este backup NÃO restaura: ' + (d.msg || '') + '\n\nFaça um novo agora e confira de novo.');
+        })
+        .catch(function (e) {
+            btn.disabled = false; btn.innerText = '🔍 Conferir o último backup';
+            alert('O servidor não respondeu: ' + e);
+        });
+}
+
+function salvarConfigBackup() {
+    fetch('/api/sistema/backup/configurar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            horario: document.getElementById('backup_horario').value,
+            pasta: document.getElementById('backup_pasta').value.trim()
+        })
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            alert(d.sucesso ? 'Gravado.\n\n' + (d.resumo || []).join('\n') : (d.msg || 'não gravou'));
+            if (d.sucesso) { carregarEstadoBackup(); if (window.mostrarAgenda && d.agenda) mostrarAgenda(d.agenda); }
+        })
+        .catch(function (e) { alert('O servidor não respondeu: ' + e); });
+}
+
+document.addEventListener('DOMContentLoaded', carregarEstadoBackup);
+
+function mostrarAgenda(agenda) {
+    if (!agenda) { return; }
+    ['webware', 'winker', 'pagamentos', 'scanner', 'superlogica', 'finmail'].forEach(function (chave) {
+        const alvo = document.getElementById('proxima_' + chave);
+        if (!alvo) { return; }
+        const dado = agenda[chave] || {};
+        alvo.textContent = dado.proxima ? ('próxima: ' + dado.proxima) : 'desligado';
+        // mostra os horários do jeito que ficaram gravados ("9h,14:00" vira "09:00, 14:00")
+        const campo = document.getElementById('time_' + chave);
+        if (campo && chave !== 'finmail' && typeof dado.horario === 'string' && document.activeElement !== campo) {
+            campo.value = dado.horario;
+        }
+    });
+    const estado = document.getElementById('estadoAgendador');
+    if (estado) {
+        estado.innerHTML = agenda._agendador_ativo
+            ? '<span class="text-success">● agendador ligado</span>'
+            : (agenda._agendador_outro_processo
+                ? '<span class="text-danger">● o agendador está preso em outro processo do sistema (um Python antigo ainda aberto): os robôs automáticos rodam lá e não aparecem aqui. Feche todos os terminais/Python do sistema e suba de novo.</span>'
+                : '<span class="text-warning">● agendador parado — os horários só valem com o servidor rodando</span>');
+    }
+}
+
 function salvarHorariosRobos() {
     const payload = {
         webware: document.getElementById('time_webware').value,
         winker: document.getElementById('time_winker').value,
         pagamentos: document.getElementById('time_pagamentos').value,
-        finmail: document.getElementById('time_finmail').value
+        scanner: document.getElementById('time_scanner').value,
+        superlogica: document.getElementById('time_superlogica').value,
+        finmail_minutos: document.getElementById('time_finmail_minutos').value
     };
-    
+
     fetch('/api/sistema/salvar_horarios_robos', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -961,9 +1176,14 @@ function salvarHorariosRobos() {
     })
     .then(r => r.json())
     .then(data => {
-        if(data.sucesso) alert(" Horários de agendamento salvos com sucesso no servidor!");
-        else alert(" Erro ao salvar horários: " + data.msg);
-    });
+        if (data.sucesso) {
+            mostrarAgenda(data.agenda);
+            alert('Agenda gravada e já valendo:\n\n' + (data.resumo || []).join('\n'));
+        } else {
+            alert('Erro ao salvar horários: ' + data.msg);
+        }
+    })
+    .catch(function () { alert('O sistema não respondeu.'); });
 }
 
 function renderizarTerminal() {
@@ -990,77 +1210,196 @@ function renderizarTerminal() {
     }
 }
 
+// ==========================================
+// 🚀 FORÇA TAREFA: vários robôs de pagamento ao mesmo tempo (um por responsável)
+// ==========================================
+const FT_OPERADORES_PADRAO = ['Ryan', 'Jessica', 'Victor', 'Arthur', 'Ellen'];   // só se a contagem não carregar
+
+function ftEsc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function ftCor(nome) { let h = 0; for (const ch of String(nome)) h = (h * 31 + ch.codePointAt(0)) % 360; return h; }
+function ftPlural(n, um, varios) { return n === 1 ? um : varios; }
+
 async function iniciarDoisRobos() {
-    // 1. Abre o pop-up pedindo para escolher os operadores
-    const { value: operadoresEscolhidos } = await Swal.fire({
+    Swal.fire({
         title: 'Força Tarefa 🚀',
-        html: `
-            <p class="text-muted small">Selecione quais carteiras os robôs devem processar simultaneamente:</p>
-            <div class="text-start mx-auto" style="max-width: 200px;">
-                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="ryan" id="op1"><label class="form-check-label fw-bold" for="op1">Ryan</label></div>
-                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="jessica" id="op2"><label class="form-check-label fw-bold" for="op2">Jessica</label></div>
-                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="victor" id="op3"><label class="form-check-label fw-bold" for="op3">Victor</label></div>
-                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="arthur" id="op4"><label class="form-check-label fw-bold" for="op4">Arthur</label></div>
-                <div class="form-check mb-2"><input class="form-check-input chk-op" type="checkbox" value="ellen" id="op5"><label class="form-check-label fw-bold" for="op5">Ellen</label></div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '▶ Iniciar Motores',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#10b981',
-        preConfirm: () => {
-            let selecionados = [];
-            // Pega todo mundo que foi marcado
-            document.querySelectorAll('.chk-op:checked').forEach(chk => selecionados.push(chk.value));
-            if (selecionados.length === 0) {
-                Swal.showValidationMessage('Selecione pelo menos um operador!');
-            }
-            return selecionados;
-        }
+        html: '<div class="text-muted small py-3">Carregando a fila de boletos…</div>',
+        showConfirmButton: false, allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
     });
 
-    // 2. Se o usuário marcou alguém e clicou em Iniciar
-    if (operadoresEscolhidos) {
-        Swal.fire({
-            title: 'Iniciando Motores! ⚙️',
-            html: `Disparando <b>${operadoresEscolhidos.length} robô(s) simultâneo(s)</b> no modo fantasma.`,
-            icon: 'info',
-            timer: 4000,
-            showConfirmButton: false
-        });
-
-        // 3. Envia a lista para o Python COM BLINDAGEM DE ERRO
-        fetch('/api/iniciar_dois_robos', {
-            method: 'POST',
-            headers: { 
-                'Accept': 'application/json',
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({ operadores: operadoresEscolhidos })
-        })
-        .then(async response => {
-            // Trava de segurança: se o Python der erro 500 ou 404, não quebra o site
-            const isJson = response.headers.get('content-type')?.includes('application/json');
-            const data = isJson ? await response.json() : null;
-
-            if (!response.ok) {
-                const error = (data && data.msg) || response.statusText;
-                return Promise.reject(error);
-            }
-
-            return data;
-        })
-        .then(data => {
-            if(!data.sucesso) {
-                Swal.fire('Atenção', data.msg, 'warning');
-            }
-            atualizarStatusRobos(); 
-        })
-        .catch(err => {
-            console.error("Erro na requisição:", err);
-            Swal.fire('Erro de Comunicação', 'O servidor Python não conseguiu processar. Reinicie o terminal (CTRL+C) e certifique-se de que colou o novo código no app.py.', 'error');
-        });
+    let dados;
+    try {
+        const resp = await fetch('/api/automacao/pagamentos_resumo', { headers: { 'Accept': 'application/json' } });
+        dados = await resp.json();
+        if (!dados || !dados.sucesso) throw new Error('resposta inválida');
+    } catch (e) {
+        // sem a contagem o seletor ainda funciona (lista fixa, sem números)
+        dados = { sucesso: true, rodando: false, offline: true, total: null, dias: {},
+                  operadores: FT_OPERADORES_PADRAO.map(n => ({ nome: n, total: null, por_dia: {}, sem_data: 0, sem_responsavel: false })) };
     }
+
+    const escolha = await ftAbrirSeletor(dados);
+    if (escolha) ftDisparar(escolha);
+}
+
+function ftAbrirSeletor(dados) {
+    const offline = !!dados.offline;
+    const operadores = dados.operadores || [];
+    const selecionados = new Set();     // nomes marcados
+    const diasMarcados = new Set();     // '05', '10'...
+    const diasDisponiveis = Object.keys(dados.dias || {}).sort();
+
+    // Quantos boletos o operador tem na fila, respeitando os vencimentos marcados (null = sem contagem)
+    const contagem = (op) => {
+        if (op.total === null || op.total === undefined) return null;
+        if (!diasMarcados.size) return op.total;
+        let n = op.sem_data || 0;                                   // o robô não filtra quem não tem vencimento
+        diasMarcados.forEach(d => { n += (op.por_dia[d] || 0); });
+        return n;
+    };
+
+    return Swal.fire({
+        title: 'Força Tarefa 🚀',
+        width: 780,
+        html: `
+            <div class="text-start">
+                <p class="text-muted small mb-3">Um robô para cada pessoa marcada, <b>todos ao mesmo tempo</b>. Cada um processa só a carteira do seu responsável (boletos <b>COLETADOS</b>).</p>
+                <div id="ft_aviso_rodando"></div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-secondary">QUEM VAI RODAR</span>
+                    <span class="d-flex gap-3">
+                        <button type="button" class="ft-acao" id="ft_todos">Todos com fila</button>
+                        <button type="button" class="ft-acao" id="ft_limpar">Limpar</button>
+                    </span>
+                </div>
+                <div class="ft-grid mb-4" id="ft_cards"></div>
+                <div id="ft_bloco_dias">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold small text-secondary">VENCIMENTOS <span class="fw-normal text-muted">(vazio = todos)</span></span>
+                        <button type="button" class="ft-acao" id="ft_dias_limpar">Todos os vencimentos</button>
+                    </div>
+                    <div class="ft-chips" id="ft_dias"></div>
+                </div>
+                <div class="ft-barra mt-4" id="ft_resumo"></div>
+                <div class="small mt-2" style="color:var(--warn-text);" id="ft_aviso"></div>
+            </div>`,
+        showCancelButton: true,
+        confirmButtonText: '▶ Iniciar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--accent)',
+        focusConfirm: false,
+        didOpen: (popup) => {
+            const $ = (id) => popup.querySelector('#' + id);
+            const cards = $('ft_cards'), chips = $('ft_dias'), resumo = $('ft_resumo');
+            const botao = Swal.getConfirmButton();
+
+            if (dados.rodando) {
+                $('ft_aviso_rodando').innerHTML = '<div class="alert alert-warning py-2 small fw-bold">⏳ A automação de pagamentos já está em execução. Pare-a antes de iniciar uma nova Força Tarefa.</div>';
+            }
+            if (offline || !diasDisponiveis.length) {
+                $('ft_bloco_dias').style.display = 'none';
+            }
+
+            function desenhar() {
+                // quem ficou sem boleto depois de filtrar os vencimentos sai da seleção
+                operadores.forEach(o => { if (selecionados.has(o.nome) && contagem(o) === 0) selecionados.delete(o.nome); });
+
+                cards.innerHTML = operadores.map(op => {
+                    const n = contagem(op), vazio = (n === 0), marcado = selecionados.has(op.nome);
+                    return `<button type="button" class="ft-card ${marcado ? 'ft-sel' : ''} ${vazio ? 'ft-vazio' : ''} ${op.sem_responsavel ? 'ft-semresp' : ''}"
+                                data-op="${ftEsc(op.nome)}" aria-pressed="${marcado}" ${vazio ? 'disabled' : ''}
+                                title="${vazio ? 'Nada na fila' + (diasMarcados.size ? ' para estes vencimentos' : '') : ''}">
+                        <span class="ft-check">✓</span>
+                        <span class="ft-avatar" style="background: hsl(${ftCor(op.nome)}, 62%, 45%);">${ftEsc(op.nome.trim().charAt(0).toUpperCase())}</span>
+                        <span class="ft-nome">${ftEsc(op.nome)}</span>
+                        <span class="ft-qtd">${n === null ? '—' : n}</span>
+                        <span class="ft-rot">${n === null ? 'sem contagem' : ftPlural(n, 'boleto na fila', 'boletos na fila')}</span>
+                    </button>`;
+                }).join('');
+
+                // contagem de cada dia considera só quem está marcado (ou todos, se ninguém está)
+                const base = selecionados.size ? operadores.filter(o => selecionados.has(o.nome)) : operadores;
+                chips.innerHTML = diasDisponiveis.map(d => {
+                    const n = base.reduce((s, o) => s + (o.por_dia[d] || 0), 0), on = diasMarcados.has(d);
+                    return `<button type="button" class="ft-chip ${on ? 'ft-chip-on' : ''} ${(n === 0 && !on) ? 'ft-chip-zero' : ''}" data-dia="${d}" aria-pressed="${on}">${d}<small>${n}</small></button>`;
+                }).join('');
+
+                const qtd = selecionados.size;
+                const total = operadores.filter(o => selecionados.has(o.nome)).reduce((s, o) => s + (contagem(o) || 0), 0);
+                const txtDias = diasMarcados.size ? `vencimentos <b>${[...diasMarcados].sort().join(', ')}</b>` : 'todos os vencimentos';
+                resumo.innerHTML = qtd === 0
+                    ? 'Toque nos nomes acima para escolher quem vai rodar.'
+                    : `<b>${qtd}</b> ${ftPlural(qtd, 'robô', 'robôs')} · ` + (offline ? '' : `<b>${total}</b> ${ftPlural(total, 'boleto', 'boletos')} na fila · `) + txtDias;
+                $('ft_aviso').textContent = qtd > 3 ? '⚠️ Cada robô abre o seu próprio Chrome — com muitos ao mesmo tempo o computador pode ficar lento.' : '';
+                botao.textContent = qtd ? `▶ Iniciar ${qtd} ${ftPlural(qtd, 'robô', 'robôs')}` : '▶ Iniciar';
+                botao.disabled = (qtd === 0) || !!dados.rodando;
+            }
+
+            cards.addEventListener('click', (ev) => {
+                const el = ev.target.closest('.ft-card');
+                if (!el || el.disabled) return;
+                const nome = el.dataset.op;
+                if (selecionados.has(nome)) selecionados.delete(nome); else selecionados.add(nome);
+                desenhar();
+            });
+            chips.addEventListener('click', (ev) => {
+                const el = ev.target.closest('.ft-chip');
+                if (!el) return;
+                const d = el.dataset.dia;
+                if (diasMarcados.has(d)) diasMarcados.delete(d); else diasMarcados.add(d);
+                desenhar();
+            });
+            $('ft_todos').addEventListener('click', () => {
+                operadores.forEach(o => { const n = contagem(o); if (!o.sem_responsavel && (n === null || n > 0)) selecionados.add(o.nome); });
+                desenhar();
+            });
+            $('ft_limpar').addEventListener('click', () => { selecionados.clear(); desenhar(); });
+            $('ft_dias_limpar').addEventListener('click', () => { diasMarcados.clear(); desenhar(); });
+            desenhar();
+        },
+        preConfirm: () => ({ operadores: [...selecionados], dias: [...diasMarcados].sort() })
+    }).then(r => r.isConfirmed ? r.value : null);
+}
+
+function ftDisparar(escolha) {
+    const nomes = escolha.operadores.join(', ');
+    Swal.fire({
+        title: 'Iniciando Motores! ⚙️',
+        html: `Disparando <b>${escolha.operadores.length} ${ftPlural(escolha.operadores.length, 'robô', 'robôs')}</b> ao mesmo tempo: ${ftEsc(nomes)}` +
+              (escolha.dias.length ? `<br><small class="text-muted">vencimentos ${ftEsc(escolha.dias.join(', '))}</small>` : ''),
+        icon: 'info',
+        timer: 4000,
+        showConfirmButton: false
+    });
+
+    // Envia a lista para o Python COM BLINDAGEM DE ERRO
+    fetch('/api/iniciar_dois_robos', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operadores: escolha.operadores, dias: escolha.dias })
+    })
+    .then(async response => {
+        // Trava de segurança: se o Python der erro 500 ou 404, não quebra o site
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+        if (!response.ok) {
+            const error = (data && data.msg) || response.statusText;
+            return Promise.reject(error);
+        }
+        return data;
+    })
+    .then(data => {
+        if (!data.sucesso) {
+            Swal.fire('Atenção', data.msg, 'warning');
+        }
+        atualizarStatusRobos();
+    })
+    .catch(err => {
+        console.error("Erro na requisição:", err);
+        Swal.fire('Erro de Comunicação', 'O servidor Python não conseguiu processar. Reinicie o terminal (CTRL+C) e certifique-se de que colou o novo código no app.py.', 'error');
+    });
 }
 
 function atualizarStatusRobos() {
@@ -1101,7 +1440,7 @@ function atualizarStatusRobos() {
                 const btnPausa = document.getElementById(`btn_pausar_${roboId}`);
                 if(btnPausa) btnPausa.style.display = 'none';
                 
-                card.style.border = "1px solid #10b981";
+                card.style.border = "1px solid var(--ok)";
             } else {
                 badge.innerText = "DESLIGADO";
                 badge.className = "status-badge status-parado";
@@ -1123,7 +1462,7 @@ function atualizarStatusRobos() {
                     badge.className = "status-badge bg-warning text-dark border-warning shadow-sm";
                 }
                 
-                card.style.border = "1px solid #e2e8f0";
+                card.style.border = "1px solid var(--line)";
             }
 
             if (info.logs && info.logs.length > 0) {
@@ -1244,7 +1583,7 @@ async function abrirPausaFinMail() {
         showCancelButton: true,
         confirmButtonText: 'Aplicar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#f59e0b'
+        confirmButtonColor: 'var(--accent)'
     });
 
     if (horas !== undefined) {

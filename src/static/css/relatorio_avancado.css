@@ -1,0 +1,182 @@
+    /* Identidade da Lello: papel branco, tinta vinho, vermelho da marca como único destaque.
+       As cores de dado foram conferidas para daltonismo e contraste. */
+    :root {
+        --papel: var(--surface);
+        --fundo: var(--bg);
+        --tinta: var(--ink);          /* texto principal */
+        --tinta-2: var(--muted);      /* texto secundário */
+        --tinta-3: var(--muted);      /* texto apagado (o guia pede contraste mínimo, por isso o mesmo tom) */
+        --linha: var(--line);
+        --linha-forte: #D3C8C7;
+        --marca: var(--accent);       /* vermelho Lello */
+        --vinho: var(--deep);
+        --rosa: var(--accent-soft);
+
+        /* cores de dado: azul, vermelho e roxo do guia (conferidas para daltonismo) */
+        --c-robo: var(--data-1);      /* automações */
+        --c-pessoa: var(--data-2);    /* equipe */
+        --c-planilha: var(--data-3);  /* sistema / saiu da planilha */
+        --c-pendente: var(--ring-track);
+
+        --h1: #FAE3E9; --h2: #F3C3CF; --h3: #E894AB; --h4: #D85C7E; --h5: var(--accent); --h6: var(--heat-4);
+    }
+
+    body { background-color: var(--fundo); }
+
+    .prod { color: var(--tinta); font-variant-numeric: tabular-nums; }
+    .prod h1, .prod h2, .prod h3, .prod h4 { color: var(--tinta); }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* faixa de código de barras: a mesma da tela de entrada */
+    .boleto { height: 7px; display: flex; overflow: hidden; margin-bottom: 26px; border-radius: 2px; }
+    .boleto i { display: block; height: 100%; background: var(--marca); flex: 1 1 0; }
+    .boleto i.vazio { background: transparent; }
+
+    /* ---- topo ---- */
+    .topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+    .topo h1 { font-size: 1.85rem; font-weight: 700; letter-spacing: -.03em; margin: 0; line-height: 1.1; }
+    .topo p { margin: 6px 0 0; color: var(--tinta-2); font-size: .92rem; }
+    .seletor { display: flex; align-items: center; gap: 10px; }
+    .seletor span { color: var(--tinta-2); font-size: .85rem; }
+    .seletor select {
+        border: 1px solid var(--line-strong); border-radius: 7px; padding: 9px 12px; background: var(--papel);
+        color: var(--tinta); font-weight: 600; font-size: .92rem; font-family: inherit; cursor: pointer; min-width: 170px;
+    }
+    .seletor select:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px rgba(0, 88, 160, .18); }
+
+    /* ---- números de abertura ---- */
+    .abertura { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--linha);
+                border: 1px solid var(--linha); border-radius: 10px; overflow: hidden; margin-bottom: 34px; }
+    .abertura > div { background: var(--papel); padding: 18px 22px; }
+    .abertura dt { font-size: .78rem; font-weight: 600; color: var(--tinta-2); margin: 0 0 6px; }
+    .abertura dd { margin: 0; font-size: 2.1rem; font-weight: 700; letter-spacing: -.035em; line-height: 1; }
+    .abertura dd u { text-decoration: none; font-size: .9rem; font-weight: 500; color: var(--tinta-3); margin-left: 4px; }
+    .abertura small { display: block; margin-top: 7px; font-size: .74rem; color: var(--tinta-3); }
+    .abertura .destaque dd { color: var(--marca); }
+
+    /* ---- seções ---- */
+    .secao { margin-bottom: 34px; }
+    .secao > header { margin-bottom: 14px; }
+    .secao h2 { font-size: 1.05rem; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+    .secao header p { margin: 3px 0 0; color: var(--tinta-2); font-size: .84rem; }
+
+    .caixa { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; overflow: hidden; }
+    .caixa + .rodape-caixa { margin-top: -1px; }
+
+    /* ---- quem coletou: lista com barra, no lugar dos cartões coloridos ---- */
+    .origem { width: 100%; }
+    .origem tr { border-bottom: 1px solid var(--linha); }
+    .origem tr:last-child { border-bottom: 0; }
+    .origem tr.abrivel { cursor: pointer; }
+    .origem tr.abrivel:hover { background: var(--fundo); }
+    .origem td { padding: 13px 18px; vertical-align: middle; }
+    .origem .rotulo { font-weight: 600; font-size: .94rem; }
+    .origem .tipo { display: block; font-size: .76rem; color: var(--tinta-3); font-weight: 400; margin-top: 1px; }
+    .origem .barra { width: 46%; }
+    .origem .trilho { height: 7px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+    .origem .trilho > span { display: block; height: 100%; border-radius: 4px; }
+    .origem .qtd { font-size: 1.05rem; font-weight: 700; width: 90px; }
+    .origem .pct { color: var(--tinta-2); font-size: .85rem; width: 64px; }
+    .origem .seta { width: 26px; color: var(--tinta-3); font-size: .62rem; text-align: center; }
+    .fam-robo .trilho > span { background: var(--c-robo); }
+    .fam-pessoa .trilho > span { background: var(--c-pessoa); }
+    .fam-planilha .trilho > span { background: var(--c-planilha); }
+    .detalhe-origem td { padding: 0 18px 16px 18px; background: var(--fundo); }
+    .detalhe-origem .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 26px; padding-top: 14px; border-top: 1px dashed var(--linha-forte); }
+    .detalhe-origem .grade div { display: flex; justify-content: space-between; font-size: .85rem; color: var(--tinta-2); }
+    .detalhe-origem .grade b { color: var(--tinta); font-weight: 600; }
+
+    /* ---- tabelas ---- */
+    table.dados { width: 100%; margin: 0; font-size: .89rem; }
+    table.dados th { font-size: .76rem; font-weight: 600; color: var(--tinta-2); padding: 11px 14px;
+                     border-bottom: 1px solid var(--linha-forte); white-space: nowrap; background: var(--papel); text-align: left; }
+    table.dados td { padding: 11px 14px; border-bottom: 1px solid var(--linha); vertical-align: middle; }
+    table.dados tr:last-child td { border-bottom: 0; }
+    table.dados tbody tr.atual td { background: var(--rosa); }
+    table.dados a.mes { color: var(--tinta); text-decoration: none; font-weight: 700; border-bottom: 1px solid transparent; }
+    table.dados a.mes:hover { border-bottom-color: var(--marca); color: var(--marca); }
+    .delta { display: block; font-size: .72rem; color: var(--tinta-3); margin-top: 1px; }
+    .delta.sobe { color: var(--ok-text); } .delta.desce { color: var(--marca); }
+    .marca-andamento { font-size: .68rem; color: var(--marca); border: 1px solid var(--heat-1); background: var(--rosa);
+                       border-radius: 20px; padding: 1px 8px; margin-left: 6px; white-space: nowrap; }
+
+    .origem tr.pessoa td { padding-top: 7px; padding-bottom: 7px; color: var(--tinta-2); border-bottom: 0; }
+    .origem tr.pessoa .rotulo { font-weight: 400; font-size: .89rem; padding-left: 36px; position: relative; }
+    .origem tr.pessoa .rotulo::before { content: ''; position: absolute; left: 20px; top: 50%; width: 8px; height: 1px; background: var(--linha-forte); }
+    .origem tr.pessoa .trilho { height: 5px; }
+    .origem tr.pessoa .trilho > span { background: var(--heat-2); }
+    .origem tr.pessoa .qtd { font-weight: 600; font-size: .92rem; }
+    .origem tr.pessoa + tr:not(.pessoa) td { border-top: 1px solid var(--linha); }
+
+    .trilho-evo { flex: 1; height: 8px; background: var(--sunk); border-radius: 4px; overflow: hidden; min-width: 90px; }
+    .trilho-evo > span { display: block; height: 100%; background: var(--marca); border-radius: 4px; }
+
+    .pilha { display: flex; gap: 2px; height: 13px; min-width: 190px; }
+    .pilha > span { display: block; min-width: 2px; border-radius: 2px; }
+    .seg-robo { background: var(--c-robo); } .seg-pessoa { background: var(--c-pessoa); }
+    .seg-planilha { background: var(--c-planilha); } .seg-pendente { background: var(--c-pendente); }
+    .legenda { display: flex; flex-wrap: wrap; gap: 5px 20px; font-size: .78rem; color: var(--tinta-2);
+               padding: 11px 14px; border-bottom: 1px solid var(--linha); }
+    .legenda i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+    /* ---- carteiras e disparos ---- */
+    .carteira { padding: 13px 18px; border-bottom: 1px solid var(--linha); cursor: pointer; }
+    .carteira:hover { background: var(--fundo); }
+    .carteira:last-of-type { border-bottom: 0; }
+    .carteira .cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .carteira .nome { font-weight: 600; font-size: .94rem; }
+    .carteira .conta { font-size: .79rem; color: var(--tinta-3); }
+    .carteira .trilho { height: 7px; background: var(--sunk); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .carteira .trilho > span { display: block; height: 100%; background: var(--marca); border-radius: 4px; }
+    .carteira .valor { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+    .detalhe-carteira { padding: 0 18px 16px; background: var(--fundo); font-size: .85rem; }
+    .detalhe-carteira .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 3px 24px;
+                               padding-top: 13px; border-top: 1px dashed var(--linha-forte); }
+    .detalhe-carteira .grade div { display: flex; justify-content: space-between; color: var(--tinta-2); }
+    .detalhe-carteira .grade b { color: var(--tinta); font-weight: 600; }
+
+    .fila { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--linha); }
+    .fila:last-child { border-bottom: 0; }
+    .fila .pos { width: 22px; color: var(--tinta-3); font-size: .78rem; font-weight: 600; }
+    .fila .nome { flex: 1; font-weight: 600; font-size: .94rem; }
+    .fila .trilho { width: 38%; height: 7px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+    .fila .trilho > span { display: block; height: 100%; background: var(--c-robo); border-radius: 4px; }
+    .fila .valor { width: 72px; text-align: right; font-weight: 700; font-size: .9rem; }
+
+    .rodape-caixa { padding: 10px 18px; font-size: .78rem; color: var(--tinta-2);
+                    background: var(--papel); border: 1px solid var(--linha); border-top: 0; border-radius: 0 0 10px 10px; }
+    .caixa.com-rodape { border-radius: 10px 10px 0 0; }
+
+    /* ---- mapa de calor ---- */
+    table.calor { width: 100%; margin: 0; font-size: .84rem; }
+    table.calor th { font-size: .74rem; font-weight: 600; color: var(--tinta-2); padding: 9px 6px; text-align: center; white-space: nowrap;
+                     border-bottom: 1px solid var(--linha-forte); }
+    table.calor th.agora { color: var(--marca); }
+    table.calor td { padding: 2px; text-align: center; border: 0; }
+    table.calor td.nome { text-align: left; padding: 7px 14px; font-weight: 600; color: var(--tinta); white-space: nowrap; }
+    table.calor td.total { padding: 7px 14px; text-align: right; font-weight: 700; }
+    .cel { display: block; padding: 7px 4px; border-radius: 3px; min-width: 50px; color: var(--tinta); }
+    .cel.vazio { color: var(--tinta-3); }
+    .cel.f1 { background: var(--h1); } .cel.f2 { background: var(--h2); } .cel.f3 { background: var(--h3); }
+    .cel.f4 { background: var(--h4); color: var(--ink); } .cel.f5 { background: var(--h5); color: #fff; } .cel.f6 { background: var(--h6); color: #fff; }
+    table.calor tfoot td { border-top: 1px solid var(--linha-forte); font-weight: 700; padding-top: 9px; }
+    table.calor tfoot td.soma { text-align: center; }
+    .escala { display: inline-flex; align-items: center; gap: 3px; font-size: .74rem; color: var(--tinta-3); }
+    .escala i { width: 15px; height: 9px; border-radius: 2px; display: inline-block; }
+
+    .vazio-painel { text-align: center; padding: 48px 20px; color: var(--tinta-3); font-size: .9rem; }
+
+    details.leitura { margin: 0 0 40px; font-size: .86rem; color: var(--tinta-2); }
+    details.leitura summary { cursor: pointer; font-weight: 600; color: var(--tinta); }
+    details.leitura ul { margin: 12px 0 0; padding-left: 20px; }
+    details.leitura li { margin-bottom: 6px; line-height: 1.5; }
+
+    @media (max-width: 991px) {
+        .abertura { grid-template-columns: repeat(2, 1fr); }
+        .origem .barra { display: none; }
+    }
+    @media (max-width: 575px) {
+        .topo h1 { font-size: 1.5rem; }
+        .abertura dd { font-size: 1.7rem; }
+        .fila .trilho { display: none; }
+    }

@@ -66,6 +66,7 @@ URL_API_PENDENCIAS = "http://127.0.0.1:5000/api/automacao/pendencias"
 URL_API_CONSULTA   = "http://127.0.0.1:5000/api/automacao/consultar_imovel"
 URL_API_COLETA     = "http://127.0.0.1:5000/api/automacao/coletar"
 URL_API_RELACIONAMENTO = "http://127.0.0.1:5000/api/automacao/relacionamento"
+URL_API_PDF_PROTEGIDO = "http://127.0.0.1:5000/api/automacao/pdf_protegido"
 TOKEN_SEGURANCA    = os.getenv("TOKEN_SEGURANCA")
 NOME_ROBO          = "AUTOMAÇÃO E-MAIL GERAL"
 
@@ -441,20 +442,74 @@ def descobrir_regra_senha(corpo_email, tentativas=0):
         return None
 
 
-def tentar_desbloquear_pdf_e_ler(pdf_bytes, cpfs_api, regra_senha=None, mes_atual=None, ano_atual=None):
-    if not pdf_bytes or not pdf_bytes.startswith(b'%PDF'): 
+def pdf_tem_senha(pdf_bytes):
+    """True quando o PDF só abre com senha."""
+    if not pdf_bytes or not pdf_bytes.startswith(b'%PDF'):
+        return False
+    try:
+        with pikepdf.open(BytesIO(pdf_bytes)):
+            return False
+    except pikepdf.PasswordError:
+        return True
+    except Exception:
+        return False
+
+
+def senhas_do_cpf(cpf, regra=""):
+    """Senhas que um CPF/CNPJ pode virar. A regra informada pelo colaborador no Raio-X vem primeiro."""
+    d = re.sub(r'[^0-9]', '', str(cpf or ''))
+    if len(d) < 4:
+        return []
+    pela_regra = {
+        "CPF_COMPLETO": [d], "PRIMEIROS_3": [d[:3]], "PRIMEIROS_4": [d[:4]], "PRIMEIROS_5": [d[:5]],
+        "PRIMEIROS_6": [d[:6]], "ULTIMOS_4": [d[-4:]], "ULTIMOS_6": [d[-6:]], "CNPJ_RAIZ": [d[:8]],
+    }
+    lista = list(pela_regra.get(str(regra or "").upper(), []))
+    lista += [d, d[:3], d[:4], d[:5], d[:6], d[:7], d[:8], d[:9], d[-4:], d[-6:], d.lstrip('0'), d[3:6]]
+    if len(d) == 11:
+        lista += [f"{d[:3]}.{d[3:6]}.{d[6:9]}-{d[9:]}", f"{d[:3]}.{d[3:6]}.{d[6:9]}"]
+    if len(d) == 14:
+        lista += [d[:8] + "0001", d[:8] + "0001" + d[12:]]
+    return lista
+
+
+def descrever_regra_senha(regra):
+    """Texto curto para a equipe ver no Raio-X (sem expor a senha fixa)."""
+    if not regra:
+        return ""
+    r = str(regra).upper()
+    if r.startswith("FIXA:"):
+        return "senha fixa informada no e-mail"
+    return {"PADRAO:CPF": "CPF completo", "PADRAO:ULTIMOS4": "4 últimos dígitos do CPF",
+            "PADRAO:PRIMEIROS6": "6 primeiros dígitos do CPF"}.get(r, r[:80])
+
+
+def avisar_pdf_protegido_api(imovel, assunto, remetente, link_gmail, regra, message_id):
+    """Joga o PDF que não abriu para o Raio-X: com imóvel vira caso dele; sem imóvel, entra na lista de e-mails."""
+    try:
+        requests.post(URL_API_PDF_PROTEGIDO, json={
+            "token": TOKEN_SEGURANCA, "imovel": str(imovel or ""), "assunto": assunto, "remetente": remetente,
+            "link": link_gmail, "regra": descrever_regra_senha(regra), "message_id": message_id,
+        }, timeout=15)
+        print(f"🔐 PDF protegido enviado ao Raio-X ({'imóvel ' + str(imovel) if imovel else 'sem imóvel identificado'}).", flush=True)
+    except Exception as e:
+        print(f"⚠️ Não consegui avisar o Raio-X sobre o PDF protegido: {e}", flush=True)
+
+
+def tentar_desbloquear_pdf_e_ler(pdf_bytes, cpfs_api, regra_senha=None, mes_atual=None, ano_atual=None, cpfs_prioritarios=None):
+    if not pdf_bytes or not pdf_bytes.startswith(b'%PDF'):
         return None, None
-    
+
     try:
         # Tenta abrir sem senha primeiro
         try:
             with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
                 return "".join([p.extract_text() for p in PyPDF2.PdfReader(BytesIO(pdf_bytes)).pages]), pdf_bytes
-        except pikepdf.PasswordError: 
-            pass 
+        except pikepdf.PasswordError:
+            pass
 
         senhas = []
-        
+
         # 1. Regra fixa do e-mail (prioridade máxima)
         if regra_senha:
             if regra_senha.startswith("FIXA:"):
@@ -479,6 +534,10 @@ def tentar_desbloquear_pdf_e_ler(pdf_bytes, cpfs_api, regra_senha=None, mes_atua
                             senhas.append(cpf_limpo[:6])
             else:
                 senhas.append(regra_senha.strip())
+
+        # 1b. CPFs que o colaborador informou no Raio-X (com a regra dele) — antes de qualquer chute
+        for cpf_colab, regra_colab in (cpfs_prioritarios or []):
+            senhas.extend(senhas_do_cpf(cpf_colab, regra_colab))
 
         # 2. Variações de CPF (expandido)
         for cpf in cpfs_api:
@@ -783,11 +842,20 @@ def processar_email():
     pendencias_da_rodada = buscar_pendencias_api()
     
     cpfs_ativos = set()
+    cpfs_prioritarios = []        # (cpf, regra) informados pelo colaborador no Raio-X
+    vistos_prioritarios = set()
     for caso in pendencias_da_rodada:
         cpf = str(caso.get('cpf_cnpj', '')).strip()
         if len(cpf) > 3:
             cpfs_ativos.add(cpf)
-    print(f" {len(cpfs_ativos)} senhas de segurança (CPFs) carregadas na memória!", flush=True)
+        cpf_colab = re.sub(r'[^0-9]', '', str(caso.get('cpf_senha_pdf') or ''))
+        if len(cpf_colab) >= 11 and (cpf_colab, caso.get('regra_senha_pdf') or '') not in vistos_prioritarios:
+            vistos_prioritarios.add((cpf_colab, caso.get('regra_senha_pdf') or ''))
+            cpfs_prioritarios.append((cpf_colab, caso.get('regra_senha_pdf') or ''))
+    # os CPFs informados no Raio-X também entram nas regras do e-mail ("seu CPF", "4 últimos"...), na frente
+    cpfs_para_senha = [c for c, _r in cpfs_prioritarios] + sorted(cpfs_ativos)
+    print(f" {len(cpfs_ativos)} senhas de segurança (CPFs) carregadas na memória! "
+          f"({len(cpfs_prioritarios)} informadas pela equipe no Raio-X)", flush=True)
 
     print("⚙️ Conectando com segurança ao Gmail...", flush=True)
     mail = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -865,18 +933,32 @@ def processar_email():
 
         pdf_final_para_salvar = None
         texto_pdf_bruto = ""
+        pdf_protegido_sem_senha = False      # tinha PDF, com senha, e nenhum CPF abriu
+        regra_do_email = None
         if teve_pdf and pdf_bytes:
-            # CHAMADA ATUALIZADA com ano_atual
+            protegido = pdf_tem_senha(pdf_bytes)
+            # a regra do e-mail (às vezes pergunta à IA) só importa quando o PDF tem senha
+            regra_do_email = descobrir_regra_senha(corpo) if protegido else None
             texto_pdf, pdf_final = tentar_desbloquear_pdf_e_ler(
-                pdf_bytes, 
-                cpfs_ativos, 
-                descobrir_regra_senha(corpo),
+                pdf_bytes,
+                cpfs_para_senha,
+                regra_do_email,
                 mes_atual=MES_ALVO,
-                ano_atual=ano_atual
+                ano_atual=ano_atual,
+                cpfs_prioritarios=cpfs_prioritarios
             )
-            if pdf_final: 
+            if pdf_final:
                 pdf_final_para_salvar = pdf_final
                 texto_pdf_bruto = texto_pdf if texto_pdf else ""
+            elif protegido:
+                pdf_protegido_sem_senha = True
+                print("🔐 PDF com senha: nenhum CPF conhecido abriu. Vai para o Raio-X para a equipe informar o CPF.", flush=True)
+
+        msg_id_bruto = msg.get('Message-ID', '')
+        link_gmail = ""
+        if msg_id_bruto:
+            codigo_secreto = urllib.parse.quote(msg_id_bruto.strip('<>'))
+            link_gmail = f"https://mail.google.com/mail/u/0/#search/rfc822msgid%3A{codigo_secreto}"
 
         print("🧠 Decodificando documento com IA de Visão...", flush=True)
         analise_texto = analisar_com_ia_visao(pdf_final_para_salvar, assunto, corpo)
@@ -966,6 +1048,10 @@ def processar_email():
 
         if not id_imovel or not dados_api or not dados_api.get('valido'):
             print(" Rejeitado: Não foi possível rastrear a identidade deste imóvel na base.", flush=True)
+            if pdf_protegido_sem_senha:
+                # sem imóvel: entra na lista de e-mails do Raio-X; a equipe diz de quem é e qual CPF abre
+                avisar_pdf_protegido_api(None, assunto, msg.get("From", ""), link_gmail, regra_do_email, msg_id_bruto)
+                registrar_historico_tempo_real({"status": "PDF PROTEGIDO SEM IMÓVEL", "assunto_email": assunto})
             continue
 
         print(f" Transação Aprovada! Morador: {dados_api.get('responsavel', 'N/A')} | Prédio: {dados_api.get('administradora', '')}", flush=True)
@@ -1002,8 +1088,13 @@ def processar_email():
         else:
             print(f"⚠️ Imóvel validado, mas sem PDF. Atualizando painel para ALERTA!", flush=True)
             observacao_final = match_note
+            if pdf_protegido_sem_senha:
+                # o boleto veio, mas com senha que nenhum CPF abriu: caso do Raio-X (Senha do PDF)
+                avisar_pdf_protegido_api(id_imovel, assunto, msg.get("From", ""), link_gmail, regra_do_email, msg_id_bruto)
+                observacao_final = ('PDF com senha: nenhum CPF cadastrado abriu (informe o CPF no Raio-X)'
+                                    + (' | ' + match_note if match_note else ''))
             if link_gmail:
-                observacao_final = (match_note + ' | ' if match_note else '') + link_gmail
+                observacao_final = (observacao_final + ' | ' if observacao_final else '') + link_gmail
             dar_baixa_api(id_imovel, status_novo="EMAIL RECEBIDO", observacao=observacao_final)
 
     mail.logout()

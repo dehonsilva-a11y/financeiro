@@ -3,401 +3,498 @@
 {% block title %}Central de Imóveis - Lello{% endblock %}
 
 {% block extra_styles %}
-<style>
-    /* Estilos Compartilhados e de Listagem */
-    .search-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 25px; }
-    .table-container { border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff; overflow: hidden; margin-top: 20px; }
-    .table-modern { font-size: 0.85rem; width: 100%; margin: 0; }
-    
-    /* CABEÇALHO AZUL ESCURO (TABELA PRINCIPAL) */
-    .table-modern thead th { background-color: #0f172a; color: #ffffff; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; border-bottom: 2px solid #1e293b; padding: 14px; letter-spacing: 0.5px; }
-    .table-modern tbody td { padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; font-weight: 500; }
-    .table-modern tbody tr:hover { background-color: #f8fafc; }
-
-    /* Estilos Específicos do Prontuário do Imóvel */
-    .profile-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-    .section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
-    .info-label { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 1px; }
-    .info-value { font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 12px; word-break: break-word; }
-    .table-history { font-size: 0.85rem; width: 100%; margin: 0; }
-    .table-history thead th { background-color: #0f172a; color: #ffffff; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; border-bottom: 2px solid #1e293b; padding: 12px; letter-spacing: 0.5px; }
-    .table-history tbody td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
-    
-    .btn-badge-pago-adm {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: #d97706;
-        border: 1px solid #f59e0b;
-        font-size: 0.7rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-badge-pago-adm:hover {
-        background-color: #f59e0b;
-        color: #ffffff;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/imoveis.css') }}">
 {% endblock %}
 
+{% macro n(x) -%}{{ "{:,}".format(x|int)|replace(',', '.') }}{%- endmacro %}
+{% macro valor(v, vazio='não informado') -%}
+    {% if v and v|string|trim not in ['', '-', 'None', 'nan'] %}{{ v }}{% else %}<span class="vazio">{{ vazio }}</span>{% endif %}
+{%- endmacro %}
+
 {% block content %}
+<div class="container-fluid px-1 imo">
+<div class="boleto" id="faixaBoleto" aria-hidden="true"></div>
 
 {% if imovel %}
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <!-- ====================== PRONTUÁRIO ====================== -->
+    <a class="voltar" href="{{ url_for('lista_imoveis') }}">← Voltar para a pesquisa</a>
+
+    <div class="cabeca-imovel mt-2">
         <div>
-            <a href="/imoveis" class="text-decoration-none small fw-bold text-secondary">← Voltar para a pesquisa</a>
-            <h4 class="fw-bold text-dark m-0 mt-1">Histórico e Prontuário do Imóvel: <span class="text-primary">{{ imovel['imovel'] }}</span></h4>
+            <div class="numero">{{ imovel['imovel'] }}</div>
+            <div class="cond-nome">{{ imovel['empreendimento'] or 'Condomínio não informado' }}</div>
         </div>
-        <div>
-            <span class="badge {% if imovel['status_cadastro'] == 'ATIVO' %}bg-success text-white{% else %}bg-secondary text-white{% endif %} px-3 py-2 fw-bold">
-                CONTRATO {{ imovel['status_cadastro'] }}
-            </span>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            {% if imovel['na_planilha'] %}
+                <span class="etiqueta neutra">na planilha do mês</span>
+            {% else %}
+                <span class="etiqueta neutra">fora da planilha do mês</span>
+            {% endif %}
+            <span class="etiqueta portal">{{ imovel['portal'] }}</span>
+            {% if imovel['sem_portal'] %}
+                <span class="etiqueta falta">recebe por e-mail / WhatsApp</span>
+            {% elif imovel['login_acesso'] and imovel['senha_acesso'] %}
+                <span class="etiqueta ok">com credencial</span>
+            {% else %}
+                <span class="etiqueta falta">sem credencial</span>
+            {% endif %}
         </div>
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="profile-card mb-3">
-                <div class="section-title">Ficha Cadastral Permanente</div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="info-label">Condomínio / Empreendimento</div>
-                        <div class="info-value text-primary">{{ imovel['empreendimento'] if imovel['empreendimento'] else '-' }}</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-label">Administradora Conectada</div>
-                        <div class="info-value">{{ imovel['administradora'] if imovel['administradora'] else '-' }}</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-label">Portal de Credenciais</div>
-                        <div class="info-value">
-                            <span class="badge {% if imovel['portal'] == 'WEBWARE' %}bg-success text-white{% elif imovel['portal'] == 'WINKER' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} px-2 py-1">
-                                {{ imovel['portal'] if imovel['portal'] else 'DIVERSOS' }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-label">Dono da Carteira</div>
-                        <div class="info-value">
-                            <span class="badge bg-light text-dark border px-2 py-1">{{ imovel['responsavel_atual'] if imovel['responsavel_atual'] else 'Não Definido' }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-xl-5">
 
-            <div class="profile-card mb-3" style="border-left: 4px solid #00a7e1;">
-                <div class="section-title">Informações da Planilha do Mês Atual</div>
-                <div class="row">
-                   <div class="col-md-6">
-                        <div class="info-label">Data de Vencimento</div>
-                        <div class="info-value text-danger fw-bold">
-                            <a href="/?busca={{ imovel['imovel'] }}" title="Ver este imóvel no Painel de Pendências" style="color: inherit; text-decoration: underline; cursor: pointer;">
-                                {{ imovel['vencimento'] }}
-                            </a>
+            <section class="ficha">
+                <h2>Onde fica a unidade</h2>
+                <div class="corpo">
+                    <dl class="campos">
+                        <div class="campo destaque">
+                            <dt>Unidade</dt>
+                            <dd>{{ valor(imovel['local']['unidade'], 'não informada') }}
+                                {% if imovel['local']['fonte_unidade'] %}<small>origem: {{ imovel['local']['fonte_unidade'] }}</small>{% endif %}
+                            </dd>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-label">Data Com Desconto (Dt.ComDesc)</div>
-                        <div class="info-value text-success fw-bold">{{ imovel['dt_comdesc'] }}</div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-label">Carteira / Lote</div>
-                        <div class="info-value">{{ imovel['carteira'] }} / {{ imovel['d_lote'] }}</div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-label">Status Interno Atual</div>
-                        <div class="info-value fw-bold text-dark">{{ imovel['status_interno'] }}</div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="info-label">Sacado</div>
-                        <div class="info-value text-dark font-monospace" style="font-size: 0.85rem;">{{ imovel['sacado'] }}</div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="info-label">Documento (CPF/CNPJ)</div>
-                        <div class="info-value font-monospace">{{ imovel['cpf_cnpj'] }}</div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="info-label">Endereço Completo / Unidade</div>
-                        <div class="info-value text-secondary small" style="font-weight: 500;">{{ imovel['endereco'] }}</div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="info-label">Observações Ficha</div>
-                        <div class="info-value small text-truncate text-muted" title="{{ imovel['acesso_planilha'] }}">{{ imovel['acesso_planilha'] }}</div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="info-label">Observação Capturada da Planilha</div>
-                        <div class="info-value text-danger small fw-semibold">{{ imovel['observacao_planilha'] }}</div>
-                    </div>
+                        <div class="campo">
+                            <dt>Bloco / torre</dt>
+                            <dd>{{ valor(imovel['local']['bloco'], 'único') }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Andar</dt>
+                            <dd>{{ valor(imovel['local']['andar'], '—') }}</dd>
+                        </div>
+                    </dl>
+                    <dl class="campos largo mt-3">
+                        <div class="campo">
+                            <dt>Endereço</dt>
+                            <dd style="font-weight: 500;">{{ valor(imovel['local']['logradouro']) }}</dd>
+                        </div>
+                        {% if imovel['local']['complementos'] %}
+                        <div class="campo">
+                            <dt>Complemento</dt>
+                            <dd style="font-weight: 500;">{{ imovel['local']['complementos']|join(' · ') }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if imovel['local']['condominio_portal'] %}
+                        <div class="campo">
+                            <dt>Como o condomínio aparece no portal</dt>
+                            <dd style="font-weight: 500;">{{ imovel['local']['condominio_portal'] }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
                 </div>
-            </div>
+            </section>
 
-            <div class="profile-card mb-4">
-                <div class="section-title d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                    <span class="m-0">Credenciais Secretas do Portal ADM</span>
-                    {% if imovel.get('cred_user') %}
-                    <span class="badge bg-light text-secondary border fw-medium" data-bs-toggle="tooltip" title="Atualizado em: {{ imovel['cred_data'] }}" style="font-size: 0.65rem;">
-                        🕒 mod. por <b>{{ imovel['cred_user'] }}</b>
-                    </span>
+            <section class="ficha">
+                <h2>Cadastro</h2>
+                <div class="corpo">
+                    <dl class="campos">
+                        <div class="campo">
+                            <dt>Administradora</dt>
+                            <dd>{{ valor(imovel['administradora']) }}
+                                {% if imovel['email_administradora'] %}<small>{{ imovel['email_administradora'] }}</small>{% endif %}
+                            </dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Carteira</dt>
+                            <dd>{{ valor(imovel['responsavel_atual'], 'não atribuída') }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Dia médio de emissão</dt>
+                            <dd>{{ valor(imovel['media_emissao'], '—') }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Sacado</dt>
+                            <dd style="font-weight: 500;">{{ valor(imovel['sacado']) }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>CPF / CNPJ</dt>
+                            <dd style="font-weight: 500; font-variant-numeric: tabular-nums;">{{ valor(imovel['cpf_cnpj']) }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Telefone</dt>
+                            <dd style="font-weight: 500;">{{ valor(imovel['telefone'], '—') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+
+            <section class="ficha">
+                <h2>Cobrança do mês</h2>
+                <div class="corpo">
+                    <dl class="campos">
+                        <div class="campo">
+                            <dt>Vencimento</dt>
+                            <dd>{% if imovel['vencimento'] %}<a href="/?busca={{ imovel['imovel'] }}" style="color: var(--marca); text-decoration: none;" title="Ver nas pendências">{{ imovel['vencimento'] }}</a>{% else %}<span class="vazio">—</span>{% endif %}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Com desconto até</dt>
+                            <dd>{{ valor(imovel['dt_comdesc'], '—') }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Status</dt>
+                            <dd>{{ imovel['status_interno'] }}</dd>
+                        </div>
+                        <div class="campo">
+                            <dt>Carteira / lote</dt>
+                            <dd style="font-weight: 500;">{{ valor(imovel['carteira'], '—') }} {% if imovel['d_lote'] %}<span style="color: var(--tinta-3);">/ {{ imovel['d_lote'] }}</span>{% endif %}</dd>
+                        </div>
+                    </dl>
+                    {% if imovel['observacao_planilha'] or imovel['acesso_planilha'] %}
+                    <dl class="campos largo mt-3">
+                        {% if imovel['observacao_planilha'] %}
+                        <div class="campo">
+                            <dt>Observação da planilha</dt>
+                            <dd style="font-weight: 500; color: var(--marca);">{{ imovel['observacao_planilha'] }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if imovel['acesso_planilha'] %}
+                        <div class="campo">
+                            <dt>Anotação de acesso na ficha</dt>
+                            <dd style="font-weight: 500;">{{ imovel['acesso_planilha'] }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
                     {% endif %}
                 </div>
+            </section>
 
-                <div class="row g-2 mb-2">
-                    <div class="col-md-12">
-                        <label class="form-label small fw-bold text-secondary m-0">URL do Portal:</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-light border-secondary">🔗</span>
-                            <input type="url" id="cred_link" class="form-control border-secondary" value="{{ imovel.get('link_portal', '') }}">
-                            <button class="btn btn-primary fw-bold text-white px-3" type="button" onclick="abrirUrlPortal()">Acessar Site ↗️</button>
+            <section class="ficha">
+                <h2>
+                    Acesso ao portal
+                    {% if imovel['cred_user'] %}
+                    <span class="etiqueta neutra" title="Atualizado em {{ imovel['cred_data'] }}">por {{ imovel['cred_user'] }}</span>
+                    {% endif %}
+                </h2>
+                <div class="corpo form-cred">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="cred_link">Endereço do portal</label>
+                            <div class="d-flex gap-2">
+                                <input type="url" id="cred_link" value="{{ imovel.get('link_portal', '') or imovel.get('url_portal', '') }}" placeholder="https://...">
+                                <button class="botao" type="button" onclick="abrirUrlPortal()">Abrir</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cred_portal">Portal</label>
+                            <select id="cred_portal" onchange="atualizarUrlPorPortal()">
+                                {% for op in ['WEBWARE', 'WINKER', 'SUPERLÓGICA', 'CTRL', 'AUTÔNOMA', 'WHATSAPP', 'DIVERSOS'] %}
+                                <option value="{{ op }}" {% if imovel['portal'] == op %}selected{% endif %}>{{ op|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cred_login">Usuário</label>
+                            <input type="text" id="cred_login" value="{{ imovel['login_acesso'] or '' }}" placeholder="não configurado" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cred_senha">Senha</label>
+                            <div class="d-flex gap-2">
+                                <input type="password" id="cred_senha" value="{{ imovel['senha_acesso'] or '' }}" placeholder="não configurada" autocomplete="off">
+                                <button class="botao" type="button" onclick="toggleSenhaVisualizacao()" aria-label="Mostrar senha">👁</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="botao" style="flex: 1;" onclick="sinalizarSemLogin()">Não tem portal</button>
+                        <button class="botao cheio" style="flex: 1;" onclick="salvarCredenciaisImovel()">Salvar acesso</button>
+                    </div>
 
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary m-0">Portal:</label>
-                        <select id="cred_portal" class="form-select form-select-sm" onchange="atualizarUrlPorPortal()">
-                            <option value="WEBWARE" {% if imovel['portal'] == 'WEBWARE' %}selected{% endif %}>Webware</option>
-                            <option value="WINKER" {% if imovel['portal'] == 'WINKER' %}selected{% endif %}>Winker</option>
-                            <option value="DIVERSOS" {% if imovel['portal'] != 'WEBWARE' and imovel['portal'] != 'WINKER' %}selected{% endif %}>Diversos</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary m-0">Usuário / Login:</label>
-                        <input type="text" id="cred_login" class="form-control form-control-sm" value="{{ imovel['login_acesso'] }}" placeholder="Não configurado">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary m-0">Senha de Acesso:</label>
-                        <div class="input-group input-group-sm">
-                            <input type="password" id="cred_senha" class="form-control" value="{{ imovel['senha_acesso'] }}" placeholder="Não configurada">
-                            <button class="btn btn-outline-secondary" type="button" onclick="toggleSenhaVisualizacao()">👁️</button>
-                        </div>
-                    </div>
+                    {% if hist_credenciais %}
+                    <details class="mt-3">
+                        <summary style="cursor: pointer; font-size: .84rem; color: var(--tinta-2);">Alterações de acesso ({{ hist_credenciais|length }})</summary>
+                        <ul class="linha-tempo mt-2" style="border-top: 1px solid var(--linha);">
+                            {% for h in hist_credenciais %}
+                            <li style="padding-left: 0; padding-right: 0;">
+                                <span class="quando">{{ h['data_hora'] }}</span>
+                                <span class="texto"><span class="quem">{{ h['usuario'] }}</span> — {{ h['texto'] }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                    {% endif %}
                 </div>
-                
-                <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-sm fw-bold shadow-sm w-50" onclick="sinalizarSemLogin()" style="color: #92400e; background-color: #fef3c7; border: 1px solid #fde68a;">🚫 Não Possui Login</button>
-                    <button class="btn btn-sm btn-primary fw-bold shadow-sm w-50" onclick="salvarCredenciaisImovel()">Atualizar Credenciais</button>   
-                </div>
-            </div> 
+            </section>
         </div>
 
-        <div class="col-lg-7">
-            <div class="profile-card p-0 overflow-hidden d-flex flex-column" style="min-height: 520px;">
-                <div class="p-4 border-bottom bg-light">
-                    <div class="fw-bold text-dark m-0 h6 text-uppercase" style="letter-spacing: 0.5px;">Linha do Tempo de Liquidações Mensais</div>
-                </div>
-                <div class="table-responsive flex-grow-1">
-                    <table class="table-history text-center">
-                        <thead>
-                            <tr>
-                                <th class="text-start" style="padding-left: 24px;">Ciclo / Referência</th>
-                                <th>Status no Mês</th>
-                                <th>Baixado Por</th>
-                                <th class="text-end" style="padding-right: 24px;">Data/Hora da Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for h in historico %}
-                            <tr>
-                                <td class="text-start fw-bold text-dark" style="padding-left: 24px;">{{ h['mes_ano'] }}</td>
-                                <td>
-                                    {% if h['status_liquidacao'] == 'PAGO NA ADM' %}
-                                    <button type="button" class="btn-badge-pago-adm" title="Clique para ver detalhes do comprovante" onclick="abrirDetalhesPagoAdm('{{ imovel['imovel'] }}')">
-                                        PAGO NA ADM 🔍
-                                    </button>
-                                    {% else %}
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 fw-bold" style="font-size: 0.7rem;">
-                                        {{ h['status_liquidacao'] }}
-                                    </span>
-                                    {% endif %}
-                                </td>
-                                <td class="fw-semibold text-secondary">{{ h['coletado_por'] }}</td>
-                                <td class="text-end text-muted small" style="padding-right: 24px;">{{ h['data_registro'] }}</td>
-                            </tr>
-                            {% endfor %}
-                            {% if not historico %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted fw-semibold">
-                                    Sem registros históricos consolidados para este imóvel em ciclos passados.
-                                </td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="col-xl-7">
+            <section class="ficha">
+                <h2>Liquidação por competência</h2>
+                {% if historico %}
+                <table class="ciclos">
+                    <thead>
+                        <tr><th>Competência</th><th>Status</th><th>Quem baixou</th><th class="text-end">Registro</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for h in historico %}
+                        <tr>
+                            <td class="fw-bold">{{ h['mes_ano'] or '—' }}</td>
+                            <td>
+                                {% if h['status_liquidacao'] == 'PAGO NA ADM' %}
+                                <span class="selo adm" onclick="abrirDetalhesPagoAdm('{{ imovel['imovel'] }}')" title="Ver o comprovante">Pago na ADM 🔍</span>
+                                {% elif h['status_liquidacao'] %}
+                                <span class="selo pago">{{ h['status_liquidacao']|capitalize }}</span>
+                                {% else %}
+                                <span class="selo outro">sem status</span>
+                                {% endif %}
+                            </td>
+                            <td style="color: var(--tinta-2);">{{ h['coletado_por'] or 'Sistema' }}</td>
+                            <td class="text-end" style="color: var(--tinta-3); font-size: .8rem;">{{ h['data_registro'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="vazio-painel">Nenhuma liquidação registrada para este imóvel.</div>
+                {% endif %}
+            </section>
+
+            <section class="ficha">
+                <h2>Movimentações recentes</h2>
+                {% if movimentos %}
+                <ul class="linha-tempo">
+                    {% for m in movimentos %}
+                    <li>
+                        <span class="quando">{{ m['quando'] }}</span>
+                        <span class="texto"><span class="quem">{{ m['quem'] }}</span> — {{ m['o_que'] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="vazio-painel">Nada registrado para este imóvel ainda.</div>
+                {% endif %}
+            </section>
+
+            {% if relacionados %}
+            <section class="ficha">
+                <h2>Atas e comunicados</h2>
+                <ul class="linha-tempo">
+                    {% for r in relacionados %}
+                    <li>
+                        <span class="quando">{{ r['data_hora'] }}</span>
+                        <span class="texto">
+                            <span class="quem">{{ r['tipo'] }}</span> —
+                            {% if r['link'] %}<a href="{{ r['link'] }}" target="_blank" rel="noopener" style="color: var(--marca);">{{ r['assunto'] }}</a>
+                            {% else %}{{ r['assunto'] }}{% endif %}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            {% if contas %}
+            <section class="ficha">
+                <h2>Contas de internet</h2>
+                <table class="ciclos">
+                    <thead><tr><th>Mês</th><th>Conta</th><th>Quem registrou</th><th class="text-end">Arquivo</th></tr></thead>
+                    <tbody>
+                        {% for c in contas %}
+                        <tr>
+                            <td class="fw-bold">{{ c['mes_ref'] }}</td>
+                            <td>{{ c['conta'] }}</td>
+                            <td style="color: var(--tinta-2);">{{ c['usuario'] }}</td>
+                            <td class="text-end">{% if c['link_drive'] %}<a href="{{ c['link_drive'] }}" target="_blank" rel="noopener" style="color: var(--marca);">abrir</a>{% else %}—{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
         </div>
     </div>
 
     <div id="dadosImovel" data-imovel="{{ imovel['imovel'] }}" style="display: none;"></div>
 
 {% else %}
-    <div class="mb-4">
-        <h4 class="fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Base Mestre de Imóveis</h4>
-        <span class="text-muted small">Histórico unificado, credenciais de portais e prontuário operacional de unidades.</span>
+    <!-- ====================== PESQUISA ====================== -->
+    <div class="topo">
+        <div>
+            <h1>Central de Imóveis</h1>
+            <p>Cadastro, unidade, credenciais de portal e histórico de cada imóvel.</p>
+        </div>
+        <a href="/gestao_logins" class="botao">Planilha de logins</a>
     </div>
 
-    <div class="search-card" style="background: linear-gradient(to right, #ffffff, #f8fafc); border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0;">
-        <form action="/imoveis" method="GET" class="d-flex flex-column align-items-center">
-            <div class="d-flex flex-column flex-md-row gap-3 w-100 justify-content-center" style="max-width: 1000px;">
-                <div class="flex-grow-1">
-                    <div class="input-group input-group-lg shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-color: #cbd5e1;">🔍</span>
-                        <input type="text" name="pesquisa" class="form-control border-start-0 ps-0 text-dark fw-medium" placeholder="Pesquise por Nº do Imóvel, Condomínio, Administradora..." value="{{ termo }}">
-                    </div>
-                </div>
-                <div style="min-width: 220px;">
-                    <select name="portal" class="form-select form-select-lg shadow-sm text-dark fw-medium">
-                        <option value="ALL" {% if portal == 'ALL' or portal == '' %}selected{% endif %}>🌐 Todos os Portais</option>
-                        <option value="WEBWARE" {% if portal == 'WEBWARE' %}selected{% endif %}>🤖 Webware</option>
-                        <option value="WINKER" {% if portal == 'WINKER' %}selected{% endif %}>🤖 Winker</option>
-                        <option value="DIVERSOS" {% if portal == 'DIVERSOS' %}selected{% endif %}>Diversos</option>
-                    </select>
-                </div>
-                <div>
-                    <button type="submit" class="btn btn-dark btn-lg fw-bold shadow-sm px-4 w-100" style="background-color: #0f172a;">Buscar Unidade</button>
-                </div>
-                <!-- NOVO BOTÃO DE LOGINS -->
-                <div>
-                    <a href="/gestao_logins" class="btn btn-warning btn-lg fw-bold shadow-sm px-4 w-100" style="background-color: #f59e0b; color: white; white-space: nowrap;">🔑 Planilha de Logins</a>
-                </div>
+    <form class="busca" action="{{ url_for('lista_imoveis') }}" method="GET">
+        <div class="linha-campos">
+            <div class="campo-texto">
+                <span class="lupa">⌕</span>
+                <input type="text" name="pesquisa" value="{{ termo }}" autofocus
+                       placeholder="Número do imóvel, condomínio, administradora, endereço, sacado, CPF ou login">
             </div>
-        </form>
-    </div>
-
-    <div class="table-container shadow-sm border-0">
-        <table class="table-modern">
-            <thead>
-                <tr>
-                    <th style="padding-left: 20px;">Nº Imóvel</th>
-                    <th>Condomínio / Empreendimento</th>
-                    <th>Endereço / Unidade</th>
-                    <th>Administradora de Origem</th>
-                    <th>Portal</th>
-                    <th>Dono da Carteira</th>
-                    <th>Status</th>
-                    <th class="text-center" style="padding-right: 20px; width: 150px;">Ação</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in registros %}
-                <tr>
-                    <td class="fw-bold text-primary" style="padding-left: 20px;">{{ r['imovel'] }}</td>
-                    <td class="fw-semibold text-dark">{{ r['empreendimento'] if r['empreendimento'] else '-' }}</td>
-                    <td class="text-secondary small" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ r['endereco'] }}">{{ r['endereco'] if r['endereco'] else 'Não informado' }}</td>
-                    <td class="text-muted">{{ r['administradora'] if r['administradora'] else '-' }}</td>
-                    <td>
-                        <span class="badge {% if r['portal'] == 'WEBWARE' %}bg-success text-white{% elif r['portal'] == 'WINKER' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} px-2 py-1">
-                            {{ r['portal'] if r['portal'] else 'DIVERSOS' }}
-                        </span>
-                    </td>
-                    <td>
-                        {% if r['responsavel_atual'] and r['responsavel_atual'] != 'Não Atribuído' %}
-                            <span class="badge bg-light text-dark border px-2 py-1">{{ r['responsavel_atual'] }}</span>
-                        {% else %}
-                            <span class="text-danger small fw-bold">Não Atribuído</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="badge {% if r['status_cadastro'] == 'ATIVO' %}bg-success bg-opacity-10 text-success border border-success{% else %}bg-secondary text-white{% endif %} px-2 py-1" style="font-size: 0.7rem;">
-                            {{ r['status_cadastro'] }}
-                        </span>
-                    </td>
-                    <td class="text-center" style="padding-right: 20px;">
-                        <a href="/imovel/{{ r['imovel'] | urlencode }}" class="btn btn-sm btn-outline-primary py-1 px-3 fw-bold" style="font-size: 0.75rem;">Prontuário</a>
-                    </td>
-                </tr>
+            <select name="portal" aria-label="Portal">
+                <option value="ALL">Todos os portais</option>
+                {% for p in portais %}
+                <option value="{{ p }}" {% if portal == p %}selected{% endif %}>{{ p|capitalize }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endif %}
+            </select>
+            <select name="carteira" aria-label="Carteira">
+                <option value="ALL">Todas as carteiras</option>
+                {% for c in carteiras %}
+                <option value="{{ c }}" {% if carteira == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+            <select name="situacao" aria-label="Situação">
+                <option value="">Qualquer situação</option>
+                <option value="na_planilha" {% if situacao == 'na_planilha' %}selected{% endif %}>Na planilha do mês</option>
+                <option value="com_login" {% if situacao == 'com_login' %}selected{% endif %}>Com credencial</option>
+                <option value="sem_login" {% if situacao == 'sem_login' %}selected{% endif %}>Sem credencial</option>
+            </select>
+            <button type="submit" class="procurar">Procurar</button>
+        </div>
+        <div class="atalhos">
+            <a href="{{ url_for('lista_imoveis') }}"><b>{{ n(resumo.total_base) }}</b> imóveis na base</a>
+            <a href="{{ url_for('lista_imoveis', situacao='na_planilha') }}"><b>{{ n(resumo.na_planilha) }}</b> na planilha do mês</a>
+            <a href="{{ url_for('lista_imoveis', situacao='sem_login') }}"><b>{{ n(resumo.sem_credencial) }}</b> sem credencial</a>
+        </div>
+    </form>
 
-<!-- 🎯 MODAL GLOBAL DE EXIBIÇÃO DE COMPROVANTES (POSICIONADO FORA DO IF/ELSE) -->
-<div class="modal fade" id="modalPagoAdm" tabindex="-1" aria-labelledby="modalPagoAdmLabel" aria-hidden="true" style="z-index: 1055;">
+    <div class="contagem">
+        <span>
+            {% if total_registros %}
+                {{ n(total_registros) }} {{ 'imóvel encontrado' if total_registros == 1 else 'imóveis encontrados' }}{% if termo %} para “{{ termo }}”{% endif %}
+            {% else %}
+                Nenhum imóvel encontrado{% if termo %} para “{{ termo }}”{% endif %}
+            {% endif %}
+        </span>
+        {% if paginas > 1 %}<span>página {{ pagina }} de {{ n(paginas) }}</span>{% endif %}
+    </div>
+
+    <div class="caixa">
+        {% if registros %}
+        <div class="table-responsive">
+            <table class="lista">
+                <thead>
+                    <tr>
+                        <th>Imóvel</th>
+                        <th>Condomínio e unidade</th>
+                        <th>Administradora</th>
+                        <th>Portal</th>
+                        <th>Carteira</th>
+                        <th>Acesso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in registros %}
+                    <tr>
+                        <td><a class="numero" href="{{ url_for('visualizar_imovel', imovel=r['imovel']) }}">{{ r['imovel'] }}</a></td>
+                        <td>
+                            <span class="cond">{{ r['empreendimento'] or 'Condomínio não informado' }}</span>
+                            <span class="sub">
+                                {%- if r['unidade'] %}{{ r['unidade'] }}{% endif -%}
+                                {%- if r['bloco'] %} · bloco {{ r['bloco'] }}{% endif -%}
+                                {%- if not r['unidade'] and not r['bloco'] %}unidade não informada{% endif -%}
+                            </span>
+                        </td>
+                        <td style="color: var(--tinta-2);">{{ r['administradora'] or '—' }}</td>
+                        <td><span class="etiqueta portal">{{ r['portal'] }}</span></td>
+                        <td>
+                            {% if r['responsavel'] != 'Não Atribuído' %}{{ r['responsavel'] }}
+                            {% else %}<span style="color: var(--tinta-3);">não atribuída</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if r['sem_portal'] %}<span class="etiqueta neutra">e-mail / WhatsApp</span>
+                            {% elif r['tem_credencial'] %}<span class="etiqueta ok">ok</span>
+                            {% else %}<span class="etiqueta falta">sem login</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="vazio-painel">
+            <p class="mb-1" style="font-size: 1rem; color: var(--tinta-2);">Nada encontrado com esses filtros.</p>
+            <p class="m-0">Tente o número do imóvel, parte do nome do condomínio ou o CPF do sacado.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if paginas > 1 %}
+    {% set args = {'pesquisa': termo, 'portal': portal, 'carteira': carteira, 'situacao': situacao} %}
+    <nav class="paginas" aria-label="Páginas de resultados">
+        {% if pagina > 1 %}<a href="{{ url_for('lista_imoveis', pagina=pagina-1, **args) }}">← anterior</a>{% endif %}
+        {% for num in range(1, paginas + 1) %}
+            {% if num == 1 or num == paginas or (num >= pagina - 2 and num <= pagina + 2) %}
+                {% if num == pagina %}<span class="agora">{{ num }}</span>
+                {% else %}<a href="{{ url_for('lista_imoveis', pagina=num, **args) }}">{{ num }}</a>{% endif %}
+            {% elif num == pagina - 3 or num == pagina + 3 %}
+                <span class="reticencia">…</span>
+            {% endif %}
+        {% endfor %}
+        {% if pagina < paginas %}<a href="{{ url_for('lista_imoveis', pagina=pagina+1, **args) }}">próxima →</a>{% endif %}
+    </nav>
+    {% endif %}
+{% endif %}
+</div>
+
+<!-- comprovante do PAGO NA ADM -->
+<div class="modal fade" id="modalPagoAdm" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header bg-dark text-white py-3">
-        <h6 class="modal-title fw-bold m-0" id="modalPagoAdmLabel">
-          📄 Detalhes da Liquidação - PAGO NA ADM
-        </h6>
-        <button type="button" class="btn-close btn-close-white" onclick="fecharModalPagoAdm()" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4" style="font-size: 0.9rem;">
-        <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
-          <div>
-            <span class="text-muted small d-block">Registrado por:</span>
-            <span id="pago_adm_usuario" class="fw-bold text-dark">--</span>
-          </div>
-          <div class="text-end">
-            <span class="text-muted small d-block">Data/Hora:</span>
-            <span id="pago_adm_data" class="fw-semibold text-secondary">--</span>
-          </div>
+    <div class="modal-content" style="border: 0; border-radius: 12px;">
+      <div class="modal-body p-4">
+        <h5 class="fw-bold mb-3" style="color: var(--vinho);">Pago na administradora</h5>
+        <div class="d-flex justify-content-between pb-2 mb-3" style="border-bottom: 1px solid var(--linha);">
+          <div><span class="d-block" style="font-size: .74rem; color: var(--tinta-2);">Registrado por</span>
+               <span id="pago_adm_usuario" class="fw-bold">--</span></div>
+          <div class="text-end"><span class="d-block" style="font-size: .74rem; color: var(--tinta-2);">Data</span>
+               <span id="pago_adm_data" class="fw-semibold">--</span></div>
         </div>
-        
-        <div class="mb-3">
-          <span class="text-muted small d-block mb-1 fw-bold">Motivo e Observações:</span>
-          <div id="pago_adm_motivo" class="p-3 bg-light rounded border text-dark" style="word-break: break-word;">--</div>
-        </div>
-      </div>
-      <div class="modal-footer bg-light py-2">
-        <button type="button" class="btn btn-sm btn-secondary fw-bold" onclick="fecharModalPagoAdm()">Fechar</button>
+        <span class="d-block mb-1" style="font-size: .74rem; color: var(--tinta-2); font-weight: 600;">Motivo e observações</span>
+        <div id="pago_adm_motivo" class="p-3 rounded" style="background: var(--fundo); border: 1px solid var(--linha); word-break: break-word;">--</div>
+        <button type="button" class="botao w-100 mt-3" onclick="fecharModalPagoAdm()">Fechar</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// =========================================
-// FUNÇÕES DE CREDENCIAIS (Escopo Global)
-// =========================================
-window.toggleSenhaVisualizacao = function() {
-    const input = document.getElementById('cred_senha');
-    if (input) input.type = input.type === 'password' ? 'text' : 'password';
+(function () {
+    var faixa = document.getElementById('faixaBoleto');
+    if (faixa) {
+        var larguras = [2, 1, 1, 3, 1, 2, 1, 1, 4, 1, 1, 2, 3, 1, 1, 1, 2, 1, 3, 2, 1, 1, 2, 4, 1, 1, 3, 1, 2, 1, 1, 2];
+        for (var i = 0; i < 210; i++) {
+            var barra = document.createElement('i');
+            barra.style.flexGrow = larguras[i % larguras.length];
+            if (i % 2) { barra.className = 'vazio'; }
+            faixa.appendChild(barra);
+        }
+    }
+}());
+
+window.toggleSenhaVisualizacao = function () {
+    var campo = document.getElementById('cred_senha');
+    if (campo) { campo.type = campo.type === 'password' ? 'text' : 'password'; }
 };
 
-window.abrirUrlPortal = function() {
-    let url = document.getElementById('cred_link').value.trim();
-    if (!url) {
-        alert("⚠️ Insira o link do portal primeiro!");
-        return;
-    }
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-    }
-    window.open(url, '_blank');
+window.abrirUrlPortal = function () {
+    var url = (document.getElementById('cred_link').value || '').trim();
+    if (!url) { alert('Informe o endereço do portal primeiro.'); return; }
+    if (!/^https?:\/\//i.test(url)) { url = 'https://' + url; }
+    window.open(url, '_blank', 'noopener');
 };
 
-window.salvarCredenciaisImovel = function(isSinalizacao = false) {
-    const elImovel = document.getElementById('dadosImovel');
-    if (!elImovel) return;
-    const numeroImovel = elImovel.getAttribute('data-imovel');
-    
-    const payload = {
-        imovel: numeroImovel,
-        login: document.getElementById('cred_login').value,
-        senha: document.getElementById('cred_senha').value,
-        portal: document.getElementById('cred_portal').value,
-        link: document.getElementById('cred_link').value
-    };
-
+window.salvarCredenciaisImovel = function (ehSinalizacao) {
+    var el = document.getElementById('dadosImovel');
+    if (!el) { return; }
     fetch('/api/imovel/salvar_credenciais', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    }).then(r => r.json()).then(data => {
-        if(data.sucesso) {
-            alert(isSinalizacao ? "Sinalização salva." : "Credenciais salvas com sucesso!");
-            window.location.reload();
-        } else {
-            alert("Erro ao salvar acessos: " + data.msg);
-        }
-    });
+        body: JSON.stringify({
+            imovel: el.getAttribute('data-imovel'),
+            login: document.getElementById('cred_login').value,
+            senha: document.getElementById('cred_senha').value,
+            portal: document.getElementById('cred_portal').value,
+            link: document.getElementById('cred_link').value
+        })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.sucesso) { window.location.reload(); }
+        else { alert('Não consegui salvar: ' + (d.msg || 'erro desconhecido')); }
+    }).catch(function () { alert('O sistema não respondeu.'); });
 };
 
-window.sinalizarSemLogin = function() {
-    if(!confirm("Sinalizar imóvel sem portal (Recebe por WhatsApp/E-mail)?")) return;
+window.sinalizarSemLogin = function () {
+    if (!confirm('Marcar que este imóvel não tem portal (recebe por e-mail ou WhatsApp)?')) { return; }
     document.getElementById('cred_portal').value = 'DIVERSOS';
     document.getElementById('cred_login').value = '[X] RECEBE POR E-MAIL/WPP';
     document.getElementById('cred_senha').value = '';
@@ -405,160 +502,33 @@ window.sinalizarSemLogin = function() {
     window.salvarCredenciaisImovel(true);
 };
 
-window.atualizarUrlPorPortal = function() {
-    const portalEl = document.getElementById('cred_portal');
-    const campoLink = document.getElementById('cred_link');
-    if (!portalEl || !campoLink) return;
+window.atualizarUrlPorPortal = function () {
+    var portal = document.getElementById('cred_portal');
+    var link = document.getElementById('cred_link');
+    if (!portal || !link || link.value.trim() !== '') { return; }
+    if (portal.value === 'WINKER') { link.value = 'https://app.winker.com.br/intra/default/login'; }
+    else if (portal.value === 'WEBWARE') { link.value = 'https://portalwm.webware.com.br/Account/Login'; }
+};
 
-    const portal = portalEl.value;
-    if (campoLink.value.trim() === "") {
-        if (portal === "WINKER") campoLink.value = "https://app.winker.com.br/intra/default/login";
-        else if (portal === "WEBWARE") campoLink.value = "https://portalwm.webware.com.br/Account/Login";
+window.fecharModalPagoAdm = function () {
+    var el = document.getElementById('modalPagoAdm');
+    if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var m = bootstrap.Modal.getInstance(el);
+        if (m) { m.hide(); }
     }
 };
 
-// =========================================
-// MODAL PAGO NA ADM
-// =========================================
-window.fecharModalPagoAdm = function() {
-    const elModal = document.getElementById('modalPagoAdm');
-    if (!elModal) return;
-    
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = bootstrap.Modal.getInstance(elModal);
-        if (modal) modal.hide();
-    }
-    
-    elModal.classList.remove('show');
-    elModal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-    
-    const backdrop = document.querySelector('.modal-backdrop');
-    if (backdrop) backdrop.remove();
+window.abrirDetalhesPagoAdm = function (numero) {
+    fetch('/api/sistema/detalhe_pago_adm/' + numero).then(function (r) { return r.json(); }).then(function (d) {
+        if (!d.sucesso) { alert(d.msg || 'Nenhum detalhe encontrado.'); return; }
+        document.getElementById('pago_adm_usuario').innerText = d.usuario || 'Sistema';
+        document.getElementById('pago_adm_data').innerText = d.data_hora || '';
+        document.getElementById('pago_adm_motivo').innerHTML = d.motivo || 'Sem detalhes informados.';
+        var el = document.getElementById('modalPagoAdm');
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) { bootstrap.Modal.getOrCreateInstance(el).show(); }
+    }).catch(function () { alert('O sistema não respondeu.'); });
 };
 
-window.abrirDetalhesPagoAdm = function(imovelNum) {
-    if (window.event) window.event.stopPropagation();
-
-    const elDados = document.getElementById('dadosImovel');
-    const numImovelGlobal = elDados ? elDados.getAttribute('data-imovel') : null;
-    const parametroFinal = imovelNum || numImovelGlobal;
-
-    if (!parametroFinal) {
-        alert("⚠️ Número do imóvel não identificado.");
-        return;
-    }
-
-    fetch(`/api/sistema/detalhe_pago_adm/${parametroFinal}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.sucesso) {
-                document.getElementById('pago_adm_usuario').innerText = data.usuario || 'Sistema';
-                document.getElementById('pago_adm_data').innerText = data.data_hora || '';
-                document.getElementById('pago_adm_motivo').innerHTML = data.motivo || 'Sem detalhes informados.';
-
-                const elModal = document.getElementById('modalPagoAdm');
-                if (!elModal) {
-                    alert(`PAGO NA ADM\n\nRegistrado por: ${data.usuario}\nData: ${data.data_hora}\n\nDetalhes:\n${data.motivo.replace(/<[^>]*>?/gm, '')}`);
-                    return;
-                }
-
-                // Abertura com Bootstrap JS
-                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                    const modal = bootstrap.Modal.getOrCreateInstance(elModal);
-                    modal.show();
-                } else {
-                    // Fallback visual forçado
-                    elModal.style.display = 'block';
-                    elModal.classList.add('show');
-                    document.body.classList.add('modal-open');
-                    
-                    if (!document.querySelector('.modal-backdrop')) {
-                        const backdrop = document.createElement('div');
-                        backdrop.className = 'modal-backdrop fade show';
-                        backdrop.onclick = window.fecharModalPagoAdm;
-                        document.body.appendChild(backdrop);
-                    }
-                }
-            } else {
-                alert(data.msg || 'Nenhum detalhe encontrado para PAGO NA ADM.');
-            }
-        })
-        .catch((err) => {
-            console.error('Erro na requisição dos detalhes:', err);
-            alert('Não foi possível se comunicar com o servidor.');
-        });
-};
-
-// =========================================
-// CARREGAMENTO INTELIGENTE (CURIOSIDADES)
-// =========================================
-
-// Usando o window para evitar o erro "Identifier has already been declared"
-if (typeof window.frasesDinamicas === 'undefined') {
-    window.frasesDinamicas = ["Varrendo a Base Mestre de Imóveis..."];
-}
-window.loopCarregamento = null;
-
-fetch('/api/sistema/curiosidades_carregamento')
-    .then(r => r.json())
-    .then(data => {
-        if (data.sucesso && data.frases.length > 0) window.frasesDinamicas = data.frases;
-    })
-    .catch(() => {});
-
-window.ativarLoading = function() {
-    const overlay = document.getElementById('overlayCarregamento');
-    const texto = document.getElementById('textoDistracao');
-    if(overlay) overlay.style.display = 'flex';
-    if(texto) {
-        let contador = 0;
-        texto.innerText = window.frasesDinamicas[0]; 
-        window.loopCarregamento = setInterval(() => {
-            contador++;
-            if(contador >= window.frasesDinamicas.length) contador = 0; 
-            texto.innerText = window.frasesDinamicas[contador];
-        }, 3000);
-    }
-};
-
-// =========================================
-// LISTENERS GERAIS
-// =========================================
-document.addEventListener("DOMContentLoaded", function() {
-    window.atualizarUrlPorPortal();
-    
-    const formPesquisa = document.querySelector('form[action="/imoveis"]');
-    if (formPesquisa) {
-        formPesquisa.addEventListener('submit', function(e) {
-            e.preventDefault();
-            window.ativarLoading();
-            setTimeout(() => this.submit(), 50);
-        });
-    }
-
-    const linksNavegacao = document.querySelectorAll('a');
-    linksNavegacao.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            const target = this.getAttribute('target');
-            const toggle = this.getAttribute('data-bs-toggle');
-
-            if (!href || href === '#' || href.startsWith('javascript:') || toggle || target === '_blank') return;
-            if (e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1) return;
-
-            e.preventDefault(); 
-            window.ativarLoading();    
-            setTimeout(() => window.location.href = href, 50);
-        });
-    });
-});
-
-window.addEventListener('pageshow', function(event) {
-    const overlay = document.getElementById('overlayCarregamento');
-    if (overlay) overlay.style.display = 'none';
-    if (window.loopCarregamento) clearInterval(window.loopCarregamento);
-});
+document.addEventListener('DOMContentLoaded', function () { window.atualizarUrlPorPortal(); });
 </script>
-
 {% endblock %}

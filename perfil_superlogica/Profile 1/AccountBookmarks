@@ -1,0 +1,146 @@
+{
+   "checksum": "75bcbc75953c12f888ae8ac657c01197",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13284045821160804",
+            "date_last_used": "13437689615891147",
+            "guid": "08975233-dba9-425a-937b-c2775fb6f38d",
+            "id": "8",
+            "name": "Caixa de entrada (35) - ctrlcond@lello.com.br - E-mail de Lello",
+            "type": "url",
+            "url": "https://mail.google.com/mail/u/0/?ogbl#inbox"
+         }, {
+            "date_added": "13284045912670551",
+            "date_last_used": "0",
+            "guid": "f67dcd06-35f0-41c0-bf4f-a164c3a1aa57",
+            "id": "9",
+            "name": "Caixa de entrada (6) - viviane.rodrigues@lello.com.br - E-mail de Lello",
+            "type": "url",
+            "url": "https://mail.google.com/mail/u/1/?ogbl#inbox"
+         }, {
+            "date_added": "13284067352444160",
+            "date_last_used": "13434818590735562",
+            "guid": "bf680dcc-ffd2-4c60-809c-3f6968b693a0",
+            "id": "10",
+            "name": "Portal imóveis",
+            "type": "url",
+            "url": "https://pi.lelloimoveis.com.br/portalImoveis/pages/login/login.xhtml"
+         }, {
+            "date_added": "13409753403588412",
+            "date_last_used": "0",
+            "guid": "d6a11feb-50ec-4f77-a517-71197786aba1",
+            "id": "11",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "Nova guia",
+            "type": "url",
+            "url": "chrome://newtab/"
+         }, {
+            "date_added": "13434216537481376",
+            "date_last_used": "0",
+            "guid": "b088c126-fb84-43ee-9ae6-07ddebdb7671",
+            "id": "12",
+            "name": "",
+            "type": "url",
+            "url": "https://app.winker.com.br/intra/default/login?wl=alliz"
+         } ],
+         "date_added": "13437709961767098",
+         "date_last_used": "0",
+         "date_modified": "13434216537481376",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "5",
+         "name": "Barra de favoritos",
+         "type": "folder"
+      },
+      "other": {
+         "children": [ {
+            "date_added": "13427993565658462",
+            "date_last_used": "0",
+            "guid": "b835eb5f-32a0-459e-81a8-4547b9526142",
+            "id": "13",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "Winker - EscolherPortal Default - Taty Condomínios | MANHATTAN | ctrlcond@lello.com.br",
+            "type": "url",
+            "url": "https://app.winker.com.br/intra/default/escolherPortal?redirect_to=%2Fintra"
+         }, {
+            "date_added": "13427996614232098",
+            "date_last_used": "0",
+            "guid": "51952cc0-9510-4868-a3e6-8779ff12a35b",
+            "id": "14",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "unik",
+            "type": "url",
+            "url": "https://app.winker.com.br/intra/default/escolherPortal?redirect_to=%2Fintra%2FmeuCondominio%2Fboleto"
+         }, {
+            "date_added": "13429200624100474",
+            "date_last_used": "0",
+            "guid": "b4b4016c-4bd0-4dc5-89a6-64de95b55484",
+            "id": "15",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "(3) WhatsApp Business",
+            "type": "url",
+            "url": "https://web.whatsapp.com/"
+         }, {
+            "date_added": "13429632679763535",
+            "date_last_used": "0",
+            "guid": "eaa712f9-c78d-483e-bd06-a52d850003f8",
+            "id": "16",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "16",
+            "type": "url",
+            "url": "https://atendimentoexpresso-s9.webware.com.br/bin/webminio/wmAECondominio.asp"
+         }, {
+            "date_added": "13430859055322878",
+            "date_last_used": "0",
+            "guid": "7f372ec2-b134-4bff-b266-cc003f3af44e",
+            "id": "17",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "gran",
+            "type": "url",
+            "url": "https://app.winker.com.br/intra/default/escolherPortal?redirect_to=%2Fintra%2Fdefault%2Flogin"
+         }, {
+            "date_added": "13431014272221372",
+            "date_last_used": "0",
+            "guid": "1335d2b2-25f8-435d-a084-75ee8111c152",
+            "id": "18",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "marina",
+            "type": "url",
+            "url": "https://app.winker.com.br/intra/default/escolherPortal"
+         } ],
+         "date_added": "13437709961767098",
+         "date_last_used": "0",
+         "date_modified": "13431014272221372",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "6",
+         "name": "Outros favoritos",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13437709961767098",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "7",
+         "name": "Dispositivos móveis",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CrcDCpYDCIiBAhKPAyAAkgH7Agr4AgoOY2hyb21lX3N5bmNfYm0SBTUxIWJtGhIJ+WBrYPBeBgAR+WBrYPBeBgAiNAnuVTxg8F4GABADGScn2UefvHetIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEiNAnuVTxg8F4GABADGScn2UefvHetIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEiNAnuVTxg8F4GABADGScn2UefvHetIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEiNAnuVTxg8F4GABADGScn2UefvHetIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEiNAnuVTxg8F4GABADGScn2UefvHetIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEiNAnEZope8F4GABADGQOvoirCrvgbIAEqHDUxIWJtL2ZkOjkxNjM3MjM1NTk0Njg4OTMxNjEpa6hrYPBeBgDqAQsIi7uK1wYQ0KbOGxIAKhh6eW9NRmdCa2pRRUQ3VHh2WGV5YnRRPT1IAxLsAQgSEucBChxaQlJqeVRjOVhNRmNjSU1hZkVYWFltSFkzUHM9EmZaOkFEcXRBWnpzZ0Q4OGk3eTFlQ1J5UE95Q2hycG95QzluOXdZZ1hhZFI0WURWeCtEM0FhNHlsVVlmNTJ3aXRkUXJheGJxK1hWTHJYTndLRTVlcURaUVlySWhRaFZSZ1lxRzlRPT0YACAAKAAwprqVpIaylgM43Yn9sP8zQN2J/bD/M0ocdnVmU3U1VkM5cUFIUldSdUtycDQzQVhMa3V3PVofIh32ZDZDY0tXcjcrZVRBaHVHSXJFczNLZHA4N3pVPWXUH8ggEuwBCBAS5wEKHHFRZ0xKYnZ5UzFjcWFiWncwU1NQRXpmYzU5ST0SZlo6QURxdEFaenNnRDg4aTd5MWVDUnlQT3lDaHJwb0xWMWJSM1ZhVjVwb0ZBTFU5aXZ6aUR2cmcvcS9LSjJiWmUzM3lCblVrK1pzNHJoREtXbkt2Wmg1cDJUL3JKS2ZFQVlQN0E9PRgAIAAoADDfrebq+/KVAzjWrpee+jNA1q6XnvozShwzOWlUcWVBUGR4bjBTdGd2M09kbk5iUEtxblk9Wh8iHdtWbTd3Ny9YUE8ralpqQUdwYzJESmxMZTU5TTg9ZbU+OlcS6wEIDhLmAQocdmdnNTlFdGF2cG9SUW9nOGd2b20ySzVMTWM4PRJmWjpBRHF0QVp6c2dEODhpN3kxZUNSeVBPeUNocnBvZ2xmUWJPS09kckxwaUxtS3lzTFdQUEtvNmFrOEpvdGYyalFPWDdRS1RMc3ljSHd0RUs1aitqVFN3WjhONkFsbWtiVWcydz09GAAgACgAMLTynP2HspYDONjshZL0M0DY7IWS9DNKHE8ycGI1bCtrWjF0ZE9TMHF2d3UxZTloMDVYYz1aHiIcbFQ2OXp6eEI0R2VicW5TOTdOd0xTcmlrZW84PWXUH8ggEsEBCAYSvAEKHFljU1RvbnZFU1B3cUNzNEwyY3JWaHY2OEw5OD0SZlo6QURxdEFaejMvNzdQbzB4aUdvQlhtbE5RbHZUQW9zbk9qdFFhQld0U0pNTDczdzdWcDUyMHdIcHI1UHc4SDBidlBWbXduN1ZtQktYdHZJV0U1eUFPdVk5Y3pLWmVWL3VES2c9PRgAIAAoADDuq/GBht6XAzgAQABKHG9QVmtod0JSYlY2NUtDV1IyK0lPTkhXb091OD1lAAAAABLsAQgPEucBChwzZ2xYY21oWG9LdkFOWitMcFUwbHlQS2ttcmM9EmZaOkFEcXRBWnpzZ0Q4OGk3eTFlQ1J5UE95Q2hycG9OdFpEWXlFcWNGYWkrRTZJVU5tNXoxYTN5U1lsVTljUHI1N3NHbURtSElmcU05YTNCbzBiWFJCVi9yZzB6RDZIK21EMHdBPT0YACAAKAAwh8bMi+7clwM45eOU0PgzQOXjlND4M0ocV0MzNmtzSk5ySTYrcm1uejN1MWcrSVZBcE9nPVofIh22K1hxSVViZFBDWFhVajJLUzUraXlpZ2hKNVBnPWVdPyVSEsEBCAcSvAEKHG5qZ0R1ODhlQ3J2WHA4NnBEN2ZIR2NxRnA4OD0SZlo6QURxdEFaeWRFbFRhdjhtMnFzRWJjNWk0ejZYMGwwWTUzbWwySkhDQlJFV0xkZ05uY2w1UVplbmxpRVBOeTNJNWU3ZFhxMklSalVIWEZDWGNSSGFOYzhMRjUwMlovS1RqYkE9PRgAIAAoADDuq/GBht6XAzgAQABKHHl6TkIwMWNuNTRBN2NSVTB1VCsvUGdtVHRVbz1lAAAAABLrAQgNEuYBChxGeXBVY3g1c3lDcXRQU2NsYk1lN0k2cXE1eGs9EmZaOkFEcXRBWnpzZ0Q4OGk3eTFlQ1J5UE95Q2hycG9GNnRPbjFVQkw4Yjhyb3lQVll4QS9sT3hveWlsVnV6RkpmN0tGSTFYYjRXNzhwVWFIQjR1a2x5b2N3NTlkT3lBZ0tXa1R3PT0YACAAKAAw9pOD0aHDlQM42uPLkPQzQNrjy5D0M0ocWlZZVDZVbEl0YXpnbWdGeWc3clZQLzNRL1l3PVoeIhxVakQrOUllQm5KSFBndElRMEtTemtMd0FaRTg9ZdQfyCAS7AEIDBLnAQocNm1iaTN3eVUvRFN4bHpFU0R1OWtlNjllUk1JPRJmWjpBRHF0QVp6c2dEODhpN3kxZUNSeVBPeUNocnBvYVFMblUzYlhGY2EwTWhiRE5nZzhZeFp2K3gybUdxV1FIemlNTTBIcWZwaG9qUmlFMm5lTjYySUNsUlJmVDRxMDZubmlKZz09GAAgACgAML/AnYGw+JYDOIrr96eLNECK6/enizRKHEZraDdSVGhwR2hyN1JTbUhxdjNJQUtDN2ZYbz1aHyId9kFGK0VZUGlZeFV1ejY0aVk1YTBVOThkeUp2Yz1l1B/IIBLsAQgJEucBChwyZFdFQUcwdTBQOVpxU2VZVlAvQW1nbFZXSkU9EmZaOkFEcXRBWnpzZ0Q4OGk3eTFlQ1J5UE95Q2hycG9ocUZrNFUxMm1uU3l1QnZmZ2t3R09yUnZnL1J3NkU3Sk9NY3I2VkNlS0V4OG93RW0vZlBvWm9Gc2hkSWdQNTQ5elYwTU5RPT0YACAAKAAwyJygzrr0lgM436SA8dsvQN+kgPHbL0ocaGtyQlZ2NldXMnd0MFBRTlFZb2RHQUx1bUZnPVofIh23TTZUOEI2U1FNSDl6V1lFeEFuaUtVN2ZxbFZBPWXaad5dEuwBCAoS5wEKHE1ac1BiNzkvN2o3Y2NXT2g3OTlXbTZsQXpBZz0SZlo6QURxdEFaenNnRDg4aTd5MWVDUnlQT3lDaHJwb1pzU1hldmdodFNuL0kzaGdSSVJad1NtemhsVW1SWlF2Kyt5NXRncVZhdDFuYW9qbGRhc0VDZWs4VktpczRkSDNYbGNweFE9PRgAIAAoADCMyuDq8omXAzj97pz72y9A/e6c+9svShxLblNXdDVhWDY2QnJOZStwemdCeXk1d3h4TXM9Wh8iHdtOamlrazVjczZUTTN0Rzh1aldSUkFZSlB6VE09ZYo//9IS7AEICxLnAQocSmV5VkN1czJkOUpVZi9TQlpjSzJJN3dMc040PRJmWjpBRHF0QVp6c2dEODhpN3kxZUNSeVBPeUNocnBvc0o5amVRQVQwMHFiMmJVYU1YdnFMSFM3Vm1GUERKSXUzaGgzSXJTZjlRRmU1ZTh3eTd0b3JOaElCVW4rV0I0YnozbjQ2UT09GAAgACgAMKej/5vStpQDOMbRgJewM0DG0YCXsDNKHGl5dWQzeVRERVpNc3BoT2V4aGxadlE3cnZBOD1aHyId7URBM0RhRjdwc2RJWFZoRU1DSWh2ek1sYUoyWT1lNHafoBLsAQgREucBChx1azNPN3Bia25xeWNNeFBKOC81V3hxODBsUmM9EmZaOkFEcXRBWnpzZ0Q4OGk3eTFlQ1J5UE95Q2hycG9FZndDTHBkNXNkclliYjRFYnpEdVAwY1BGUVJBTE9ZSHZ5czRnZUJVL1BKT2dQNWt5WmVyWVVLS2oxcUxNMHhPak5uMlNBPT0YACAAKAAwh+SBua65lgM43rH75v4zQN6x++b+M0ocWTZ4OE5RUnlPZ1BoQUxWWDZSTnI3N1c4UjQwPVofIh3tOGxFU1g1b1hSbFhrM0ZvcE03d0c4M1dMM2RFPWXUH8ggEusBCAgS5gEKHDhWK2Y2K0JuMGdYWTFST084T1pPcGc5cUZubz0SZlo6QURxdEFaenNnRDg4aTd5MWVDUnlQT3lDaHJwb1VML2RHTzJaWVg1aVpqb2xoQkh4NHhqaG1wbURVdEN4VGpxMmthZGJySkE3dGV3dkhhZ3MyczhVbEtwWXhqZFNYL0hHZmc9PRgAIAAoADDI476sut2XAzjp2frw2y9A6dn68NsvShxlSVV3UjEyTHZkWkt0dmxHR0ZjazhSNzRxcW89Wh4iHG9MajNyY1R5QUVzV1c4WE1QNjl3ZDNTNDVSRT1l4ExPZBKpAQgFEqQBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9Ek5aOkFEcXRBWnlYZURtZkN3dkFlRkZ3WFFTYW4yaDVmRWhLRkxkZlhFaFFrSW8xcXhSRm04cjJ4dG9iSjhYYzNUeG44eStFZzhEMGpuVjEYACAAKAAw7qvxgYbelwM4AEAAShxhUkNXTGdoRjliNUlucUtJRHZ1Si9qdlFrRmM9ZQAAAAAwATgA",
+   "version": 1
+}

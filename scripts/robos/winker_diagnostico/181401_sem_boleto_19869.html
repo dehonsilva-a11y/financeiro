@@ -1,0 +1,657 @@
+<html lang="pt-br" ng-app="intra" class="ng-scope swal2-shown" style="overflow-x: initial;"><head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}</style>
+            <link rel="stylesheet" type="text/css" href="https://assets.winker.com.br/assets/min/5.27.43/intra.css">
+<link rel="stylesheet" type="text/css" href="https://assets.winker.com.br/assets/min/5.27.43/intra-aclamit.css">
+<link rel="stylesheet" type="text/css" href="https://assets.winker.com.br/js/jquery.smartbanner/jquery.smartbanner.css">
+<title>Boletos - Aclamit | VILLA MADRID | ctrlcond@lello.com.br</title>
+            <link rel="shortcut icon" href="/themes/favicon/winker/favicon.ico?v=5.27.43">
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="apple-itunes-app" content="app-id=6751276535,app-argument=https://www.winker.com.br/"><meta name="google-play-app" content="app-id=br.com.winker.wl.aclamit">            
+            <!-- CSS -->
+
+            <style>
+                [ng\:cloak], [ng-cloak], .ng-cloak {
+                    display: none !important;
+                }
+
+                #megasac-info {
+                    display: none !important;
+                }
+
+                #button_whatsapp {
+                    position: fixed !important;
+                    z-index: 2;
+                }
+            </style>
+        <style type="text/css" id="customProgressCSS">.progress-container {    width: 100%;    max-width: 300px;    background: #444;    border-radius: 10px;    overflow: hidden;    height: 20px;    margin: 0 auto;    position: relative;}.progress-bar {    width: 0%;    height: 100%;    background: linear-gradient(45deg, #2ecc71, #196F3D);    text-align: center;    line-height: 20px;    color: white;    font-weight: bold;    animation: brilho 1.5s infinite alternate;}@keyframes brilho {    0% { filter: brightness(100%); }    100% { filter: brightness(130%); }}@media print {    .blockUI { display: none !important; }}</style><style type="text/css">.fancybox-margin{margin-right:0px;}</style></head>
+
+	<body class="main swal2-shown" style="" data-menu-position="closed">
+        <div class="jPanelMenu-panel" style="position: relative; left: 0px;"><div id="header"></div><div id="user-nav" class="hidden-print">
+                            <div class="company-menu" data-testid="cabecalho-white-label">
+                    <div id="logo_rd">
+                                                <a href="/intra">
+                            <span class="logo"></span>
+                        </a>
+                    </div>
+                    <div class="link-wrapper">
+                        <ul class="link-list">
+                                                                                    <li><a target="_blank" href="https://aclamitadm.com.br/">Home</a></li>
+                                                        <li><a target="_blank" href="https://aclamitadm.com.br/contato/">Contato</a></li>
+                                                        <li><a target="_blank" href="https://aclamitadm.com.br/sobre/">Sobre Nós</a></li>
+                                                    </ul>
+                        <select onchange="this.options[this.selectedIndex].value &amp;&amp; (window.location = this.options[this.selectedIndex].value);" style="display:none;" class="link-option select-raw" name="link" id="link">
+                            <option value="empty">Navegar</option>
+                                                            <option value="https://aclamitadm.com.br/">Home</option>
+                                                            <option value="https://aclamitadm.com.br/contato/">Contato</option>
+                                                            <option value="https://aclamitadm.com.br/sobre/">Sobre Nós</option>
+                                                    </select>
+                    </div>
+                    
+                                    </div>
+            
+            <ul class="nav btn-group pull-left menu">
+                <li class="btn dropdown divider">
+                    <a href="/" data-toggle="dropdown" title="Menu"><i class="fa fa-bars menu-icon"></i>
+                    <span class="menu-name">Menu</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-main" style="float:right;">
+                        <li><a data-testid="menu-intra" class="" style="font-size: 13px" href="/intra"><div><i class="fa fa-home"></i></div> <span>Tela inicial</span></a></li><li class="active"><a data-testid="menu-meucondominio-boleto" class=" active" style="font-size: 13px" href="/intra/meuCondominio/boleto"><div><i class="fa fa fa-barcode"></i></div> <span>Boletos</span></a></li><li><a data-testid="menu-meucondominio-documento" class="" style="font-size: 13px" href="/intra/meuCondominio/documento"><div><i class="fa fa-file"></i></div> <span>Documentos</span></a></li><li><a data-testid="menu-comunicacao-mensagem" class="" style="font-size: 13px" href="/intra/comunicacao/mensagem"><div><i class="fa fa-comments"></i></div> <span>Mensagens</span></a></li><li><a data-testid="menu-meucondominio-correspondencia" class="" style="font-size: 13px" href="/intra/meuCondominio/correspondencia"><div><i class="fa fa fa-envelope-o"></i></div> <span>Correspondências</span></a></li><li><a data-testid="menu-meucondominio-fornecedorcontrato" class="indisponivel" style="font-size: 13px" href="/intra/meuCondominio/fornecedorContrato"><div><i class="fa fa-pencil"></i></div> <span>Contratos</span></a></li><li><a data-testid="menu-meucondominio-assembleia-view" class="" style="font-size: 13px" href="/intra/meuCondominio/assembleia/view"><div><i class="fa fa-bullhorn"></i></div> <span>Assembleias</span></a></li><li><a data-testid="menu-meucondominio-manutencaopreventiva" class="indisponivel" style="font-size: 13px" href="/intra/meuCondominio/manutencaoPreventiva"><div><i class="fa fa-wrench"></i></div> <span>Manutenções</span></a></li><li><a data-testid="menu-meucondominio-albumfoto" class="indisponivel" style="font-size: 13px" href="/intra/meuCondominio/albumFoto"><div><i class="fa fa-camera"></i></div> <span>Album de Fotos</span></a></li><li><a data-testid="menu-meucondominio-reserva" class="" style="font-size: 13px" href="/intra/meuCondominio/reserva"><div><i class="fa fa-calendar"></i></div> <span>Reservas</span></a></li><li><a data-testid="menu-condominio-visita-painel" class="indisponivel" style="font-size: 13px" href="/intra/condominio/visita/painel"><div><i class="fa fa-university"></i></div> <span>Portaria</span></a></li><li><a data-testid="menu-meucondominio-sobre" class="" style="font-size: 13px" href="/intra/meuCondominio/sobre"><div><i class="fa fa-info-circle"></i></div> <span>Meu portal</span></a></li><li><a data-testid="menu-meucondominio-faq" class="" style="font-size: 13px" href="/intra/meuCondominio/faq"><div><i class="fa fa-life-saver"></i></div> <span>Ajuda</span></a></li><li><a data-testid="menu-meucondominio-certidao" class="" style="font-size: 13px" href="/intra/meuCondominio/certidao"><div><i class="fa fa-file-text-o"></i></div> <span><span style="white-space: normal;">Certidões</span></span></a></li>                    </ul>
+                </li>
+            </ul>
+
+            <div class="pull-left user-nav-logo">
+
+                
+                                
+                    <div class="pull-left" id="powered">
+                        <a href="/intra">
+                                                            <span class="logo-powered"></span>
+                                                    </a>
+                    </div>
+
+                            </div>
+
+                        
+                        
+                            <ul class="nav btn-group">
+                    <li class="btn btn-nav-completarCadastro">
+                        <a href="/intra/pessoa/completarCadastro/" class="tip-bottom" data-original-title="Complete seu cadastro">
+                            <span class="battery-percent">41%</span>
+                            <img src="https://assets.winker.com.br/images/icons/battery/battery-1.png" style="width: 30px; margin-top: -3px">
+                        </a>
+                    </li>
+                </ul>
+            
+                        
+            <ul class="nav btn-group">
+                
+                                <li class="btn divider" id="btn-novidade" style="position:relative;">
+                    <a href="javascript:void(0);" id="novidade-sino" title="Novidades" style="position:relative; display:inline-block;">
+                        <i class="fa fa-bell"></i>
+                        <span id="novidade-badge" class="label label-danger" style="display:none; position:absolute; top:5px; right:-6px; font-size:9px; padding:2px 4px;"></span>
+                    </a>
+                    <div id="novidade-dropdown" style="display:none; position:absolute; top:100%; right:0; width:320px; background:#fff; border:1px solid #ddd; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,.15); z-index:9999;"><div class="novidade-sino-dropdown">
+            <div class="novidade-vazia text-center text-muted" style="padding:20px;">
+            <i class="fa fa-bell-slash fa-2x"></i>
+            <p>Nenhuma novidade disponível.</p>
+        </div>
+        <div class="text-center" style="padding:8px; border-top:1px solid #eee;">
+        <a href="javascript:void(0);" id="novidade-ver-historico" class="text-muted small">Ver histórico</a>
+    </div>
+</div>
+</div>
+                </li>
+                
+                
+                <li class="btn dropdown divider user-divider" id="btn-perfil">
+                    <a id="btn-perfil-link" style="font-size: 14px" title="" href="javascript:void(0);" data-toggle="dropdown" class="dropdown-toggle tip-bottom" data-original-title="Dados pessoais">
+                        <span id="me">
+                            <span id="fotoUsuario">
+                                                                    <img src="https://cdn.winker.com.br/files/upload/2023/02/17/131863.63efbc068ff9a3.37132580_3e4abdad.jpg" height="26" width="26" style="border: 0">
+                                                            </span>
+                        </span>
+                        <span class="text" style="font-weight: bold;">Lello imóveis Locação e Vendas Ltda.</span>
+                        <b class="caret"></b>
+                    </a>
+
+                    
+                                        
+                    <ul class="dropdown-menu dropdown-menu-right multi-level">
+
+                        <li><a title="Dados pessoais" href="/intra/pessoa/perfil/atualizar"> <i class="fa fa-user"></i> <span class="text">Meu perfil</span></a></li>
+                                                    
+                                                                    <li>
+                                        <a title="Adicionar outros moradores" href="/intra/condominio/unidade/adicionarMorador">
+                                            <i class="fa fa-users"></i> <span class="text">Adicionar outros moradores</span>
+                                        </a>
+                                    </li>
+                                
+                                                                    <li>
+                                        <a title="Veículos" href="/intra/condominio/veiculo/indexMeusVeiculos">
+                                            <i class="fa fa-car"></i>
+                                            <span class="text">Veículos</span>
+                                        </a>
+                                    </li>
+                                
+                                                                    <li>
+                                        <a title="Meus animais de estimação" href="/intra/condominio/pet/indexMeusPets">
+                                            <i class="fa fa-paw"></i>
+                                            <span class="text">Meus animais de estimação</span>
+                                        </a>
+                                    </li>
+                                
+                                <li>
+                                    <a title="Política de Privacidade" href="https://www.winker.com.br/politica-de-privacidade" target="_blank">
+                                        <i class="fa fa-info-circle"></i>
+                                        <span class="text">Política de Privacidade</span>
+                                    </a>
+                                </li>
+                                                    
+                        <li class="divider"></li>
+
+                                                    <li>
+                                <a href="javascript:alterarFoto()">
+                                    <i class="fa fa-photo"></i>
+                                    <span class="text">Alterar minha foto</span>
+                                </a>
+                            </li>
+                                                    
+                                                        <li class="divider"></li>
+
+                                                            <li><a class="text" href="javascript:openChangeCondominio()">Trocar de portal</a></li>
+                                                        
+                        <li class="divider"></li>
+                        <li><a title="Sair" href="/intra/default/logout"><i class="fa fa-share"></i> <span class="text">Sair</span></a></li>
+                        </ul>
+                </li>
+
+            </ul>
+        </div><div id="sidebar" style="position: absolute; display: none;">
+            <div id="me">
+                <form enctype="multipart/form-data" id="formFotoUsuario" class="ng-pristine ng-valid">
+                    <input type="hidden" id="alterarFotoUsuario_id_usuario" name="Usuario[id_usuario]">
+                    <input type="file" id="alterarFotoUsuario_arquivo" name="Usuario[foto.uploadedFile]" style="visibility: hidden; width: 1px; height: 1px" multiple="">
+                </form>
+            </div>
+
+            <br>
+		</div><div id="content" style="height: 635px;">
+                                    <div id="content-header">
+                        <h1>Boletos</h1>
+                    </div>
+                
+                <div class="container breadcrumbs-domus">
+                    <div id="breadcrumb"><a href="/intra" class="tip-bottom" data-original-title="Ir para a página principal"><i class="fa fa-building"></i> VILLA MADRID</a><a href="#" class="tip-bottom current" data-original-title="">Boletos</a></div>                </div>
+
+                
+                
+                <div class="container">
+	
+    <div class="col-xs-12">
+        <div class="panel panel-">
+            <div class="panel-heading">
+                                <strong>ATENÇÃO:</strong> Caso tenha dúvidas sobre taxas em aberto, entre em contato com a responsável pela cobrança
+                                    -
+                    <strong>
+                        ACLAMIT  (11) 2942-3222                    </strong>
+                                
+                            </div>
+        </div>
+    </div>
+
+<div ng-controller="BoletoController" ng-init="initMeuCondominioBoletos()" class="ng-scope">
+
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a data-toggle="tab" href="#boletos">
+                    <i style="margin-right: 5px;" class="fa fa-table"> </i>Boletos recentes
+                </a>
+            </li>
+                            <li>
+                    <a data-toggle="tab" href="#extrato">
+                        <i style="margin-right: 5px;" class="fa fa-table"> </i>Extrato
+                    </a>
+                </li>
+                    </ul>
+
+        <div class="tab-content">
+                        <div id="extrato" class="col-xs-12 tab-pane">
+                <!-- ngIf: billings_from_my_unit.length > 0 -->
+                <!-- ngIf: my_units.length > 1 --><label ng-if="my_units.length &gt; 1" class="ng-scope"> Unidade:</label><!-- end ngIf: my_units.length > 1 -->
+                <!-- ngIf: my_units.length > 1 --><div class="input-group ng-scope" ng-if="my_units.length &gt; 1">
+                    <div class="select2-container ng-invalid ng-invalid-required ng-valid-parse" id="s2id_unit"><a href="javascript:void(0)" onclick="return false;" class="select2-choice select2-default" tabindex="-1">   <span class="select2-chosen">Selecione Unidade...</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></a><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen2"><div class="select2-drop select2-display-none select2-with-searchbox"><div class="alert" style="display:none"></div>   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><input type="hidden" id="unit" name="unit" ng-model="selected_unit" options="{ allowClear: true }" s2-options="unit.id_unit as unit.label for unit in my_units" ng-value="unit.id_unit" ng-change="loadHistory()" placeholder="Selecione Unidade..." required="required" class="ng-invalid ng-invalid-required ng-valid-parse select2-offscreen" tabindex="-1" value="">
+                </div><!-- end ngIf: my_units.length > 1 -->
+
+                <label>Obter informações a partir de:</label>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input ng-model="start_date" class="start-date form-control input-sm datepicker ng-pristine ng-untouched ng-valid" ng-change="loadHistory()" style="width: 200px;" autocomplete="off">
+                </div>
+
+                <!-- ngIf: billings_from_my_unit -->
+            </div>
+            
+            <div id="boletos" class="col-xs-12 tab-pane active ng-isolate-scope" infinite-scroll="mostrarMaisBoletos()" infinite-scroll-disabled="return.loading" infinite-scroll-distance="0">
+
+                <div class="well form-inline ng-pristine ng-valid" role="group" style="margin-right: 5px;">
+                    <!-- ngIf: my_units && my_units.length > 1 --><span ng-if="my_units &amp;&amp; my_units.length &gt; 1" class="ng-scope">
+                        <div class="select2-container select2-allowclear ng-valid" id="s2id_divisao"><a href="javascript:void(0)" onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">EDIFÍCIO COSTA DEL SOL</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></a><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen3"><div class="select2-drop select2-display-none select2-with-searchbox"><div class="alert" style="display:none"></div>   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><input type="hidden" ng-model="pesquisa.divisao.id_divisao" id="divisao" name="divisao" options="{ allowClear: true }" s2-options="division.id_division as division.division_label for division in my_divisions" ng-change="isAdmBoletos ? pesquisa.divisao.change() : pesquisa.divisao.changeByMyUnits()" placeholder="Escolha Divisão..." class="ng-valid select2-offscreen" tabindex="-1" value="77867">
+
+                        <ng-container ng-switch="!!pesquisa.divisao.id_divisao">
+                            <!-- ngSwitchWhen: false -->
+                            <!-- ngSwitchWhen: true --><ng-container ng-switch-when="true" class="ng-scope">
+                                <div class="select2-container select2-allowclear ng-valid" id="s2id_unidade"><a href="javascript:void(0)" onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">000085</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></a><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen5"><div class="select2-drop select2-display-none select2-with-searchbox"><div class="alert" style="display:none"></div>   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><input type="hidden" ng-model="pesquisa.unidade.id_unidade" id="unidade" name="unidade" options="{ allowClear: true }" s2-options="unidade.id_unit as (unidade.name_without_division) for unidade in pesquisa.unidade.options" ng-change="pesquisa.clearBilling()" placeholder="Escolha Unidade..." class="ng-valid select2-offscreen" tabindex="-1" value="1926663">
+                            </ng-container><!-- end ngSwitchWhen: -->
+                        </ng-container>
+                    </span><!-- end ngIf: my_units && my_units.length > 1 -->
+
+                    <div class="select2-container ng-valid" id="s2id_referencia"><a href="javascript:void(0)" onclick="return false;" class="select2-choice select2-default" tabindex="-1">   <span class="select2-chosen">Escolha Referência...</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></a><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen1"><div class="select2-drop select2-display-none select2-with-searchbox"><div class="alert" style="display:none"></div>   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><input type="hidden" ng-model="pesquisa.referencia.data_ref_rateio" id="referencia" name="referencia" options="{ allowClear: true }" s2-options="referencia.data_ref_rateio as referencia.referencia for referencia in pesquisa.referencia.options" placeholder="Escolha Referência..." class="ng-valid select2-offscreen" tabindex="-1" value="">
+
+                    <button class="btn btn-success btn-sm" ng-click="carregarBoletos(1)">Filtrar</button>
+
+                    <!-- ngIf: my_units && my_units.length > 1 && boletos.length === 0 && !carregouBoletos && (!pesquisa.divisao.id_divisao || !pesquisa.unidade.id_unidade) -->
+
+                    <!-- ngIf: boletos.length === 0 && !carregouBoletos && pesquisa.unidade.id_unidade -->
+                </div>
+
+                <div style="clear: both;height: 100%; overflow: auto">
+                    <!-- ngRepeat: value in boletos | toArray: true | orderBy: ['full_unit_name'] -->
+
+                    <!-- ngIf: boletos.length === 0 && carregouBoletos && !return.loading && pesquisa.divisao.id_divisao && pesquisa.unidade.id_unidade --><div ng-if="boletos.length === 0 &amp;&amp; carregouBoletos &amp;&amp; !return.loading &amp;&amp; pesquisa.divisao.id_divisao &amp;&amp; pesquisa.unidade.id_unidade" class="list-group-item ng-scope" style="font-style: italic">
+                        Nenhum boleto disponível
+                    </div><!-- end ngIf: boletos.length === 0 && carregouBoletos && !return.loading && pesquisa.divisao.id_divisao && pesquisa.unidade.id_unidade -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .dropdown-menu {
+        min-width: 219px;
+    }
+
+    .tdRetorno{
+        text-align: center;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        background-color: rgba(202, 202, 202, 0.12);
+    }
+
+    .filtersSearch{
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 9;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+    }
+
+    .filtersDropdown li{
+        padding: 8px;
+    }
+
+    .dropdown-menu:after {
+        border-bottom: 6px solid #fff !important;
+        border-left: 6px solid transparent !important;
+        border-right: 6px solid transparent !important;
+        content: "";
+        display: inline-block;
+        left: 10px !important;
+        right: initial !important;
+        position: absolute;
+        top: -6px;
+    }
+
+    .dropdown-menu:before {
+        border-bottom: 7px solid rgba(0,0,0,0.2);
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        content: "";
+        display: inline-block;
+        left: 9px !important;
+        right: initial !important;
+        position: absolute;
+        top: -7px;
+    }
+
+    .select2-container .select2-choice .select2-chosen {
+        color: #999;
+        font-size: 13px;
+        padding-left: 8px;
+    }
+
+    .labelIcheck{
+        font-weight: normal;
+        font-size: 13px;
+        color: #999;
+    }
+
+    .select2-drop{
+        z-index: 200001;
+    }
+
+    .bootbox .modal-dialog {
+        width: 50%;
+    }
+
+    .tooltip {
+        position: fixed;
+    }
+
+    .list-group-item {
+        overflow: hidden;
+    }
+
+    .botao-copiar {
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+    }
+
+    .botao-copiar .mensagem-copia {
+        visibility: hidden;
+        width: 150px;
+        background-color: #0c016b;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: -15%;
+        left: 0%;
+        margin-left: 15px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    @media screen and (max-width: 952px) and (min-width: 100px) {
+        .bootbox .modal-dialog {
+            width: 90%;
+        }
+
+        .botao-copiar .mensagem-copia {
+            visibility: hidden;
+            width: 15vw;
+            background-color: #0c016b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: -15%;
+            left: 0%;
+            margin-left: -11vw;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    }
+
+    @media screen and (max-width: 655px) and (min-width: 220px) {
+        .col-xs-5 {
+            width: 100%;
+        }
+    }
+
+</style>
+
+</div><!-- content -->
+
+            </div><div style="margin-bottom: 60px;"></div><div class="modal fade" id="novidade-historico-modal" tabindex="-1" role="dialog" aria-labelledby="novidade-historico-modal-label" aria-hidden="true" style="overflow: hidden; outline: none;">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button>
+                        <h4 class="modal-title" id="novidade-historico-modal-label"><i class="fa fa-history"></i> Histórico de novidades</h4>
+                    </div>
+                    <div class="modal-body" id="novidade-historico-modal-body" style="padding:0;"></div>
+                </div>
+            </div>
+        </div><div class="modal fade" id="novidade-modal" tabindex="-1" role="dialog" aria-labelledby="novidade-modal-label" aria-hidden="true" style="overflow: hidden; outline: none;">
+            <div class="modal-dialog modal-lg" role="document" style="width:90%; max-width:1600px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button>
+                        <h4 class="modal-title" id="novidade-modal-label"><i class="fa fa-bell"></i> Novidades</h4>
+                    </div>
+                    <div class="modal-body" id="novidade-modal-body"></div>
+                </div>
+            </div>
+        </div><div class="modal" id="modal-confirmacao" style="display: none; overflow: hidden; outline: none;" aria-hidden="true" tabindex="5000">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                        <h3>Confirmação</h3>
+                    </div>
+                    <div class="modal-body"><p></p></div>
+                    <div class="modal-footer">
+                        <a href="" class="btn yes btn-primary">Sim</a>
+                        <a href="javascript:void(0)" class="btn btn-danger" data-dismiss="modal">Não</a>
+                    </div>
+                </div>
+            </div>
+        </div><div class="modal modalAlerta" id="modal-alerta" style="display: none; overflow: hidden; outline: none;" aria-hidden="true" tabindex="5001">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                        <h3>Alerta</h3>
+                    </div>
+                    <div class="modal-body"><p></p></div>
+                    <div class="modal-footer">
+                        <a href="javascript:void(0)" class="btn btn-danger" data-dismiss="modal">Fechar</a>
+                    </div>
+                </div>
+            </div>
+        </div><div class="modal modalCropFoto" id="modal-cropFoto" style="display: none; overflow: hidden; outline: none;" aria-hidden="true" tabindex="5002">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="$('.modal').hide(); jcrop_api.destroy()">×</button>
+                        <h3>Alterar imagem</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-imagem">
+                            <img src="">
+                        </div>
+                    </div>
+
+                    <input type="hidden" class="crop_x">
+                    <input type="hidden" class="crop_y">
+                    <input type="hidden" class="crop_w">
+                    <input type="hidden" class="crop_h">
+
+                    <div class="modal-footer">
+                        <a href="javascript:cropFoto()" class="btn btn-success" data-dismiss="modal">Salvar alterações</a>
+                    </div>
+                </div>
+            </div>
+        </div><div id="div-ajuda-perfil" class="hide" style="z-index: 1500;font-family: Roboto,Arial,sans-serif;">
+            <i class="fa fa-user"></i><font style="font-size: 17px; text-align: center;"> Atualize suas informações!</font><br><br>
+            Mantenha seus dados atualizados, para obter uma melhor experiência.
+            <br>
+
+            <br>
+            <button id="btn-fechar-ajuda-perfil" class="btn btn-success pull-right" data-dismiss="clickover">Próximo</button>
+            <br><br>
+        </div><div id="div-ajuda-atendimento" class="hide" style="z-index: 1500;font-weight: 300;font-size: 17px;text-align: center;font-family: Roboto,Arial,sans-serif;">
+            <i class="fa fa-bullhorn"></i><font style="font-size: 17px; text-align: center;"> Atendimento simplificado!</font><br><br>
+             Agora você consegue fazer uma solicitação ao síndico de forma fácil e rápida, além de poder acompanhar a resolução de um jeito prático.
+            <br>
+
+            <br>
+            <button id="btn-fechar-ajuda-atendimento" class="btn btn-success pull-right" data-dismiss="clickover">Próximo</button>
+            <br><br>
+        </div><div id="div-ajuda-mensagem" class="hide" style="z-index: 1500;font-weight: 300;font-size: 17px;text-align: center;font-family: Roboto,Arial,sans-serif;">
+            <i class="fa fa-envelope"></i><font style="font-size: 17px; text-align: center;"> Mais comunicação!</font><br><br>
+             Troque mensagens com outros condôminos, de forma simples.
+            <br>
+
+            <br>
+            <button id="btn-fechar-ajuda-mensagem" class="btn btn-success pull-right" data-dismiss="clickover">Próximo</button>
+            <br><br>
+        </div><div id="div-ajuda-menu" class="hide" style="width: 300px; z-index: 1500;font-weight: 300;font-size: 17px;text-align: center;font-family: Roboto,Arial,sans-serif;">
+            <i class="fa fa-bullhorn large"></i><font style="font-size: 17px; text-align: center;"> Navegue pelo Aclamit!</font><br><br>
+             Use o menu para acessar Chamados, realizar Reservas e mais.
+            <br>
+
+            <br>
+            <button id="btn-fechar-ajuda-menu" class="btn btn-success pull-right" data-dismiss="clickover">Próximo</button>
+            <br><br>
+        </div><div id="div-ajuda-mural" class="hide" style="z-index: 1500;font-weight: 300;font-size: 17px;text-align: center;font-family: Roboto,Arial,sans-serif;">
+            <i class="fa fa-clock-o"></i><font style="font-size: 17px; text-align: center;"> Saiba o dia a dia do condomínio!</font><br><br>
+             Essa é sua página inicial. Fique atualizado com tudo que acontece no seu condomínio aqui no Aclamit.
+            <br>
+
+            <br>
+            <button id="btn-fechar-ajuda-mural" class="btn btn-success pull-right" data-dismiss="clickover">Próximo</button>
+            <br><br>
+        </div><div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
+            <div class="slides"></div>
+            <h3 class="title"></h3>
+            <a class="prev">‹</a>
+            <a class="next">›</a>
+            <a class="close">×</a>
+            <a class="play-pause"></a>
+            <ol class="indicator"></ol>
+        </div></div><div id="jPanelMenu-menu" style="position: absolute; display: none; width: 250px; z-index: -1;">
+            <div id="me">
+                <form enctype="multipart/form-data" id="formFotoUsuario" class="ng-pristine ng-valid">
+                    <input type="hidden" id="alterarFotoUsuario_id_usuario" name="Usuario[id_usuario]">
+                    <input type="file" id="alterarFotoUsuario_arquivo" name="Usuario[foto.uploadedFile]" style="visibility: hidden; width: 1px; height: 1px" multiple="">
+                </form>
+            </div>
+
+            <br>
+		</div>
+        
+
+        
+		
+
+        <style>
+            .breadcrumbs-domus {
+                margin-top:47px;
+            }
+
+            #content-header {
+                display: none;
+            }
+        </style>
+                    
+        
+        
+        
+
+        <!-- JavaScript -->
+        <script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-78NMS7PTEY&amp;cx=c&amp;_slc=1"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script>BASE_URL = '';</script>
+                    <script>
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+                ga('create', 'UA-38763333-3', 'winker.com.br');
+                ga('send', 'pageview');
+            </script>
+        
+                
+                <script>
+            (function () {
+                var PREFIXO_IDENTIDADE = 'winker_assistente_identidade_';
+                var URL_LOGOUT = '/intra/default/logout';
+
+                function esquecerIdentidadesDoAssistente() {
+                    var chaves = [];
+
+                    try {
+                        for (var i = 0; i < window.localStorage.length; i++) {
+                            var chave = window.localStorage.key(i);
+
+                            if (chave && chave.indexOf(PREFIXO_IDENTIDADE) === 0) {
+                                chaves.push(chave);
+                            }
+                        }
+
+                        for (var j = 0; j < chaves.length; j++) {
+                            window.localStorage.removeItem(chaves[j]);
+                        }
+                    } catch (e) {}
+                }
+
+                document.addEventListener('click', function (evento) {
+                    var alvo = evento.target;
+
+                    while (alvo && alvo !== document) {
+                        if (alvo.tagName === 'A' && alvo.getAttribute('href') === URL_LOGOUT) {
+                            esquecerIdentidadesDoAssistente();
+
+                            return;
+                        }
+
+                        alvo = alvo.parentNode;
+                    }
+                }, true);
+            })();
+        </script>
+
+                        
+        
+        <!-- MODAIS -->
+        
+
+        
+
+        
+
+        
+
+        
+
+
+        
+        
+
+        
+
+        
+
+        
+
+        
+	<script type="text/javascript" src="https://assets.winker.com.br/assets/min/5.27.43/intra.js"></script>
+<script type="text/javascript" src="https://assets.winker.com.br/js/sys/intra/admCondominio/boleto.js?v=5.27.43"></script>
+<script type="text/javascript" src="https://assets.winker.com.br/js/sys/../angularjs/angular-select2.min.js?v=5.27.43"></script>
+<script type="text/javascript" src="https://assets.winker.com.br/js/jquery.smartbanner/jquery.smartbanner.js"></script>
+<script type="text/javascript" src="https://assets.winker.com.br/js/sys/intra/condominio/novidade.js"></script>
+<script type="text/javascript">
+/*<![CDATA[*/
+var maxFileSize = 40;
+var SERVER_API = 'https://api.winker.com.br/v1';
+var APP_ASSETS_ROOT = 'https://assets.winker.com.br';
+
+        var ID_PORTAL           = '22497';
+        var LABEL_DIVISAO       = 'Divisão';
+        var LABEL_UNIDADE       = 'Unidade';
+        var IS_ADM_BOLETOS      = false;
+    
+var TOKEN_API = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZGQzMzg3NWI2NTAzOGYzMGNmODk5N2VjN2ZjNGMxM2Q5ZTQxYWQ2MWRiZjAyOGYwN2IwNzA2MzJmYTA1ZDUyIiwiaXNzIjoiaHR0cHM6XC9cL2FwaS53aW5rZXIuY29tLmJyIiwiYXVkIjoiaHR0cHM6XC9cL2FwaS53aW5rZXIuY29tLmJyIiwiaWF0IjoxNzk0ODQ4NDQwLCJuYmYiOjE3OTQ4NDg1MDAsImV4cCI6MTg1ODAwNjg0MCwicHJpdmF0ZURhdGEiOnsidXNlciI6eyJpZF91c2VyIjoxMzE4NjMsInNlc3Npb25faWQiOiI5NGI5MWViZTU2MmE2NDEzZjA3ZTU1ZjA3NzU4NDE3OCIsInVzZXJfdG9rZW4iOm51bGx9LCJrZXkiOiJkYmIxMGEyYjkzYWE5MGM4MWQyOWVhODk5NGFkNGJjZCIsInVzZXJfdG9rZW4iOiI5NGI5MWViZTU2MmE2NDEzZjA3ZTU1ZjA3NzU4NDE3OCJ9fQ.7WdZphvQlhSvgi1lxqD4db5rqOJ1ggJ3SbhdxRh8VPs';
+var STATUS_OVERDUE = 'overdue';
+var STATUS_BILLING = '1';
+$.smartbanner({"title":"Aclamit","price":"GRATUITO","inGooglePlay":"Na Google Play","inAppStore":"Na App Store","button":"VER","daysReminder":0,"author":"ACLAMIT ASSESSORIA CONTABIL E ADMINISTRACAO SS LTDA","icon":"https:\/\/is1-ssl.mzstatic.com\/image\/thumb\/Purple211\/v4\/04\/4e\/0a\/044e0a7d-646d-3f6f-f0f9-1e029b3df277\/AppIcon-0-0-1x_U007emarketing-0-11-0-85-220.png\/512x512bb.jpg"});
+jQuery(function($) {
+$.smartbanner({title: 'Winker', price: 'GRATUITO', inGooglePlay: 'Na Google Play', inAppStore: 'Na App Store', button: 'VER', daysReminder: 0});
+});
+/*]]>*/
+</script>
+
+
+<style id="jPanelMenu-style-master">body{width:100%}.jPanelMenu,body{overflow-x:hidden}#jPanelMenu-menu{display:block;position:fixed;top:0;left:0;height:100%;z-index:-1;-webkit-overflow-scrolling:touch}.jPanelMenu-panel{position:static;left:0;top:0;z-index:2;width:100%;min-height:100%;}</style><div id="ascrail2000" class="nicescroll-rails" style="width: 7px; z-index: 9999; cursor: default; position: fixed; top: 0px; left: 1343px; height: 749px; display: none;"><div style="position: relative; top: 0px; float: right; width: 5px; height: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2000-hr" class="nicescroll-rails" style="height: 7px; z-index: 9999; top: 742px; left: 0px; position: fixed; cursor: default; display: none;"><div style="position: relative; top: 0px; height: 5px; width: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2001" class="nicescroll-rails" style="width: 7px; z-index: 9999; cursor: default; position: fixed; top: 0px; left: 1343px; height: 749px; display: none;"><div style="position: relative; top: 0px; float: right; width: 5px; height: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2001-hr" class="nicescroll-rails" style="height: 7px; z-index: 9999; top: 742px; left: 0px; position: fixed; cursor: default; display: none;"><div style="position: relative; top: 0px; height: 5px; width: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2002" class="nicescroll-rails" style="width: 7px; z-index: 9999; cursor: default; position: fixed; top: 0px; left: 1343px; height: 749px; display: none;"><div style="position: relative; top: 0px; float: right; width: 5px; height: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2002-hr" class="nicescroll-rails" style="height: 7px; z-index: 9999; top: 742px; left: 0px; position: fixed; cursor: default; display: none;"><div style="position: relative; top: 0px; height: 5px; width: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2003" class="nicescroll-rails" style="width: 7px; z-index: 9999; cursor: default; position: fixed; top: 0px; left: 1343px; height: 749px; display: none;"><div style="position: relative; top: 0px; float: right; width: 5px; height: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2003-hr" class="nicescroll-rails" style="height: 7px; z-index: 9999; top: 742px; left: 0px; position: fixed; cursor: default; display: none;"><div style="position: relative; top: 0px; height: 5px; width: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2004" class="nicescroll-rails" style="width: 7px; z-index: 9999; cursor: default; position: fixed; top: 0px; left: 1343px; height: 749px; display: none;"><div style="position: relative; top: 0px; float: right; width: 5px; height: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div id="ascrail2004-hr" class="nicescroll-rails" style="height: 7px; z-index: 9999; top: 742px; left: 0px; position: fixed; cursor: default; display: none;"><div style="position: relative; top: 0px; height: 5px; width: 0px; background-color: rgb(66, 66, 66); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div></div><div class="swal2-container swal2-fade swal2-shown" style="overflow-y: auto;"><div role="dialog" aria-labelledby="swal2-title" aria-describedby="swal2-content" class="swal2-modal swal2-show" tabindex="-1" style="width: 500px; padding: 20px; background: rgb(255, 255, 255); display: block; min-height: 181px;"><ul class="swal2-progresssteps" style="display: none;"></ul><div class="swal2-icon swal2-error" style="display: none;"><span class="swal2-x-mark"><span class="swal2-x-mark-line-left"></span><span class="swal2-x-mark-line-right"></span></span></div><div class="swal2-icon swal2-question" style="display: none;">?</div><div class="swal2-icon swal2-warning" style="display: none;">!</div><div class="swal2-icon swal2-info" style="display: none;">i</div><div class="swal2-icon swal2-success" style="display: none;"><div class="swal2-success-circular-line-left" style="background: rgb(255, 255, 255);"></div><span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span><div class="swal2-success-ring"></div> <div class="swal2-success-fix" style="background: rgb(255, 255, 255);"></div><div class="swal2-success-circular-line-right" style="background: rgb(255, 255, 255);"></div></div><img class="swal2-image" style="display: none;"><h2 class="swal2-title" id="swal2-title"><i class="fa fa-warning"></i> Falha ao obter boletos </h2><div id="swal2-content" class="swal2-content" style="display: block;">Não foi possível consultar os boletos agora.</div><input class="swal2-input" style="display: none;"><input type="file" class="swal2-file" style="display: none;"><div class="swal2-range" style="display: none;"><output></output><input type="range"></div><select class="swal2-select" style="display: none;"></select><div class="swal2-radio" style="display: none;"></div><label for="swal2-checkbox" class="swal2-checkbox" style="display: none;"><input type="checkbox"></label><textarea class="swal2-textarea" style="display: none;"></textarea><div class="swal2-validationerror" style="display: none;"></div><div class="swal2-buttonswrapper" style="display: block;"><button type="button" class="swal2-confirm swal2-styled" style="background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214);">OK</button><button type="button" class="swal2-cancel swal2-styled" style="display: none; background-color: rgb(170, 170, 170);">Cancel</button></div><button type="button" class="swal2-close" aria-label="Close this dialog" style="display: block;">×</button></div></div></body></html>

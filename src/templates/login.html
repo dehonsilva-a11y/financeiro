@@ -3,41 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso - Gestão Lello</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f172a; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Segoe UI', sans-serif; }
-        .login-box { background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); width: 100%; max-width: 400px; }
-        .btn-lello { background-color: #00a7e1; color: #ffffff; font-weight: 600; font-size: 1rem; padding: 12px; border: none; border-radius: 6px; width: 100%; transition: all 0.2s; }
-        .btn-lello:hover { background-color: #008ec2; }
-    </style>
+    <title>Entrar · Portal de Cobranças</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/lello.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
-    <div class="login-box text-center">
-        <h4 class="fw-bold mb-1" style="color: #0f172a;">Portal de Cobranças</h4>
-        <p class="text-muted small mb-4">Autenticação de Colaborador</p>
-        
-        <form action="/login" method="POST">
-            <div class="mb-4 text-start">
-                <label class="form-label small fw-bold text-secondary">Identifique-se para acessar o sistema:</label>
-                <select name="usuario" class="form-select form-select-lg" required style="font-size: 0.95rem;">
-                    <option value="" disabled selected>Selecione seu nome...</option>
-                    <option value="Alessandra">Alessandra</option>
-                    <option value="Arthur">Arthur</option>
-                    <option value="Ellen">Ellen</option>
-                    <option value="Geovanna">Geovanna</option>
-                    <option value="Gisele">Gisele</option>
-                    <option value="Heloisa">Heloisa</option>
-                    <option value="Jéssica">Jessica</option>
-                    <option value="João">João</option>
-                    <option value="Marcio">Marcio</option>
-                    <option value="Paulo">Paulo</option>
-                    <option value="Ryan">Ryan</option>
-                    <option value="Victor">Victor</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-lello">Entrar no Sistema</button>
-        </form>
-    </div>
+    <div class="boleto" id="faixa" aria-hidden="true"></div>
+
+    <main>
+        <div class="coluna">
+            <img src="{{ url_for('static', filename='img/lello.png') }}" alt="Lello Imóveis" class="marca">
+
+            <!-- ENTRAR -->
+            <section id="painelEntrar">
+                <h1>Portal de Cobranças</h1>
+                <p class="linha-fina">Entre com seu usuário e senha.</p>
+
+                <div class="recado ruim" id="caixaErro" role="alert" {% if not erro %}hidden{% endif %}>{{ erro or '' }}</div>
+                {% if aviso %}<div class="recado neutro" id="caixaAviso">{{ aviso }}</div>{% endif %}
+
+                <form id="formEntrar" method="POST" action="{{ url_for('login') }}" novalidate>
+                    <div class="campo">
+                        <label for="usuario">Usuário</label>
+                        <input type="text" id="usuario" name="usuario" autocomplete="username"
+                               placeholder="seu primeiro nome" autocapitalize="none" spellcheck="false" required>
+                    </div>
+                    <div class="campo com-botao">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+                        <button type="button" class="olho" id="botaoOlho" aria-label="Mostrar senha" title="Mostrar senha">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="aviso-caps" id="avisoCaps" hidden>Caps Lock está ligado.</div>
+
+                    <button type="submit" class="entrar" id="botaoEntrar">
+                        <span id="textoEntrar">Entrar</span>
+                    </button>
+                </form>
+
+                <button type="button" class="secundario" id="abrirEsqueci">Esqueci minha senha</button>
+            </section>
+
+            <!-- ESQUECI A SENHA -->
+            <section id="painelEsqueci" hidden>
+                <h1>Recuperar senha</h1>
+                <p class="linha-fina">Digite seu usuário. Mandamos um link para o e-mail cadastrado.</p>
+
+                <div class="recado" id="recadoEsqueci" role="status" hidden></div>
+
+                <form id="formEsqueci" novalidate>
+                    <div class="campo">
+                        <label for="usuarioEsqueci">Usuário</label>
+                        <input type="text" id="usuarioEsqueci" autocapitalize="none" spellcheck="false"
+                               placeholder="seu primeiro nome" required>
+                    </div>
+                    <button type="submit" class="entrar" id="botaoEnviarLink"><span id="textoEnviar">Enviar link</span></button>
+                </form>
+
+                <button type="button" class="secundario" id="voltarEntrar">Voltar para a entrada</button>
+            </section>
+        </div>
+    </main>
+
+    <footer>Uso interno · Lello Imóveis</footer>
+
+<script>
+(function () {
+    'use strict';
+
+    // Faixa de código de barras: barras de larguras variadas, como a de um boleto.
+    var faixa = document.getElementById('faixa');
+    // barras e espaços de larguras variadas, como o código de barras de um boleto
+    var larguras = [2, 1, 1, 3, 1, 2, 1, 1, 4, 1, 1, 2, 3, 1, 1, 1, 2, 1, 3, 2, 1, 1, 2, 4, 1, 1, 3, 1, 2, 1, 1, 2];
+    for (var i = 0; i < 210; i++) {
+        var barra = document.createElement('i');
+        barra.style.flexGrow = larguras[i % larguras.length];
+        if (i % 2) { barra.className = 'vazio'; }
+        faixa.appendChild(barra);
+    }
+
+    var campoUsuario = document.getElementById('usuario');
+    var campoSenha = document.getElementById('senha');
+    var caixaErro = document.getElementById('caixaErro');
+    var botaoEntrar = document.getElementById('botaoEntrar');
+    var textoEntrar = document.getElementById('textoEntrar');
+    var coluna = document.querySelector('.coluna');
+
+    // Lembra quem usou este computador da última vez (só o usuário, nunca a senha).
+    var ultimo = '';
+    try { ultimo = localStorage.getItem('lello_ultimo_usuario') || ''; } catch (e) { ultimo = ''; }
+    if (ultimo) { campoUsuario.value = ultimo; campoSenha.focus(); } else { campoUsuario.focus(); }
+
+    function mostrarErro(mensagem) {
+        caixaErro.textContent = mensagem;
+        caixaErro.hidden = false;
+        campoSenha.classList.add('erro');
+        coluna.classList.remove('tremer');
+        void coluna.offsetWidth;
+        coluna.classList.add('tremer');
+    }
+    function limparErro() {
+        caixaErro.hidden = true;
+        campoSenha.classList.remove('erro');
+        campoUsuario.classList.remove('erro');
+    }
+    campoSenha.addEventListener('input', limparErro);
+    campoUsuario.addEventListener('input', limparErro);
+
+    // Mostrar / ocultar senha
+    var botaoOlho = document.getElementById('botaoOlho');
+    botaoOlho.addEventListener('click', function () {
+        var vendo = campoSenha.type === 'text';
+        campoSenha.type = vendo ? 'password' : 'text';
+        botaoOlho.setAttribute('aria-label', vendo ? 'Mostrar senha' : 'Ocultar senha');
+        botaoOlho.title = vendo ? 'Mostrar senha' : 'Ocultar senha';
+        botaoOlho.style.color = vendo ? '' : 'var(--vermelho)';
+        campoSenha.focus();
+    });
+
+    // Caps Lock ligado é o motivo mais comum de "minha senha parou de funcionar"
+    var avisoCaps = document.getElementById('avisoCaps');
+    function olharCaps(evento) {
+        if (typeof evento.getModifierState !== 'function') { return; }
+        avisoCaps.hidden = !evento.getModifierState('CapsLock');
+    }
+    campoSenha.addEventListener('keydown', olharCaps);
+    campoSenha.addEventListener('keyup', olharCaps);
+    campoSenha.addEventListener('blur', function () { avisoCaps.hidden = true; });
+
+    function ocupado(botao, texto, ligado, rotuloOriginal) {
+        botao.disabled = ligado;
+        texto.innerHTML = ligado ? '<span class="girando"></span>' + rotuloOriginal : rotuloOriginal;
+        faixa.classList.toggle('lendo', ligado);
+    }
+
+    document.getElementById('formEntrar').addEventListener('submit', function (evento) {
+        evento.preventDefault();
+        limparErro();
+        var usuario = campoUsuario.value.trim();
+        var senha = campoSenha.value;
+        if (!usuario) { campoUsuario.classList.add('erro'); campoUsuario.focus(); return mostrarErro('Digite seu usuário.'); }
+        if (!senha) { campoSenha.focus(); return mostrarErro('Digite sua senha.'); }
+
+        ocupado(botaoEntrar, textoEntrar, true, 'Entrando…');
+        fetch('{{ url_for("login") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ usuario: usuario, senha: senha })
+        }).then(function (resposta) {
+            return resposta.json().then(function (dados) { return { ok: resposta.ok, dados: dados }; });
+        }).then(function (r) {
+            if (r.ok && r.dados.sucesso) {
+                try { localStorage.setItem('lello_ultimo_usuario', usuario); } catch (e) {}
+                textoEntrar.innerHTML = '<span class="girando"></span>Abrindo o sistema…';
+                window.location.href = r.dados.destino || '/';
+                return;
+            }
+            ocupado(botaoEntrar, textoEntrar, false, 'Entrar');
+            mostrarErro(r.dados.msg || 'Não foi possível entrar.');
+            campoSenha.value = '';
+            campoSenha.focus();
+        }).catch(function () {
+            ocupado(botaoEntrar, textoEntrar, false, 'Entrar');
+            mostrarErro('O sistema não respondeu. Verifique a conexão e tente de novo.');
+        });
+    });
+
+    // Esqueci minha senha
+    var painelEntrar = document.getElementById('painelEntrar');
+    var painelEsqueci = document.getElementById('painelEsqueci');
+    var campoEsqueci = document.getElementById('usuarioEsqueci');
+    var recadoEsqueci = document.getElementById('recadoEsqueci');
+    var botaoEnviar = document.getElementById('botaoEnviarLink');
+    var textoEnviar = document.getElementById('textoEnviar');
+
+    document.getElementById('abrirEsqueci').addEventListener('click', function () {
+        painelEntrar.hidden = true; painelEsqueci.hidden = false;
+        campoEsqueci.value = campoUsuario.value.trim();
+        campoEsqueci.focus();
+    });
+    document.getElementById('voltarEntrar').addEventListener('click', function () {
+        painelEsqueci.hidden = true; painelEntrar.hidden = false;
+        recadoEsqueci.hidden = true;
+        campoSenha.focus();
+    });
+
+    document.getElementById('formEsqueci').addEventListener('submit', function (evento) {
+        evento.preventDefault();
+        var usuario = campoEsqueci.value.trim();
+        if (!usuario) { campoEsqueci.focus(); return; }
+        ocupado(botaoEnviar, textoEnviar, true, 'Enviando…');
+        fetch('{{ url_for("api_esqueci_senha") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ usuario: usuario })
+        }).then(function (resposta) { return resposta.json(); })
+          .then(function (dados) {
+            ocupado(botaoEnviar, textoEnviar, false, 'Enviar link');
+            recadoEsqueci.className = 'recado ' + (dados.sucesso ? 'bom' : 'ruim');
+            recadoEsqueci.textContent = dados.msg || '';
+            recadoEsqueci.hidden = false;
+        }).catch(function () {
+            ocupado(botaoEnviar, textoEnviar, false, 'Enviar link');
+            recadoEsqueci.className = 'recado ruim';
+            recadoEsqueci.textContent = 'O sistema não respondeu. Tente de novo.';
+            recadoEsqueci.hidden = false;
+        });
+    });
+}());
+</script>
 </body>
 </html>

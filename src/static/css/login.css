@@ -1,0 +1,82 @@
+        :root {
+            --papel: #ffffff;
+            --vinho: #5c0521;      /* o mesmo tom da palavra IMÓVEIS na marca */
+            --vermelho: #c20332;   /* o vermelho da marca */
+            --vermelho-escuro: #9c0228;
+            --rosa: #fbeff2;
+            --cinza: #6b5c62;
+            --linha: #e9e2e5;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0; background: var(--papel); color: var(--vinho);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* O único ornamento da página: a faixa de código de barras do boleto. */
+        .boleto { height: 10px; display: flex; overflow: hidden; flex: none; }
+        .boleto i { display: block; height: 100%; background: var(--vermelho); flex: 1 1 0; }
+        .boleto i.vazio { background: transparent; }
+        .boleto.lendo i:not(.vazio) { animation: varre .9s ease-in-out infinite; }
+        .boleto.lendo i:nth-child(3n) { animation-delay: .1s; }
+        .boleto.lendo i:nth-child(3n+1) { animation-delay: .2s; }
+        @keyframes varre { 0%, 100% { opacity: .9; } 50% { opacity: .2; } }
+
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+        .coluna { width: 100%; max-width: 360px; }
+
+        .marca { height: 58px; margin-bottom: 36px; display: block; }
+        h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; line-height: 1.15; }
+        .linha-fina { color: var(--cinza); font-size: 0.95rem; margin: 0 0 28px; }
+
+        label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--vinho); margin-bottom: 6px; }
+        .campo { position: relative; margin-bottom: 18px; }
+        input[type=text], input[type=password], input[type=email] {
+            width: 100%; height: 48px; padding: 0 14px; font-size: 1rem; color: var(--vinho);
+            background: #fff; border: 1px solid var(--linha); border-radius: 8px; outline: none;
+            font-family: inherit; transition: border-color .15s, box-shadow .15s;
+        }
+        input::placeholder { color: #b9a9af; }
+        input:focus { border-color: var(--vermelho); box-shadow: 0 0 0 3px rgba(194, 3, 50, .13); }
+        input.erro { border-color: var(--vermelho); background: #fffafb; }
+        .com-botao input { padding-right: 52px; }
+        .olho {
+            position: absolute; right: 6px; bottom: 6px; width: 36px; height: 36px; border: 0; background: none;
+            color: var(--cinza); cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        }
+        .olho:hover { background: var(--rosa); color: var(--vinho); }
+        .olho svg { width: 19px; height: 19px; }
+
+        button.entrar {
+            width: 100%; height: 48px; margin-top: 6px; border: 0; border-radius: 8px;
+            background: var(--vermelho); color: #fff; font-size: 1rem; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        button.entrar:hover { background: var(--vermelho-escuro); }
+        button.entrar:disabled { opacity: .72; cursor: default; }
+        .girando { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+                   border-radius: 50%; animation: gira .7s linear infinite; }
+        @keyframes gira { to { transform: rotate(360deg); } }
+
+        .secundario {
+            margin-top: 18px; background: none; border: 0; padding: 0; font-family: inherit; font-size: 0.88rem;
+            color: var(--cinza); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+        }
+        .secundario:hover { color: var(--vermelho); }
+
+        .recado { border-radius: 8px; padding: 12px 14px; font-size: 0.88rem; line-height: 1.45; margin-bottom: 20px; }
+        .recado.ruim { background: var(--rosa); color: #8e0226; border: 1px solid #f3d3dc; }
+        .recado.bom { background: #f1f7f3; color: #1e5b39; border: 1px solid #d5e8de; }
+        .recado.neutro { background: #f7f5f6; color: var(--cinza); border: 1px solid var(--linha); }
+        .aviso-caps { font-size: 0.8rem; color: var(--vermelho); margin-top: -10px; margin-bottom: 14px; }
+
+        .tremer { animation: treme .32s; }
+        @keyframes treme { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+
+        footer { padding: 20px; border-top: 1px solid var(--linha); text-align: center; color: var(--cinza); font-size: 0.78rem; }
+        [hidden] { display: none !important; }
+        :focus-visible { outline: 2px solid var(--vermelho); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
